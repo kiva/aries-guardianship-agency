@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helm-config.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "helm-config.name" . }}
+    helm.sh/chart: {{ include "helm-config.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: {{ .Values.strategy.type }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "helm-config.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "helm-config.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+      - args:
+        name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        envFrom:
+        - secretRef:
+            name: {{ .Values.secrets }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - name: {{ .Values.service.portName }}
+            containerPort: {{ .Values.service.containerPort }}
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: {{ .Values.service.containerPort }}
+            httpHeaders:
+            - name: x-request-id
+              value: k8s-healthz
+          initialDelaySeconds: 20
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: {{ .Values.service.containerPort }}
+            httpHeaders:
+            - name: x-request-id
+              value: k8s-healthz
+          initialDelaySeconds: 20
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+      imagePullSecrets:
+        {{- with .Values.image.imagePullSecrets }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

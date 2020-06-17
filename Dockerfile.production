@@ -1,0 +1,21 @@
+FROM node:carbon-alpine as node_modules
+WORKDIR /tmp/
+ARG NPM_TOKEN
+ADD .npmrc ./
+COPY package.json package-lock.json ./
+RUN npm install --production
+
+FROM node:carbon-alpine as dist
+WORKDIR /tmp/
+ARG NPM_TOKEN
+ADD .npmrc ./
+COPY package.json package-lock.json tsconfig.json ./
+RUN npm install
+COPY src/ src/
+RUN npm run build
+
+FROM node:carbon-alpine
+WORKDIR /www
+COPY --from=node_modules /tmp/node_modules ./node_modules
+COPY --from=dist /tmp/dist ./dist
+CMD ["node", "dist/main.js"]
