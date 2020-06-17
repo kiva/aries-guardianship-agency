@@ -1,0 +1,22 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: protocol-gateway
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+    kubernetes.io/ingress.ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+      - backend:
+          serviceName: protocol-gateway
+          servicePort: 8080
+        path: /
+  tls:
+  - hosts:
+    - {{ .Values.ingress.host }}
+    secretName: protocol-gateway-service-tls
