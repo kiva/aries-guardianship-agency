@@ -1,4 +1,5 @@
-#
+# Docker compose to spin up agency
+# Currently expects the ledger and wallet db to be available on the kiva-network
 #
 version: '3'
 
@@ -7,13 +8,13 @@ networks:
     external: true
 
 services:
-  protocol-agency-controller:
+  guardianship-agency:
     env_file:
       - ./.env
     build: ./
     command: npm run start:debug
-    image: protocol-agency-controller
-    container_name: protocol-agency-controller
+    image: guardianship-agency
+    container_name: guardianship-agency
     working_dir: /www
     ports:
       - "3010:3010"
@@ -24,47 +25,5 @@ services:
       - //var/run/docker.sock:/var/run/docker.sock
     networks:
       - kiva-network
-    depends_on:
-      - protocol-steward-agent
     tty: true
 
-  protocol-steward-agent:
-    image: bcgovimages/aries-cloudagent:py36-1.14-1_0.5.1
-    container_name: protocol-steward-agent
-    ports:
-      - ${STEWARD_AGENT_ADMIN_PORT}:${STEWARD_AGENT_ADMIN_PORT}
-      - ${STEWARD_AGENT_HTTP_PORT}:${STEWARD_AGENT_HTTP_PORT}
-    entrypoint: /bin/bash
-    command: [
-      "-c",
-      "sleep 14;
-          aca-py start \
-          --inbound-transport http '0.0.0.0' ${STEWARD_AGENT_HTTP_PORT} \
-          --outbound-transport http \
-          --endpoint ${STEWARD_AGENT_ENDPOINT} \
-          --genesis-file '${INDY_POOL_TRANSACTIONS_GENESIS_PATH}' \
-          --wallet-type 'indy' \
-          --wallet-name '${STEWARD_WALLET_ID}' \
-          --wallet-key '${STEWARD_WALLET_KEY}' \
-          --wallet-storage-type '${WALLET_TYPE}' \
-          --wallet-storage-config '{\"url\":\"${WALLET_DB_HOST}:${WALLET_DB_PORT}\",\"wallet_scheme\":\"MultiWalletSingleTable\"}' \
-          --wallet-storage-creds '{\"account\":\"${POSTGRES_USER}\",\"password\":\"${POSTGRES_PASSWORD}\",\"admin_account\":\"${POSTGRES_USER}\",\"admin_password\":\"${POSTGRES_PASSWORD}\"}' \
-          --seed '${STEWARD_AGENT_SEED}' \
-          --admin '0.0.0.0' ${STEWARD_AGENT_ADMIN_PORT} \
-          --admin-api-key '${STEWARD_ADMIN_API_KEY}' \
-          --label ${STEWARD_AGENT_NAME} \
-          --webhook-url ${STEWARD_CONTROLLER_WEB_HOOK_URL} \
-          --log-level debug \
-          --auto-accept-invites \
-          --auto-accept-requests",
-    ]
-    env_file:
-      - ./.env
-    volumes:
-      - ./resources:/home/indy/resources/
-    networks:
-      - kiva-network
-    tty: true
-
-volumes:
-  node_modules:
