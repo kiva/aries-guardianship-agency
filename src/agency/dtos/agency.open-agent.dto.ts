@@ -1,25 +1,25 @@
-import { IsString, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString, ValidateNested, IsNumber } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Optional } from '@nestjs/common';
 
 export class AgencyOpenAgentDto {
     @ApiProperty({
-        description: 'citizen wallet id'
+        description: 'citizen wallet id',
     })
-    readonly walletId: any;
+    @IsString() readonly walletId: string;
 
     @ApiProperty({
-        description: 'citizen wallet key (password)'
+        description: 'citizen wallet key (password)',
     })
-    readonly walletkKey: any;
+    @IsString() readonly walletkKey: string;
 
     @ApiProperty({
-        description: 'OAuth authorization'
+        description: 'OAuth authorization',
     })
-    readonly adminApiKey: any;
+    @IsString() readonly adminApiKey: string;
 
-    @ApiProperty({
-        description: 'time when OAuth expires'
+    @ApiPropertyOptional({
+        description: 'time when OAuth expires',
     })
-    readonly expires: any;
+    @Optional() @IsNumber() readonly expires: number;
 }
