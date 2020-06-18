@@ -3,6 +3,7 @@ import { Logger } from '@kiva/protocol-common/logger';
 import { ProtocolException } from '@kiva/protocol-common/protocol.exception';
 import Dockerode from 'dockerode';
 import { IAgentManager } from './agent.manager.interface';
+import { AppService } from 'app/app.service';
 
 /**
  *
@@ -37,7 +38,7 @@ export class DockerService implements IAgentManager {
         // Putting const values here for now for simplicity:
         // The ports shouldn't matter in production because they will only be localled to the container, but on our macs
         // we want agents to have different ports so we can access them easier
-        const INDY_POOL_TRANSACTIONS_GENESIS_PATH = '/home/indy/resources/pool_transactions_genesis_local_dev';
+        const genesisTransactions = await AppService.getGenesisFile();
         const walletStorageConfig = {
             url: process.env.WALLET_DB_HOST + ':' + process.env.WALLET_DB_PORT,
             wallet_scheme: 'MultiWalletSingleTable',
@@ -60,9 +61,6 @@ export class DockerService implements IAgentManager {
             HostConfig: {
                 AutoRemove: true,
                 NetworkMode: 'kiva-network',
-                Binds: [ // TODO instead of passing in the genesis file via volumes, we can do it over http which will make this less complex
-                    '/Users/jsaur/projects/protocol/experimental/agency/resources:/home/indy/resources/' // TODO how to do relative paths?
-                ],
                 PortBindings: {
                     [`${adminPort}/tcp`]: [{ 'HostPort': adminPort}],
                     [`${httpPort}/tcp`]: [{ 'HostPort': httpPort}]
@@ -73,7 +71,8 @@ export class DockerService implements IAgentManager {
                 // Constant values
                 '--inbound-transport', 'http', '0.0.0.0', httpPort,
                 '--outbound-transport', 'http',
-                '--genesis-file', INDY_POOL_TRANSACTIONS_GENESIS_PATH,
+                '--ledger-pool-name', process.env.INDY_POOL_NAME,
+                '--genesis-transactions', genesisTransactions,
                 '--wallet-type', 'indy',
                 '--wallet-storage-type', 'postgres_storage',
                 // Agent specific values
@@ -98,9 +97,9 @@ export class DockerService implements IAgentManager {
         });
         await container.start();
         // Comment this in if we want to see docker logs here:
-        // await container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
-        //     stream.pipe(process.stdout);
-        // });
+        await container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
+            stream.pipe(process.stdout);
+        });
         return container.id
     }
 
