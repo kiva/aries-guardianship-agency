@@ -5,7 +5,7 @@ import Dockerode from 'dockerode';
 import { IAgentManager } from './agent.manager.interface';
 
 /**
- * 
+ *
  */
 @Injectable()
 export class DockerService implements IAgentManager {
@@ -35,7 +35,7 @@ export class DockerService implements IAgentManager {
         httpPort: string
     ): Promise<string> {
         // Putting const values here for now for simplicity:
-        // The ports shouldn't matter in production because they will only be localled to the container, but on our macs 
+        // The ports shouldn't matter in production because they will only be localled to the container, but on our macs
         // we want agents to have different ports so we can access them easier
         const INDY_POOL_TRANSACTIONS_GENESIS_PATH = '/home/indy/resources/pool_transactions_genesis_local_dev';
         const walletStorageConfig = {
