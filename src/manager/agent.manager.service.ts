@@ -3,6 +3,8 @@ import { DockerService } from './docker.service';
 import { IAgentManager } from './agent.manager.interface';
 import cryptoRandomString from 'crypto-random-string';
 import { Logger } from '@kiva/protocol-common/logger';
+import { AgentConfig } from './agent.config';
+import { K8sService } from './k8s.service';
 
 /**
  * TODO validation, error cases, etc
@@ -14,15 +16,21 @@ export class AgentManagerService {
 
     constructor(@Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
         // TODO move this logic to an agent manager factory, which can be injected via a module
+        // We can also use env type to infer this
         if (process.env.MANAGER_TYPE === 'DOCKER') {
             this.manager = new DockerService();
         } else if (process.env.MANAGER_TYPE === 'K8S') {
-            // initialize the k8s agent manger
+            this.manager = new K8sService();
         } else {
             throw new Error('Invalid config for MANAGER_TYPE');
         }
     }
 
+    /**
+     * Contains the general logic to spin up an agent regardless of environment
+     * TODO need to think through a few more cases - like how the public endpoints and ports will work
+     * TODO need to handle error cases and ensure logging works in our deployed envs
+     */
     public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string) {
         const agentId = cryptoRandomString({ length: 32, type: 'hex' });
         const adminPort = this.generateRandomPort();
@@ -37,7 +45,9 @@ export class AgentManagerService {
         // since we don't want to expose the admin api publicly. Both locally and remotely this will be the docker container for the agency
         const webhookUrl = `http://protocol-agency-controller:3010/v1/controller/${agentId}`;
 
-        const containerId = await this.manager.startAgent(walletId, walletKey, adminApiKey, agentId, agentEndpoint, webhookUrl, adminPort, httpPort);
+        const agentConfig = new AgentConfig(walletId, walletKey, adminApiKey, agentId, agentEndpoint, webhookUrl, adminPort, httpPort);
+
+        const containerId = await this.manager.startAgent(agentConfig);
 
         await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey });
 

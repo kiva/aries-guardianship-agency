@@ -8,7 +8,6 @@ import { LoggingInterceptor } from '@kiva/protocol-common/logging.interceptor';
 import { DatadogLogger } from '@kiva/protocol-common/datadog.logger';
 import { Constants } from '@kiva/protocol-common/constants';
 import { traceware } from '@kiva/protocol-common/tracer';
-import {readFileSync} from 'fs';
 
 /**
  * The Root Application Service
@@ -56,13 +55,5 @@ export class AppService {
             const document = SwaggerModule.createDocument(app, options);
             SwaggerModule.setup('api-docs', app, document);
         }
-    }
-
-    /**
-     * @othink this could go in another class
-     * Making it static for now so it's easier to call
-     */
-    public static async getGenesisFile(): Promise<string> {
-        return readFileSync(process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH).toString();
     }
 }
