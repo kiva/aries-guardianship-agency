@@ -1,3 +1,5 @@
+# so that this file isn't accidently checked in
+.npmrc
 # Logs
 logs
 *.log
