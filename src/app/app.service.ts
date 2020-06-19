@@ -19,7 +19,6 @@ export class AppService {
      * Sets up app in a way that can be used by main.ts and e2e tests
      */
     public static async setup(app: INestApplication) {
-
         // Setting request-id middleware which assigns a unique requestid per incomming requests if not sent by client.
         const requestId = require('express-request-id')();
         app.use(requestId);
@@ -56,8 +55,5 @@ export class AppService {
             const document = SwaggerModule.createDocument(app, options);
             SwaggerModule.setup('api-docs', app, document);
         }
-
-
-
     }
 }
