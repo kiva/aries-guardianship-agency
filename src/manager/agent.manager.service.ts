@@ -12,6 +12,7 @@ import { K8sService } from './k8s.service';
 @Injectable()
 export class AgentManagerService {
 
+    private readonly DEFAULT_TTL_MS: number = 1000 * 60 * 5;
     private manager: IAgentManager;
 
     constructor(@Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
@@ -31,8 +32,11 @@ export class AgentManagerService {
      * TODO need to think through a few more cases - like how the public endpoints and ports will work
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
-    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string) {
+    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl: number) {
+        ttl = ttl || this.DEFAULT_TTL_MS;
+
         const agentId = cryptoRandomString({ length: 32, type: 'hex' });
+        // TODO: could it be possible the same port is randomly generated?
         const adminPort = this.generateRandomPort();
         const httpPort = this.generateRandomPort();
 
@@ -48,15 +52,15 @@ export class AgentManagerService {
 
         const containerId = await this.manager.startAgent(agentConfig);
 
-        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey });
+        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl });
 
-         // TODO we could configure and auto timeout for ephemeral containers
-        // setTimeout(
-        //     async () => {
-        //         await this.manager.stopAgent(containerId);
-        //     },
-        //     20000,
-        // );
+        // ttl = time to live in milliseconds.  if 0, then live in eternity
+        if (ttl > 0) {
+            setTimeout(
+                async () => {
+                    await this.spinDownAgent(agentId);
+                }, ttl);
+        }
         return { agentId, containerId, adminPort, httpPort };
     }
 
@@ -64,6 +68,7 @@ export class AgentManagerService {
      * TODO we should probably respond with something
      */
     public async spinDownAgent(agentId: string) {
+        // TODO: do we need to remove this entry
         const agent: any = await this.cache.get(agentId);
         Logger.log('Spinning down agent', agent);
         // TODO handle case were agent not there

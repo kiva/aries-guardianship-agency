@@ -1,5 +1,6 @@
 # so that this file isn't accidently checked in
 .npmrc
+.idea
 # Logs
 logs
 *.log
