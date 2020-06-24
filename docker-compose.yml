@@ -1,17 +1,61 @@
-# Docker compose to spin up agency
-# Currently expects the ledger and wallet db to be available on the kiva-network
-#
-version: '3'
+# Docker compose to spin up agency + indy ledger + postgres wallets db within this repo
+# Note ensure the following env params are set
+# WALLET_DB_HOST=wallets-db
+# NETWORK_NAME=agency-network
+version: '3.5'
 
 networks:
-  kiva-network:
-    external: true
+  agency-network:
+    name: agency-network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: 10.0.0.0/24
 
 services:
-  guardianship-agency:
+      # indy pool needs a static ip configured in the pool_transactions_genesis so need to start it first
+  indy-pool:
+    build:
+      context: .
+      dockerfile: docker/indy-pool.dockerfile
+      args:
+        pool_ip: '10.0.0.2'
+    image: indy-pool
+    container_name: indy-pool
+    working_dir: /home/indy
+    ports:
+      - "9701:9701"
+      - "9702:9702"
+      - "9703:9703"
+      - "9704:9704"
+      - "9705:9705"
+      - "9706:9706"
+      - "9707:9707"
+      - "9708:9708"
+    networks:
+      agency-network:
+        ipv4_address: 10.0.0.2
+
+  wallets-db:
+    image: postgres:11
+    container_name: wallets-db
+    command: postgres
     env_file:
-      - ./.env
-    build: ./
+      - .env
+    networks:
+      - agency-network
+    depends_on:
+      - indy-pool
+    tty: true
+
+  guardianship-agency:
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+    env_file:
+      - .env
     command: npm run start:debug
     image: guardianship-agency
     container_name: guardianship-agency
@@ -24,6 +68,7 @@ services:
       - ./:/www
       - //var/run/docker.sock:/var/run/docker.sock
     networks:
-      - kiva-network
+      - agency-network
+    depends_on:
+      - indy-pool
     tty: true
-
