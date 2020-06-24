@@ -26,7 +26,7 @@ export class DockerService implements IAgentManager {
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
         const container = await this.dockerode.createContainer({
-            Image: 'bcgovimages/aries-cloudagent:py36-1.14-1_0.5.1', // TODO eventually we'll need a kiva image with our customizations
+            Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
             name: config.label,
             ExposedPorts: {
@@ -35,7 +35,7 @@ export class DockerService implements IAgentManager {
             },
             HostConfig: {
                 AutoRemove: true,
-                NetworkMode: 'kiva-network',
+                NetworkMode: process.env.NETWORK_NAME,
                 PortBindings: {
                     [`${config.adminPort}/tcp`]: [{ 'HostPort': config.adminPort}],
                     [`${config.httpPort}/tcp`]: [{ 'HostPort': config.httpPort}]
