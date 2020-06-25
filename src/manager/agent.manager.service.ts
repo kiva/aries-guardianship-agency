@@ -53,6 +53,7 @@ export class AgentManagerService {
 
         const containerId = await this.manager.startAgent(agentConfig);
 
+        // when ttl is 0, record will stay in cache indefinitely
         await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl });
 
         // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
