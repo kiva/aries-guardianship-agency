@@ -53,6 +53,8 @@ export class AgentManagerService {
 
         const containerId = await this.manager.startAgent(agentConfig);
 
+        // @tothink move this caching to db
+        // record lives in cache until it is explicitly deleted
         await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: 0});
 
         // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
@@ -78,7 +80,7 @@ export class AgentManagerService {
     }
 
     /**
-     * TODO not sure if we'll keep this around because it doesn't guaruntee port overlaps, and also, ports are only really important when
+     * TODO not sure if we'll keep this around because it doesn't guarantee port overlaps, and also, ports are only really important when
      * testing on a mac. We deployed in k8s all agents can have the same ports and its file
      * Generates a random port between 5000-9999
      */
