@@ -53,7 +53,7 @@ export class AgentManagerService {
         const containerId = await this.manager.startAgent(agentConfig);
 
         // @tothink move this caching to db
-        // record lives in cache until it is explicitly deleted
+        // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
         Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1000)}}`);
         await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: (ttl === 0 ? ttl : ttl + 1000)});
         // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
