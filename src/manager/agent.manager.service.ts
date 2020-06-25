@@ -12,7 +12,7 @@ import { K8sService } from './k8s.service';
 @Injectable()
 export class AgentManagerService {
 
-    private readonly DEFAULT_TTL_MS: number = 1000 * 60 * 5;
+    private readonly DEFAULT_TTL_MS: number = 5;
     private manager: IAgentManager;
 
     constructor(@Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
@@ -33,7 +33,8 @@ export class AgentManagerService {
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
     public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl: number) {
-        ttl = ttl || this.DEFAULT_TTL_MS;
+        // 0 is a valid value in this case as it means service will run indefinitely
+        ttl = (ttl === undefined ? this.DEFAULT_TTL_MS : ttl);
 
         const agentId = cryptoRandomString({ length: 32, type: 'hex' });
         // TODO: could it be possible the same port is randomly generated?
@@ -54,12 +55,12 @@ export class AgentManagerService {
 
         await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl });
 
-        // ttl = time to live in milliseconds.  if 0, then live in eternity
+        // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
         if (ttl > 0) {
             setTimeout(
                 async () => {
                     await this.spinDownAgent(agentId);
-                }, ttl);
+                }, ttl * 1000);
         }
         return { agentId, containerId, adminPort, httpPort };
     }
