@@ -12,7 +12,7 @@ import { K8sService } from './k8s.service';
 @Injectable()
 export class AgentManagerService {
 
-    private readonly DEFAULT_TTL_MS: number = 5;
+    private readonly DEFAULT_TTL_SECONDS: number = 3600;
     private manager: IAgentManager;
 
     constructor(@Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
@@ -34,8 +34,7 @@ export class AgentManagerService {
      */
     public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl: number) {
         // 0 is a valid value in this case as it means service will run indefinitely
-        ttl = (ttl === undefined ? this.DEFAULT_TTL_MS : ttl);
-
+        ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const agentId = cryptoRandomString({ length: 32, type: 'hex' });
         // TODO: could it be possible the same port is randomly generated?
         const adminPort = this.generateRandomPort();
@@ -55,8 +54,8 @@ export class AgentManagerService {
 
         // @tothink move this caching to db
         // record lives in cache until it is explicitly deleted
-        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: 0});
-
+        Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1000)}}`);
+        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: (ttl === 0 ? ttl : ttl + 1000)});
         // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
         if (ttl > 0) {
             setTimeout(
