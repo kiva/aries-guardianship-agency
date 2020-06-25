@@ -1,4 +1,6 @@
 import { Injectable, INestApplication } from '@nestjs/common';
+import { json } from 'body-parser';
+import { HttpConstants } from '@kiva/protocol-common/http-context/http.constants';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -25,7 +27,8 @@ export class AppService {
 
         const logger = new Logger(DatadogLogger.getLogger());
         app.useLogger(logger);
-
+        // Increase json parse size to handle encoded images
+        app.use(json({ limit: HttpConstants.JSON_LIMIT }));
         app.use(helmet());
 
         const corsWhitelist = process.env.CORS_WHITELIST;

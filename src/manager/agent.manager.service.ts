@@ -12,6 +12,7 @@ import { K8sService } from './k8s.service';
 @Injectable()
 export class AgentManagerService {
 
+    private readonly DEFAULT_TTL_SECONDS: number = 3600;
     private manager: IAgentManager;
 
     constructor(@Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
@@ -31,8 +32,11 @@ export class AgentManagerService {
      * TODO need to think through a few more cases - like how the public endpoints and ports will work
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
-    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string) {
+    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl: number) {
+        // 0 is a valid value in this case as it means service will run indefinitely
+        ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const agentId = cryptoRandomString({ length: 32, type: 'hex' });
+        // TODO: could it be possible the same port is randomly generated?
         const adminPort = this.generateRandomPort();
         const httpPort = this.generateRandomPort();
 
@@ -48,15 +52,17 @@ export class AgentManagerService {
 
         const containerId = await this.manager.startAgent(agentConfig);
 
-        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey });
-
-         // TODO we could configure and auto timeout for ephemeral containers
-        // setTimeout(
-        //     async () => {
-        //         await this.manager.stopAgent(containerId);
-        //     },
-        //     20000,
-        // );
+        // @tothink move this caching to db
+        // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
+        Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1000)}}`);
+        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: (ttl === 0 ? ttl : ttl + 1000)});
+        // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
+        if (ttl > 0) {
+            setTimeout(
+                async () => {
+                    await this.spinDownAgent(agentId);
+                }, ttl * 1000);
+        }
         return { agentId, containerId, adminPort, httpPort };
     }
 
@@ -64,14 +70,16 @@ export class AgentManagerService {
      * TODO we should probably respond with something
      */
     public async spinDownAgent(agentId: string) {
+        // TODO: do we need to remove this entry
         const agent: any = await this.cache.get(agentId);
+        await this.cache.del(agentId);
         Logger.log('Spinning down agent', agent);
         // TODO handle case were agent not there
         await this.manager.stopAgent(agent.containerId);
     }
 
     /**
-     * TODO not sure if we'll keep this around because it doesn't guaruntee port overlaps, and also, ports are only really important when
+     * TODO not sure if we'll keep this around because it doesn't guarantee port overlaps, and also, ports are only really important when
      * testing on a mac. We deployed in k8s all agents can have the same ports and its file
      * Generates a random port between 5000-9999
      */
