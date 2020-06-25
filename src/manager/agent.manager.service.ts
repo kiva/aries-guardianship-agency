@@ -53,8 +53,7 @@ export class AgentManagerService {
 
         const containerId = await this.manager.startAgent(agentConfig);
 
-        // when ttl is 0, record will stay in cache indefinitely
-        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl });
+        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: 0});
 
         // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
         if (ttl > 0) {
@@ -72,6 +71,7 @@ export class AgentManagerService {
     public async spinDownAgent(agentId: string) {
         // TODO: do we need to remove this entry
         const agent: any = await this.cache.get(agentId);
+        await this.cache.del(agentId);
         Logger.log('Spinning down agent', agent);
         // TODO handle case were agent not there
         await this.manager.stopAgent(agent.containerId);
