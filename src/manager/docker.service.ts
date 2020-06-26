@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import Dockerode from 'dockerode';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
@@ -21,11 +21,12 @@ export class DockerService implements IAgentManager {
     /**
      * Start an agent with the given params using the expose docker api
      * TODO I don't think this handles errors properly if the agent fails to spin up
+     * TODO investigate how to do port bindings so that we can reuse the same port number internally within the docker network (ie not expose on mac)
      */
     public async startAgent(config: AgentConfig): Promise<string> {
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
-        const container = await this.dockerode.createContainer({
+        const containerOptions = {
             Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
             name: config.label,
@@ -67,7 +68,11 @@ export class DockerService implements IAgentManager {
                 '--auto-store-credential',
                 '--auto-respond-presentation-request',
             ],
-        });
+        };
+        if (config.seed) {
+            containerOptions.Cmd.push('--seed', config.seed);
+        }
+        const container = await this.dockerode.createContainer(containerOptions);
         await container.start();
         // Comment this in if we want to see docker logs here:
         container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {

@@ -40,6 +40,8 @@ export class AgentConfig {
 
     readonly adminPort: string;
 
+    readonly seed: string;
+
     /**
      * Sets up the agent config
      */
@@ -49,9 +51,10 @@ export class AgentConfig {
         adminApiKey: string,
         agentName: string,
         agentEndpoint: string,
-        controllerEndpoint: string,
+        webhookUrl: string,
         adminPort: string,
         httpPort: string,
+        seed?: string,
     ) {
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
         this.outboundTransport = 'http';
@@ -66,10 +69,11 @@ export class AgentConfig {
         this.admin = `0.0.0.0 ${adminPort}`;
         this.adminApiKey = adminApiKey;
         this.label = agentName;
-        this.webhookUrl = controllerEndpoint;
+        this.webhookUrl = webhookUrl;
         this.endpoint = agentEndpoint;
         this.httpPort = httpPort;
         this.adminPort = adminPort;
+        this.seed = seed;
     }
 
     private getWalletStorageConfig() {

@@ -13,10 +13,11 @@ export class AgentManagerController {
 
     /**
      * TODO use the DTOs from the agency folder
+     * TODO ignoring the linting errors for now, need to fix eventually - perhaps by passing the full DTO object
      */
     @Post()
     public createAgent(@Body() body: any) {
-        return this.agentManagerService.spinUpAgent(body.walletId, body.walletKey, body.adminApiKey, body.ttl);
+        return this.agentManagerService.spinUpAgent(body.walletId, body.walletKey, body.adminApiKey, body.ttl, body.seed, body.controllerUrl, body.alias);
     }
 
     /**

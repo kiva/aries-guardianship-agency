@@ -32,10 +32,12 @@ export class AgentManagerService {
      * TODO need to think through a few more cases - like how the public endpoints and ports will work
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
-    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl: number) {
-        // 0 is a valid value in this case as it means service will run indefinitely
+    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number, seed?: string, controllerUrl?: string, alias?: string) {
+        // Note: according to the docs a 0 value means caching for infinity, however this does not work in practice - it doesn't cache at all
+        // Short term you can pass in -1 and it will cache for max int (ie a very long time)
+        // TODO Long term we should have a proper DB store for permanent agents (or figure out a way to avoid having to save agent data all together)
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
-        const agentId = cryptoRandomString({ length: 32, type: 'hex' });
+        const agentId = alias || cryptoRandomString({ length: 32, type: 'hex' });
         // TODO: could it be possible the same port is randomly generated?
         const adminPort = this.generateRandomPort();
         const httpPort = this.generateRandomPort();
@@ -46,16 +48,17 @@ export class AgentManagerService {
 
         // TODO the webhook url should be a private one just on the network between the agent and the controller
         // since we don't want to expose the admin api publicly. Both locally and remotely this will be the docker container for the agency
-        const webhookUrl = `${process.env.INTERNAL_URL}/v1/controller/${agentId}`;
+        const webhookUrl = controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${agentId}`;
 
-        const agentConfig = new AgentConfig(walletId, walletKey, adminApiKey, agentId, agentEndpoint, webhookUrl, adminPort, httpPort);
+        const agentConfig = new AgentConfig(walletId, walletKey, adminApiKey, agentId, agentEndpoint, webhookUrl, adminPort, httpPort, seed);
 
         const containerId = await this.manager.startAgent(agentConfig);
 
         // @tothink move this caching to db
         // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
-        Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1000)}}`);
+        Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1000)}`);
         await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: (ttl === 0 ? ttl : ttl + 1000)});
+
         // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
         if (ttl > 0) {
             setTimeout(
