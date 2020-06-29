@@ -1,0 +1,17 @@
+{
+  "default" : {
+    "ALL_ELSE": "deny",
+    "ConnectionInvite": "once"
+  },
+  "local": {
+  },
+  "dev": {
+  },
+  "qa": {
+  },
+  "sand": {
+  },
+  "prod": {
+  }
+
+}

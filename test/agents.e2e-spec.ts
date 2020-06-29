@@ -3,6 +3,7 @@ import { Test } from '@nestjs/testing';
 import { INestApplication, Logger } from '@nestjs/common';
 import { AppService } from '../src/app/app.service';
 import { AppModule } from '../src/app/app.module';
+import {AgentGovernance} from '../src/manager/agent.governance';
 
 /**
  * These tests probably won't stay around, I just wanted to get something going
@@ -134,4 +135,19 @@ describe('Agency Integration Tests', () => {
             .expect(200);
     });
 
+    it('Governance data is valid', () => {
+        const agentGovernance: AgentGovernance = new AgentGovernance();
+    });
+
+    it('Governance isValidValue detects invalid value', () => {
+        const agentGovernance: AgentGovernance = new AgentGovernance();
+        expect(false === agentGovernance.isValidValue('bob'));
+    });
+
+    it('Governance validate detects invalid value', () => {
+        const agentGovernance: AgentGovernance = new AgentGovernance();
+        agentGovernance.policies = { inValidPolicy: 'jibberish'};
+        agentGovernance.validate();
+        expect(agentGovernance.policies[0] === 'deny');
+    });
 });
