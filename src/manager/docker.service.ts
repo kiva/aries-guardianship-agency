@@ -67,6 +67,7 @@ export class DockerService implements IAgentManager {
                 '--auto-respond-credential-offer',
                 '--auto-store-credential',
                 '--auto-respond-presentation-request',
+                // TODO if we want to support local DID's we can use '--wallet-local-did',
             ],
         };
         if (config.seed) {
