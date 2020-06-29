@@ -1,9 +1,11 @@
 {
   "default" : {
-    "ALL_ELSE": "deny",
-    "ConnectionInvite": "once"
+    "ALL_ELSE": "deny"
   },
   "local": {
+    "invitation": "once",
+    "request": "always",
+    "response": "always"
   },
   "dev": {
   },
