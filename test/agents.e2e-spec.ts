@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { INestApplication, Logger } from '@nestjs/common';
 import { AppService } from '../src/app/app.service';
 import { AppModule } from '../src/app/app.module';
-import {AgentGovernance} from '../src/manager/agent.governance';
+import {AgentGovernance} from '../src/controller/agent.governance';
 
 /**
  * These tests probably won't stay around, I just wanted to get something going
