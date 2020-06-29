@@ -5,6 +5,11 @@ You will need to add your .env vars from another repo
   TODO figure out a good way to pass those .env vars in
 You will need to add .npmrc file to pull protocol-common package from kiva npm server.
   TODO eventually we will make the npm package public
+Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache
+Check /config/env.json for the most up to date version:
+```
+ docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
+```
 The main docker-compose will spin up the agency, a local indy ledger, and a postgres wallets db to connect to:
 ```
 npm run install
