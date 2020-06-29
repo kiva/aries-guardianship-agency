@@ -8,6 +8,7 @@ import { Logger } from '@kiva/protocol-common/logger';
  */
 @Injectable()
 export class AgentGovernance {
+    // TODO: do we need to change this data structure to be by topic+state?
     public policies = { };
     constructor() {
         switch (process.env.NODE_ENV) {
