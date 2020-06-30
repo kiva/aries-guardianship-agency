@@ -37,6 +37,8 @@ The `once` value is unique.  When a permission is queried (via `getPermission(..
 ## Code
 [Source](../src/controller/agent.governance.ts)
 
+### Example use cases
+See the governance [unit tests](../test/agents.e2e-spec.ts)
 
 ## Future changes
 

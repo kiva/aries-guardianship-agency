@@ -13,11 +13,12 @@ import {AgentGovernance} from './agent.governance';
 export class AgentControllerService {
 
     private readonly http: ProtocolHttpService;
-
+    private readonly agentGovernance: AgentGovernance;
     constructor(
         httpService: HttpService,
         @Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
         this.http = new ProtocolHttpService(httpService);
+        this.agentGovernance = new AgentGovernance('Permissive');
     }
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
@@ -40,7 +41,6 @@ export class AgentControllerService {
             // TODO: add in policy check. eg:
             //     const action = new AgentGovernance(topic).getPermission(body.state)
             //     switch (action) ...
-            // TODO: how do we track occurrences of body.state???
             // TODO: clean up if/else with switch
             if (body.state === 'invitation') {
                 Logger.log('...processing invitation')
