@@ -51,9 +51,11 @@ In the future, we may want to have assignable behaviors to a policy.  Here's one
 
 ```json
  [name] : {
-    [key] : {
-      "permission": [always | once | deny ],
-      "action": [user defined data]
+    [topic] : {
+      [request] : {
+          "permission": [always | once | deny ],
+          "action": [user defined data]
+      }
     } 
 }
 ```
