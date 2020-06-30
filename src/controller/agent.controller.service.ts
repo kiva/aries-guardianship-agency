@@ -3,6 +3,7 @@ import { ProtocolHttpService } from '@kiva/protocol-common/protocol.http.service
 import { AxiosRequestConfig } from 'axios';
 import { ProtocolException } from '@kiva/protocol-common/protocol.exception';
 import { Logger } from '@kiva/protocol-common/logger';
+import {AgentGovernance} from './agent.governance';
 
 /**
  * TODO this needs to handle general requests that come from the agents for the controller to handle -
@@ -36,9 +37,9 @@ export class AgentControllerService {
             }
 
             // If this is an external invitation then accept-invitation
-            // TODO: add in check for allowing AgentGovernance.policies[body.state]
-            // const action = new AgentGovernance(topic).getPermission(body.state)
-            // switch (action) ...
+            // TODO: add in policy check. eg:
+            //     const action = new AgentGovernance(topic).getPermission(body.state)
+            //     switch (action) ...
             // TODO: how do we track occurrences of body.state???
             // TODO: clean up if/else with switch
             if (body.state === 'invitation') {

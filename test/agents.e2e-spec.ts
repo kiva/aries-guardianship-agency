@@ -166,4 +166,10 @@ describe('Agency Integration Tests', () => {
         const agentGovernance: AgentGovernance = new AgentGovernance('Permissive', data);
         expect(agentGovernance.getPermission('all') === 'deny');
     });
+
+    it('Governance changes once permission to deny on use', () => {
+        const agentGovernance: AgentGovernance = new AgentGovernance('Permissive');
+        expect(agentGovernance.getPermission('invitation') === 'once');
+        expect(agentGovernance.getPermission('invitation') === 'deny');
+    });
 });

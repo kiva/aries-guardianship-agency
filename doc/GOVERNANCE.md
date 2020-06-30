@@ -1,4 +1,4 @@
-# Governence Policy System
+# Governance Policy System
 
 ## Data structure
 There are one or more objects at the top-level.  
@@ -6,7 +6,8 @@ There are one or more objects at the top-level.
 `default` is required.  The key of `all` specifies what value will be applied to permission request not found in the policy.  If `all`
 is missing, it will be created with the value of `deny`.
 
-Policies are defined as a top-level object. The name is user defined.  Policies must conform to the following structure. 
+Policies are defined as top-level objects. The name is user defined.  Policies are key value paris where the key is user defined value and
+the value is one of `[always | once | deny]` as documented below: 
 
 ```json
  [name] : {
@@ -29,6 +30,9 @@ Here is an example that contains a user defined policy called 'Permissive'.
   }
 }
 ```
+
+### About `once`
+The `once` value is unique.  When a permission is queried (via `getPermission(...)` API call), the value for that key is updated to `deny`.
 
 ## Code
 [Source](../src/controller/agent.governance.ts)

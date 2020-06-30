@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Constants } from '@kiva/protocol-common/constants';
-import data from '../config/governence.json';
 import { Logger } from '@kiva/protocol-common/logger';
+import data from '../config/governence.json';
 
 /**
  * TODO validation, error cases, etc
@@ -54,6 +53,12 @@ export class AgentGovernance {
         if (key === undefined) {
             return this.policies[AgentGovernance.ALL_KEY];
         }
-        return this.policies[value];
+
+        const permission = this.policies[value];
+        // Here's how we enforce "once", change it to deny once its been read
+        if (permission === AgentGovernance.PERMISSION_ONCE) {
+            this.policies[value] = AgentGovernance.PERMISSION_DENY;
+        }
+        return permission;
     }
 }
