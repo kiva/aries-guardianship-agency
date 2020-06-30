@@ -41,7 +41,7 @@ export class AgentControllerService {
             // If this is an external invitation then accept-invitation
             // TODO: add in policy check. eg:
             //     const action = this.agentGovernance.getPermission(topic, body.state)
-            //     switch (action) ...
+            //     if (action === 'deny') throw new Error('denied!');
             // TODO: clean up if/else with switch
             if (body.state === 'invitation') {
                 Logger.log('...processing invitation')
