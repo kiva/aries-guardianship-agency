@@ -1,19 +1,17 @@
 {
+  "comment": "The default section is required.  The others are defined as needed. So in this example, Permissive and SierraLeone as user defined sections. The valid values for keys in a section are always, once, deny",
   "default" : {
-    "ALL_ELSE": "deny"
+    "comment": "this section is the default which will apply when a policy requested is missing or when an action in a policy is missing",
+    "all": "deny"
   },
-  "local": {
-    "invitation": "once",
-    "request": "always",
+  "Permissive": {
+    "invitation": "always",
+    "create-proof": "always",
     "response": "always"
   },
-  "dev": {
-  },
-  "qa": {
-  },
-  "sand": {
-  },
-  "prod": {
+  "SierraLeone": {
+    "invitation": "once",
+    "create-proof": "always",
+    "response": "always"
   }
-
 }

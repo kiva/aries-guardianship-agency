@@ -37,9 +37,10 @@ export class AgentControllerService {
 
             // If this is an external invitation then accept-invitation
             // TODO: add in check for allowing AgentGovernance.policies[body.state]
-            // const action = new AgentGovernance().policies[body.state]
+            // const action = new AgentGovernance(topic).getPermission(body.state)
             // switch (action) ...
             // TODO: how do we track occurrences of body.state???
+            // TODO: clean up if/else with switch
             if (body.state === 'invitation') {
                 Logger.log('...processing invitation')
                 req = {

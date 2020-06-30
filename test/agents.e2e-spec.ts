@@ -135,19 +135,35 @@ describe('Agency Integration Tests', () => {
             .expect(200);
     });
 
-    it('Governance data is valid', () => {
-        const agentGovernance: AgentGovernance = new AgentGovernance();
+    it('Governance installed data is valid', () => {
+        const agentGovernance: AgentGovernance = new AgentGovernance('doesnt_matter');
     });
 
     it('Governance isValidValue detects invalid value', () => {
-        const agentGovernance: AgentGovernance = new AgentGovernance();
+        const agentGovernance: AgentGovernance = new AgentGovernance('Permissive');
         expect(false === agentGovernance.isValidValue('bob'));
     });
 
-    it('Governance validate detects invalid value', () => {
-        const agentGovernance: AgentGovernance = new AgentGovernance();
-        agentGovernance.policies = { inValidPolicy: 'jibberish'};
-        agentGovernance.validate();
-        expect(agentGovernance.policies[0] === 'deny');
+    it('Governance validates correctly adjusts invalid value', () => {
+        const data = {
+            default : {
+                all: 'deny'
+            },
+            Permissive : {
+                inValidPolicy: 'jibberish'
+            }
+        };
+        const agentGovernance: AgentGovernance = new AgentGovernance('Permissive', data);
+        expect(agentGovernance.getPermission('inValidPolicy') === 'deny');
+    });
+
+    it('Governance validate correctly adds all', () => {
+        const data = {
+            Permissive : {
+                inValidPolicy: 'jibberish'
+            }
+        };
+        const agentGovernance: AgentGovernance = new AgentGovernance('Permissive', data);
+        expect(agentGovernance.getPermission('all') === 'deny');
     });
 });
