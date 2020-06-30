@@ -3,10 +3,10 @@
 ## Data structure
 There are one or more objects at the top-level.  
 
-`default` is required.  The key of `all` will be applied to any request not found in the policy.
+`default` is required.  The key of `all` specifies what value will be applied to permission request not found in the policy.  If `all`
+is missing, it will be created with the value of `deny`.
 
-Policies are defined as a top-level object.  In this example below, there is another top-level section called `Permissive`.  The name is user defined.
-The object `Permissive` must conform to the following structure:
+Policies are defined as a top-level object. The name is user defined.  Policies must conform to the following structure. 
 
 ```json
  [name] : {
@@ -14,6 +14,7 @@ The object `Permissive` must conform to the following structure:
 }
 ```
 
+Here is an example that contains a user defined policy called 'Permissive'.  
 
 ```json
 {
@@ -30,7 +31,7 @@ The object `Permissive` must conform to the following structure:
 ```
 
 ## Code
-[Source](src/controller/agent.governance.ts)
+[Source](../src/controller/agent.governance.ts)
 
 
 ## Future changes
