@@ -140,7 +140,7 @@ describe('Agency Integration Tests', () => {
     });
 
     it('Governance isValidValue detects invalid value', () => {
-        const agentGovernance: AgentGovernance = new AgentGovernance('Permissive');
+        const agentGovernance: AgentGovernance = new AgentGovernance('permissive');
         expect(false === agentGovernance.isValidValue('bob'));
     });
 
@@ -149,27 +149,32 @@ describe('Agency Integration Tests', () => {
             default : {
                 all: 'deny'
             },
-            Permissive : {
-                inValidPolicy: 'jibberish'
+            somethingWrong : {
+                invalidTopic : {
+                    invalidPermission: 'jibberish'
+                }
             }
         };
-        const agentGovernance: AgentGovernance = new AgentGovernance('Permissive', data);
-        expect(agentGovernance.getPermission('inValidPolicy') === 'deny');
+        const agentGovernance: AgentGovernance = new AgentGovernance('somethingWrong', data);
+        expect(agentGovernance.getPermission('invalidTopic', 'invalidPermission') === 'deny');
     });
 
     it('Governance validate correctly adds all', () => {
         const data = {
-            Permissive : {
-                inValidPolicy: 'jibberish'
+            somethingWrong : {
+                invalidTopic : {
+                    invalidPermission: 'jibberish'
+                }
             }
         };
-        const agentGovernance: AgentGovernance = new AgentGovernance('Permissive', data);
-        expect(agentGovernance.getPermission('all') === 'deny');
+        const agentGovernance: AgentGovernance = new AgentGovernance('somethingWrong', data);
+        // all, all doesnt exist so it should return default of deny
+        expect(agentGovernance.getPermission('all','all') === 'deny');
     });
 
     it('Governance changes once permission to deny on use', () => {
-        const agentGovernance: AgentGovernance = new AgentGovernance('Permissive');
-        expect(agentGovernance.getPermission('invitation') === 'once');
-        expect(agentGovernance.getPermission('invitation') === 'deny');
+        const agentGovernance: AgentGovernance = new AgentGovernance('permissive');
+        expect(agentGovernance.getPermission('Permissive', 'invitation') === 'once');
+        expect(agentGovernance.getPermission('Permissive', 'invitation') === 'deny');
     });
 });

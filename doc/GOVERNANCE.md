@@ -6,12 +6,15 @@ There are one or more objects at the top-level.
 `default` is required.  The key of `all` specifies what value will be applied to permission request not found in the policy.  If `all`
 is missing, it will be created with the value of `deny`.
 
-Policies are defined as top-level objects. The name is user defined.  Policies are key value paris where the key is user defined value and
+Policies are defined as top-level objects. The name is user defined.  Policies are collections of topics.
+Topics are also user defined.  Topics are the final level in the policy definition and these key value paris where the key is user defined value and
 the value is one of `[always | once | deny]` as documented below: 
 
 ```json
  [name] : {
-    [key] : [always | once | deny ] 
+    [topic] {
+      [key] : [always | once | deny ]
+    } 
 }
 ```
 
@@ -25,8 +28,10 @@ Here is an example that contains a user defined policy called 'Permissive'.
     "all": "deny"
   },
   "Permissive": {
-    "invitation": "always",
-    "create-proof": "always"
+    "connections": {
+      "invitation": "always",
+      "request": "always"
+    }
   }
 }
 ```

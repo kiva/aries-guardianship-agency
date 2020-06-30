@@ -4,14 +4,20 @@
     "comment": "this section is the default which will apply when a policy requested is missing or when an action in a policy is missing",
     "all": "deny"
   },
-  "Permissive": {
-    "invitation": "always",
-    "create-proof": "always",
-    "response": "always"
+  "permissive": {
+    "connections": {
+      "invitation": "always",
+      "request": "always"
+    }
   },
   "SierraLeone": {
-    "invitation": "once",
-    "create-proof": "always",
-    "response": "always"
+    "connections": {
+      "invitation": "once",
+      "request": "always"
+    },
+    "create-proof": {
+      "invitation": "once",
+      "request": "always"
+    }
   }
 }
