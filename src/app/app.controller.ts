@@ -1,5 +1,6 @@
 import { Get, Controller } from '@nestjs/common';
 import { HttpConstants } from '@kiva/protocol-common/http-context/http.constants';
+import { AgentConfig } from '../manager/agent.config';
 
 /**
  * Base route is just for various health check endpoints
@@ -20,5 +21,13 @@ export class AppController {
     @Get('healthz')
     healthz(): string {
         return HttpConstants.HEALTHZ_RESPONSE;
+    }
+
+    /**
+     * This is strictly needed, but could be useful for external users
+     */
+    @Get('genesis-file')
+    getGenesisFile(): string {
+        return AgentConfig.getGenesisFile();
     }
 }

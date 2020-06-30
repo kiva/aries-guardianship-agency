@@ -1,4 +1,6 @@
 import { Injectable, INestApplication } from '@nestjs/common';
+import { json } from 'body-parser';
+import { HttpConstants } from '@kiva/protocol-common/http-context/http.constants';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -19,14 +21,14 @@ export class AppService {
      * Sets up app in a way that can be used by main.ts and e2e tests
      */
     public static async setup(app: INestApplication) {
-
         // Setting request-id middleware which assigns a unique requestid per incomming requests if not sent by client.
         const requestId = require('express-request-id')();
         app.use(requestId);
 
         const logger = new Logger(DatadogLogger.getLogger());
         app.useLogger(logger);
-
+        // Increase json parse size to handle encoded images
+        app.use(json({ limit: HttpConstants.JSON_LIMIT }));
         app.use(helmet());
 
         const corsWhitelist = process.env.CORS_WHITELIST;
@@ -56,8 +58,5 @@ export class AppService {
             const document = SwaggerModule.createDocument(app, options);
             SwaggerModule.setup('api-docs', app, document);
         }
-
-
-
     }
 }

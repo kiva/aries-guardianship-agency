@@ -1,8 +1,8 @@
-import { Global, Module, CacheModule } from "@nestjs/common";
+import { Global, Module, CacheModule } from '@nestjs/common';
 import * as fsStore from 'cache-manager-fs-hash';
 
 /**
- * TODO right now we're using a file system cache for simplicity, at some point we should switch to redis or something 
+ * TODO right now we're using a file system cache for simplicity, at some point we should switch to redis or something
  */
 @Global()
 @Module({
