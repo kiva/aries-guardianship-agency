@@ -3,6 +3,7 @@ import { ProtocolHttpService } from '@kiva/protocol-common/protocol.http.service
 import { AxiosRequestConfig } from 'axios';
 import { ProtocolException } from '@kiva/protocol-common/protocol.exception';
 import { Logger } from '@kiva/protocol-common/logger';
+import {AgentGovernance} from './agent.governance';
 
 /**
  * TODO this needs to handle general requests that come from the agents for the controller to handle -
@@ -12,11 +13,13 @@ import { Logger } from '@kiva/protocol-common/logger';
 export class AgentControllerService {
 
     private readonly http: ProtocolHttpService;
-
+    private readonly agentGovernance: AgentGovernance;
     constructor(
         httpService: HttpService,
         @Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
         this.http = new ProtocolHttpService(httpService);
+        // TODO: the input to the constructor needs to come from something else
+        this.agentGovernance = new AgentGovernance('permissive');
     }
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
@@ -36,6 +39,10 @@ export class AgentControllerService {
             }
 
             // If this is an external invitation then accept-invitation
+            // TODO: add in policy check. eg:
+            //     const action = this.agentGovernance.getPermission(topic, body.state)
+            //     if (action === 'deny') throw new Error('denied!');
+            // TODO: clean up if/else with switch
             if (body.state === 'invitation') {
                 Logger.log('...processing invitation')
                 req = {
