@@ -70,7 +70,7 @@ export class AgentManagerService {
 
         // TODO for right now let's delay and then inititate the connection
         // TODO this functionality should be optional based on passed in params
-        await this.delay(10000);
+        await this.delay(8000);
         const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
 
         return { agentId, containerId, adminPort, httpPort, connectionData };
