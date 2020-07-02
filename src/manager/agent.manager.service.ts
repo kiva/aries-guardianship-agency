@@ -1,10 +1,11 @@
-import { Injectable, CacheStore, CACHE_MANAGER, Inject } from '@nestjs/common';
+import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nestjs/common';
 import { DockerService } from './docker.service';
 import { IAgentManager } from './agent.manager.interface';
 import cryptoRandomString from 'crypto-random-string';
 import { Logger } from '@kiva/protocol-common/logger';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
+import { ProtocolHttpService } from '@kiva/protocol-common/protocol.http.service';
 
 /**
  * TODO validation, error cases, etc
@@ -66,7 +67,13 @@ export class AgentManagerService {
                     await this.spinDownAgent(agentId);
                 }, ttl * 1000);
         }
-        return { agentId, containerId, adminPort, httpPort };
+
+        // TODO for right now let's delay and then inititate the connection
+        // TODO this functionality should be optional based on passed in params
+        await this.delay(8000);
+        const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
+
+        return { agentId, containerId, adminPort, httpPort, connectionData };
     }
 
     /**
@@ -88,5 +95,32 @@ export class AgentManagerService {
      */
     private generateRandomPort(): string {
         return (Math.floor(5000 + Math.random() * 5000)).toString();
+    }
+
+    /**
+     * TODO rather than a fixed delay, we should respond to something from the agent which indicates that it's up
+     */
+    private delay(ms: number) {
+        return new Promise( resolve => setTimeout(resolve, ms) );
+    }
+
+    /**
+     * TODO move to it's own class and pass in the http object
+     * TODO error handling
+     */
+    private async createConnection(agentId: string, adminPort: string, adminApiKey: string) {
+        const http = new ProtocolHttpService(new HttpService());
+        const url = `http://${agentId}:${adminPort}/connections/create-invitation`;
+        const req: any = {
+            method: 'POST',
+            url,
+            headers: {
+                'x-api-key': adminApiKey,
+            },
+        };
+
+        const res = await http.requestWithRetry(req);
+        return res.data.invitation;
+
     }
 }
