@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Logger } from '@kiva/protocol-common/logger';
+import { Logger } from 'protocol-common/logger';
 import data from '../config/governence.json';
 
 /**

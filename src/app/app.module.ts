@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@kiva/protocol-common/config.module';
+import { ConfigModule } from 'protocol-common/config.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import data from '../config/env.json';

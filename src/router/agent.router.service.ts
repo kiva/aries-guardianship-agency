@@ -1,6 +1,5 @@
-import { Injectable, HttpService, CacheStore, Inject, CACHE_MANAGER } from '@nestjs/common';
-import { ProtocolHttpService } from '@kiva/protocol-common/protocol.http.service';
-import { Logger } from '@kiva/protocol-common/logger';
+import { Injectable, CacheStore, Inject, CACHE_MANAGER } from '@nestjs/common';
+import { Logger } from 'protocol-common/logger';
 
 /**
  *

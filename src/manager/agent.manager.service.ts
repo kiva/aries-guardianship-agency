@@ -2,10 +2,10 @@ import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nes
 import { DockerService } from './docker.service';
 import { IAgentManager } from './agent.manager.interface';
 import cryptoRandomString from 'crypto-random-string';
-import { Logger } from '@kiva/protocol-common/logger';
+import { Logger } from 'protocol-common/logger';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
-import { ProtocolHttpService } from '@kiva/protocol-common/protocol.http.service';
+import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 
 /**
  * TODO validation, error cases, etc

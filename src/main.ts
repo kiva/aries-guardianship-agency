@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
+import { Logger } from 'protocol-common/logger';
 import { AppModule } from './app/app.module';
 import { AppService } from './app/app.service';
-import { Logger } from '@kiva/protocol-common/logger';
-import { AgentManagerService } from 'manager/agent.manager.service';
 
 async function bootstrap() {
     const port = process.env.PORT;
