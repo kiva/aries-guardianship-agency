@@ -1,8 +1,8 @@
 import { Injectable, HttpService, Inject, CACHE_MANAGER, CacheStore } from '@nestjs/common';
-import { ProtocolHttpService } from '@kiva/protocol-common/protocol.http.service';
+import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { AxiosRequestConfig } from 'axios';
-import { ProtocolException } from '@kiva/protocol-common/protocol.exception';
-import { Logger } from '@kiva/protocol-common/logger';
+import { ProtocolException } from 'protocol-common/protocol.exception';
+import { Logger } from 'protocol-common/logger';
 import {AgentGovernance} from './agent.governance';
 
 /**

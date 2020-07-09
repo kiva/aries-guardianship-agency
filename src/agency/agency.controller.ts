@@ -1,5 +1,5 @@
 import { Controller, Post, Body} from '@nestjs/common';
-import { ProtocolValidationPipe } from '@kiva/protocol-common/protocol.validation.pipe';
+import { ProtocolValidationPipe } from 'protocol-common/protocol.validation.pipe';
 import { AgencyOpenAgentDto } from './dtos/agency.open-agent.dto';
 import { AgentManagerService } from '../manager/agent.manager.service';
 
