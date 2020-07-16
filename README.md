@@ -1,7 +1,24 @@
 # Aries Guardianship Agency
 
 ### Setup
-You will need to add your .env vars from another repo (TODO figure out a good way to pass those .env vars in)  
+You will need to following variables in the .env file.  Values are not literal, this just an example:
+```
+# ENV FILE FOR AGENCY
+NODE_ENV=LOCAL
+
+# For Wallet DB
+WALLET_DB_HOST=hostname
+WALLET_DB_PORT=5432
+WALLET_DB_USER=username
+WALLET_DB_PASS=password
+WALLET_DB_ADMIN_USER=adminusername
+WALLET_DB_ADMIN_PASS=password
+POSTGRES_PASSWORD=password
+```
+If you have access to other protocol repos, you can get the values from those repos.
+
+(TODO figure out a good way to pass those .env vars in)  
+  
 Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache  
 
 Check src/config/env.json for the most up to date version:
