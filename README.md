@@ -21,7 +21,7 @@ If you have access to other protocol repos, you can get the values from those re
   
 Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache  
 
-Check src/config/env.json for the most up to date version:
+Check `src/config/env.json` for the most up to date version:
 ```
  docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
 ```
@@ -65,7 +65,7 @@ If you want to connect to the kiva-network from the protocol-repo you need to up
   NETWORK_NAME=kiva-network
 You can then run
 ```
-npm run install
+npm install
 docker-compose -f docker-compose.kiva-network.yml
 ```
 
