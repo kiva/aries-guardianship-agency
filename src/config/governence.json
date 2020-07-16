@@ -6,18 +6,44 @@
   },
   "permissive": {
     "connections": {
-      "invitation": "always",
-      "request": "always"
+      "create-invitation": "always",
+      "receive-invitation": "always",
+      "accept-invitation": "always",
+      "accept-request": "always",
+      "send-ping": "always",
+      "remove": "always"
+    },
+    "proof": {
+      "proposal_sent": "always",
+      "proposal_received": "always",
+      "offer_sent": "always",
+      "offer_received": "always",
+      "request_sent": "always",
+      "request_received": "always",
+      "credential_issued": "always",
+      "credential_received": "always",
+      "credential_acked": "always"
     }
   },
   "SierraLeone": {
     "connections": {
-      "invitation": "once",
-      "request": "always"
+      "create-invitation": "once",
+      "receive-invitation": "always",
+      "accept-invitation": "always",
+      "accept-request": "always",
+      "send-ping": "always",
+      "remove": "always"
     },
-    "create-proof": {
-      "invitation": "once",
-      "request": "always"
+    "proof": {
+      "proposal_sent": "once",
+      "proposal_received": "once",
+      "offer_sent": "once",
+      "offer_received": "once",
+      "request_sent": "always",
+      "request_received": "always",
+      "credential_issued": "once",
+      "credential_received": "once",
+      "credential_acked": "always"
     }
   }
 }

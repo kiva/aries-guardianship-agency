@@ -8,9 +8,9 @@ import data from '../config/governence.json';
 @Injectable()
 export class AgentGovernance {
     // see GOVERANCE.md for documentation on policies data structure
-    private static PERMISSION_DENY = 'deny';
-    private static PERMISSION_ONCE = 'once';
-    private static PERMISSION_ALWAYS = 'always';
+    public static PERMISSION_DENY = 'deny';
+    public static PERMISSION_ONCE = 'once';
+    public static PERMISSION_ALWAYS = 'always';
     private static ALL_KEY = 'all';
     private static COMMENT_SECTION = 'comment';
     private readonly policies = { };
