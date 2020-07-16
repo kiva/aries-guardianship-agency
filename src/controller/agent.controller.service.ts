@@ -7,6 +7,8 @@ import { AgentGovernance } from './agent.governance';
 import { HandlersFactory } from './handler/handlers.factory';
 
 /**
+ * Agent acting on the behalf of a "citizen"
+ *
  * TODO this needs to handle general requests that come from the agents for the controller to handle -
  * it should have some way of checking what it's behavior should be and respond accordingly
  */
@@ -24,20 +26,10 @@ export class AgentControllerService {
     }
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
-        if (AgentGovernance.PERMISSION_DENY === this.agentGovernance.getPermission(route, topic)) {
-            throw new ProtocolException('AgencyGovernance',`${topic} governance doesnt not allow.`);
-        }
-
+        Logger.info(`AgentControllerService.handleRequest(${agentId}, ${route}, ${topic})`, body);
         const agent: any = await this.cache.get(agentId);
         const agentUrl = `http://${agentId}:${agent.adminPort}`;
 
         return HandlersFactory.getHandler(this.agentGovernance, topic).handlePost(agentUrl, agent.adminApiKey, route, topic, body);
-    }
-
-    /**
-     * Test function in case we want to slow things down
-     */
-    delay(ms: number) {
-        return new Promise( resolve => setTimeout(resolve, ms) );
     }
 }

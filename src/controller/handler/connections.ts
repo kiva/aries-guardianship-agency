@@ -1,18 +1,17 @@
 import { AxiosRequestConfig } from 'axios';
 import { Logger } from 'protocol-common/logger';
-import { NotImplementedException } from "@nestjs/common";
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
+import { ProtocolException } from 'protocol-common/protocol.exception';
 import { IAgentResponseHandler } from './agent.response.handler';
 import { AgentGovernance } from '../agent.governance';
 
+/*
+    Acapy webhooks handler for input received from the url [webhookurl]/v1/controller/topic/connections
+ */
 export class Connections implements IAgentResponseHandler {
     private static CONNECTIONS_URL: string = 'connections';
     private readonly http: ProtocolHttpService;
     constructor(private readonly agentGovernance: AgentGovernance) {
-    }
-
-    public async handleGet(agentUrl: string, adminApiKey: string, route: string, topic: string): Promise<any> {
-        throw new NotImplementedException();
     }
 
     /*
@@ -38,33 +37,31 @@ export class Connections implements IAgentResponseHandler {
         topic will be "connections"
     */
     public async handlePost(agentUrl: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
+        if (route !== 'topic' || topic !== 'connections') {
+            throw new ProtocolException('Connections',`${route}/${topic} is not valid.`);
+        }
 
-        /*
-            TODO: to accept an invitation, some other process will do these steps
-                1 - get a connection invitation
-                2 - pass invitation to second agent
-             From there, we can
-                1 - tell one agent to accept (trick is which one)
-                2 - then tell the other agent to accept
+        if (body.state !== 'request') {
+            Logger.info(`${body.state} not applicable`);
+            return;
+        }
 
-         */
+        if (AgentGovernance.PERMISSION_DENY === this.agentGovernance.getPermission(route, topic)) {
+            throw new ProtocolException('AgencyGovernance',`${topic} governance doesnt not allow.`);
+        }
 
-        Logger.log(`...processing ${body.state}`, body);
-
-        let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/`;
+        let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-request`;
 
         const req: AxiosRequestConfig = {
             method: 'POST',
             url,
             headers: {
                 'x-api-key': adminApiKey,
-            },
-            data: body.message
+            }
         };
 
-        Logger.log(`...calling ${req.url}`);
+        Logger.log(`requesting agent to accept connection invite ${req.url}`);
         const res = await this.http.requestWithRetry(req);
-        // have to return actual API results so that client can process it
         return res;
     }
 }
