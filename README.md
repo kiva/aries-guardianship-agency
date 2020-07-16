@@ -4,13 +4,13 @@
 You will need to add your .env vars from another repo (TODO figure out a good way to pass those .env vars in)  
 Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache  
 
-Check /config/env.json for the most up to date version:
+Check src/config/env.json for the most up to date version:
 ```
  docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
 ```
 The main docker-compose will spin up the agency, a local indy ledger, and a postgres wallets db to connect to:
 ```
-npm run install
+npm install
 docker-compose up
 ```
 To run tests:
@@ -25,6 +25,13 @@ POST http://localhost:3010/v1/manager
 	"walletId": "walletId001",
 	"walletKey": "walletKey001",
 	"adminApiKey": "adminApiKey"
+	"walletId": "walletId",
+	"walletKey": "walletkey",
+	"adminApiKey": "someAdminKey",
+	"ttl": -1,
+	"seed": "000000000000000000000000ABCDEFG1",
+	"controllerUrl": "http://controller:1010",
+	"alias": "testAgent2"
 }
 ```
 To spin down the agent, use the returned agentId from above and do:
