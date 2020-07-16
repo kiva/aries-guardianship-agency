@@ -4,6 +4,7 @@ import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
 import { IAgentResponseHandler } from './agent.response.handler';
 import { AgentGovernance } from '../agent.governance';
+import { CacheStore } from '@nestjs/common';
 
 /*
     Acapy webhooks handler for input received from the url [webhookurl]/v1/controller/topic/connections
@@ -11,7 +12,7 @@ import { AgentGovernance } from '../agent.governance';
 export class Connections implements IAgentResponseHandler {
     private static CONNECTIONS_URL: string = 'connections';
     private readonly http: ProtocolHttpService;
-    constructor(private readonly agentGovernance: AgentGovernance) {
+    constructor(private readonly agentGovernance: AgentGovernance, private readonly cache: CacheStore) {
     }
 
     /*
@@ -50,6 +51,12 @@ export class Connections implements IAgentResponseHandler {
             throw new ProtocolException('AgencyGovernance',`${topic} governance doesnt not allow.`);
         }
 
+        // if the agentUrl is in the cache then the agent has already accepted the request
+        if (this.cache.get<any>(agentUrl)) {
+            return;
+        }
+
+        await this.cache.set(agentUrl, {  }, { ttl: 0});
         let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-request`;
 
         const req: AxiosRequestConfig = {

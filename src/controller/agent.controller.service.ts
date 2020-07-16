@@ -30,6 +30,6 @@ export class AgentControllerService {
         const agent: any = await this.cache.get(agentId);
         const agentUrl = `http://${agentId}:${agent.adminPort}`;
 
-        return HandlersFactory.getHandler(this.agentGovernance, topic).handlePost(agentUrl, agent.adminApiKey, route, topic, body);
+        return HandlersFactory.getHandler(this.agentGovernance, topic, this.cache).handlePost(agentUrl, agent.adminApiKey, route, topic, body);
     }
 }

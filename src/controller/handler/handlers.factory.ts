@@ -3,6 +3,7 @@ import { IAgentResponseHandler } from './agent.response.handler';
 import { Connections } from './connections';
 import { AgentGovernance } from '../agent.governance';
 import { Proofs } from './proof';
+import {CacheStore} from "@nestjs/common";
 
 /*
     @TODO we want to replace this factory with nestjs injection at some point
@@ -11,12 +12,12 @@ export class HandlersFactory {
     /*
 
      */
-    public static getHandler(agentGovernance: AgentGovernance, topic: string): IAgentResponseHandler {
+    public static getHandler(agentGovernance: AgentGovernance, topic: string, cache: CacheStore): IAgentResponseHandler {
         switch (topic) {
             case 'connections':
-                return new Connections(agentGovernance);
+                return new Connections(agentGovernance, cache);
             case 'proofs':
-                return new Proofs(agentGovernance);
+                return new Proofs(agentGovernance, cache);
             default:
                 break;
         }
