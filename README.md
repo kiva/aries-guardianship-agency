@@ -47,7 +47,6 @@ POST http://localhost:3010/v1/manager
 	"adminApiKey": "someAdminKey",
 	"ttl": -1,
 	"seed": "000000000000000000000000ABCDEFG1",
-	"controllerUrl": "http://controller:1010",
 	"alias": "testAgent2"
 }
 ```
