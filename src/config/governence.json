@@ -6,18 +6,12 @@
   },
   "permissive": {
     "connections": {
-      "invitation": "always",
-      "request": "always"
+      "accept-invitation": "always"
     }
   },
-  "SierraLeone": {
+  "SingleConnection": {
     "connections": {
-      "invitation": "once",
-      "request": "always"
-    },
-    "create-proof": {
-      "invitation": "once",
-      "request": "always"
+      "accept-invitation": "once"
     }
   }
 }
