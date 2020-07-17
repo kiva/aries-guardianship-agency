@@ -47,7 +47,7 @@ export class Connections implements IAgentResponseHandler {
             return;
         }
 
-        if (AgentGovernance.PERMISSION_DENY === this.agentGovernance.getPermission(route, topic)) {
+        if (AgentGovernance.PERMISSION_DENY === this.agentGovernance.getPermission("connections", "accept-invitation")) {
             throw new ProtocolException('AgencyGovernance',`${topic} governance doesnt not allow.`);
         }
 
