@@ -34,6 +34,11 @@ export class AgentManagerService {
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
     public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number, seed?: string, controllerUrl?: string, alias?: string) {
+        const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey);
+        if (runningData) {
+            return runningData;
+        }
+
         // Note: according to the docs a 0 value means caching for infinity, however this does not work in practice - it doesn't cache at all
         // Short term you can pass in -1 and it will cache for max int (ie a very long time)
         // TODO Long term we should have a proper DB store for permanent agents (or figure out a way to avoid having to save agent data all together)
@@ -57,8 +62,8 @@ export class AgentManagerService {
 
         // @tothink move this caching to db
         // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
-        Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1000)}`);
-        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: (ttl === 0 ? ttl : ttl + 1000)});
+        Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1)}`);
+        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: (ttl === 0 ? ttl : ttl + 1)});
 
         // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
         if (ttl > 0) {
@@ -121,6 +126,29 @@ export class AgentManagerService {
 
         const res = await http.requestWithRetry(req);
         return res.data.invitation;
+    }
 
+    /**
+     * If we already have an agent running with the same agent id, don't try to start a new one, just return the connection data
+     * for the existing one - we use the adminApiKey to ensure that the caller actually has permissions to query the agent
+     * TODO we may want more checks here, eg to ensure the docker container is actually running, but for now we treat the cache as truth
+     */
+    private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string) {
+        if (agentId) {
+            const agentData: any = await this.cache.get(agentId);
+            Logger.log(agentData);
+            if (agentData) {
+                // TODO need error handling if this call fails
+                const connectionData = await this.createConnection(agentId, agentData.adminPort, adminApiKey);
+                return {
+                    agentId,
+                    containerId: agentData.containerId,
+                    adminPort: agentData.adminPort,
+                    httpPort: agentData.httpPort,
+                    connectionData
+                };
+            }
+        }
+        return null;
     }
 }
