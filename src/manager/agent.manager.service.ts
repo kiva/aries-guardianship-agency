@@ -33,7 +33,7 @@ export class AgentManagerService {
      * TODO need to think through a few more cases - like how the public endpoints and ports will work
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
-    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number, seed?: string, controllerUrl?: string, alias?: string) {
+    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number, seed?: string, controllerUrl?: string, alias?: string, autoConnect?: boolean) {
         const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey);
         if (runningData) {
             return runningData;
@@ -73,10 +73,14 @@ export class AgentManagerService {
                 }, ttl * 1000);
         }
 
-        // TODO for right now let's delay and then inititate the connection
-        // TODO this functionality should be optional based on passed in params
-        await this.delay(8000);
-        const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
+        let connectionData = {};
+        // when autoConnect is true, then call the createConnection method
+        // when autoCorrect is not defined, treat it as true
+        if (!autoConnect || autoConnect === true) {
+            // TODO for right now let's delay and then initiate the connection
+            await this.delay(8000);
+            connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
+        }
 
         return { agentId, containerId, adminPort, httpPort, connectionData };
     }
