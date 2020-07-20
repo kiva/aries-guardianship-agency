@@ -79,7 +79,10 @@ export class DockerService implements IAgentManager {
         await container.start();
         // Comment this in if we want to see docker logs here:
         container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
-            stream.pipe(process.stdout);
+            // stream.pipe(process.stdout);
+            stream.on('data', (chunk: Buffer) => {
+                Logger.log(`we got stuff [${chunk.length}] '${chunk.toString()}'`);
+            })
         });
         return container.id
     }
