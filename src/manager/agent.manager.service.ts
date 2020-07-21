@@ -3,9 +3,10 @@ import { DockerService } from './docker.service';
 import { IAgentManager } from './agent.manager.interface';
 import cryptoRandomString from 'crypto-random-string';
 import { Logger } from 'protocol-common/logger';
+import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
+import { ProtocolException } from 'protocol-common/protocol.exception';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 
 /**
  * TODO validation, error cases, etc
@@ -33,8 +34,8 @@ export class AgentManagerService {
      * TODO need to think through a few more cases - like how the public endpoints and ports will work
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
-    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number, seed?: string, controllerUrl?: string, alias?: string) {
-        const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey);
+    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number, seed?: string, controllerUrl?: string, alias?: string, autoConnect: boolean = true) {
+        const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey, autoConnect);
         if (runningData) {
             return runningData;
         }
@@ -73,10 +74,14 @@ export class AgentManagerService {
                 }, ttl * 1000);
         }
 
-        // TODO for right now let's delay and then inititate the connection
-        // TODO this functionality should be optional based on passed in params
-        await this.delay(8000);
-        const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
+        let connectionData = {};
+        // when autoConnect is true, then call the createConnection method
+        // when autoCorrect is not defined or null, treat it as true
+        if (autoConnect === true) {
+            // TODO for right now let's delay and then initiate the connection
+            await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey);
+            connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
+        }
 
         return { agentId, containerId, adminPort, httpPort, connectionData };
     }
@@ -129,15 +134,59 @@ export class AgentManagerService {
     }
 
     /**
+     * TODO move to it's own class and pass in the http object
+     */
+    private async pingConnectionWithRetry(agentId: string, adminPort: string, adminApiKey: string, durationMS: number = 10000) : Promise<any> {
+        Logger.info(`pingConnectionWithRetry`);
+        const compute = (l , r) => {
+            let result = l.getTime() - r.getTime();
+            if (result <= 0) {
+                result = (result + 1000) % 1000;
+            }
+            return result;
+        };
+
+        const http = new ProtocolHttpService(new HttpService());
+        const url = `http://${agentId}:${adminPort}/status`;
+        Logger.info(`agent admin url is ${url}`);
+        const req: any = {
+            method: 'GET',
+            url,
+            headers: {
+                'x-api-key': adminApiKey,
+                accept: 'application/json'
+            },
+        };
+
+        // no point in rushing this
+        await this.delay(1000);
+        const startOf = new Date();
+        while (durationMS > compute(new Date(), startOf)) {
+            // attempt a status check, if successful call it good and return
+            // otherwise retry until duration is exceeded
+            const res = await http.requestWithRetry(req);
+            if (res.status === 200) {
+                Logger.info(`agent ${agentId} is up and responding`);
+                return;
+            }
+
+            await this.delay(1000);
+            Logger.info(`pingConnectionWithRetry is retrying`);
+        }
+
+        throw new ProtocolException('Agent', `Never got a good status code from agent ${agentId}`);
+    }
+
+    /**
      * If we already have an agent running with the same agent id, don't try to start a new one, just return the connection data
      * for the existing one - we use the adminApiKey to ensure that the caller actually has permissions to query the agent
      * TODO we may want more checks here, eg to ensure the docker container is actually running, but for now we treat the cache as truth
      */
-    private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string) {
+    private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string, autoConnect: boolean = true) {
         if (agentId) {
             const agentData: any = await this.cache.get(agentId);
             Logger.log(agentData);
-            if (agentData) {
+            if (agentData && autoConnect === true) {
                 // TODO need error handling if this call fails
                 const connectionData = await this.createConnection(agentId, agentData.adminPort, adminApiKey);
                 return {
@@ -148,6 +197,10 @@ export class AgentManagerService {
                     connectionData
                 };
             }
+            if (agentData && autoConnect === false) {
+                return agentData;
+            }
+
         }
         return null;
     }
