@@ -197,6 +197,10 @@ export class AgentManagerService {
                     connectionData
                 };
             }
+            if (agentData && autoConnect === false) {
+                return agentData;
+            }
+
         }
         return null;
     }
