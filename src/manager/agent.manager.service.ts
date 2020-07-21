@@ -35,7 +35,7 @@ export class AgentManagerService {
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
     public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number, seed?: string, controllerUrl?: string, alias?: string, autoConnect: boolean = true) {
-        const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey);
+        const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey, autoConnect);
         if (runningData) {
             return runningData;
         }
@@ -133,6 +133,9 @@ export class AgentManagerService {
         return res.data.invitation;
     }
 
+    /**
+     * TODO move to it's own class and pass in the http object
+     */
     private async pingConnectionWithRetry(agentId: string, adminPort: string, adminApiKey: string, durationMS: number = 10000) : Promise<any> {
         Logger.info(`pingConnectionWithRetry`);
         const compute = (l , r) => {
@@ -179,11 +182,11 @@ export class AgentManagerService {
      * for the existing one - we use the adminApiKey to ensure that the caller actually has permissions to query the agent
      * TODO we may want more checks here, eg to ensure the docker container is actually running, but for now we treat the cache as truth
      */
-    private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string) {
+    private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string, autoConnect: boolean = true) {
         if (agentId) {
             const agentData: any = await this.cache.get(agentId);
             Logger.log(agentData);
-            if (agentData) {
+            if (agentData && autoConnect === true) {
                 // TODO need error handling if this call fails
                 const connectionData = await this.createConnection(agentId, agentData.adminPort, adminApiKey);
                 return {
