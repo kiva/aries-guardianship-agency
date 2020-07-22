@@ -160,23 +160,22 @@ export class AgentManagerService {
             },
         };
 
-        // no point in rushing this
-        await this.delay(1000);
         const startOf = new Date();
         while (durationMS > compute(new Date(), startOf)) {
+            // no point in rushing this
+            await this.delay(1000);
+
             // attempt a status check, if successful call it good and return
             // otherwise retry until duration is exceeded
-            let res;
             try {
-                res = await http.request(req).toPromise();
+                const res = await http.request(req).toPromise();
+                if (res.status === 200) {
+                    Logger.info(`agent ${agentId} is up and responding`);
+                    return;
+                }
             } catch (e) {
-                continue;
+                // Do nothing and try again
             }
-            if (res.status === 200) {
-                Logger.info(`agent ${agentId} is up and responding`);
-                return;
-            }
-
             await this.delay(1000);
             Logger.info(`pingConnectionWithRetry is retrying`);
         }
