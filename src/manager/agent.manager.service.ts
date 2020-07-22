@@ -176,7 +176,6 @@ export class AgentManagerService {
             } catch (e) {
                 // Do nothing and try again
             }
-            await this.delay(1000);
             Logger.info(`pingConnectionWithRetry is retrying`);
         }
 
