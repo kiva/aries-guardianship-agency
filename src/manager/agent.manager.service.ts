@@ -146,7 +146,9 @@ export class AgentManagerService {
             return result;
         };
 
-        const http = new ProtocolHttpService(new HttpService());
+        // TODO we should either add a non-retry call to ProtocolHttpService, or make the existing requestWithRetry more configurable to be used here
+        // const http = new ProtocolHttpService(new HttpService());
+        const http = new HttpService();
         const url = `http://${agentId}:${adminPort}/status`;
         Logger.info(`agent admin url is ${url}`);
         const req: any = {
@@ -158,19 +160,22 @@ export class AgentManagerService {
             },
         };
 
-        // no point in rushing this
-        await this.delay(1000);
         const startOf = new Date();
         while (durationMS > compute(new Date(), startOf)) {
+            // no point in rushing this
+            await this.delay(1000);
+
             // attempt a status check, if successful call it good and return
             // otherwise retry until duration is exceeded
-            const res = await http.requestWithRetry(req);
-            if (res.status === 200) {
-                Logger.info(`agent ${agentId} is up and responding`);
-                return;
+            try {
+                const res = await http.request(req).toPromise();
+                if (res.status === 200) {
+                    Logger.info(`agent ${agentId} is up and responding`);
+                    return;
+                }
+            } catch (e) {
+                // Do nothing and try again
             }
-
-            await this.delay(1000);
             Logger.info(`pingConnectionWithRetry is retrying`);
         }
 
