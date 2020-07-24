@@ -78,9 +78,9 @@ export class DockerService implements IAgentManager {
         const container = await this.dockerode.createContainer(containerOptions);
         await container.start();
         // Comment this in if we want to see docker logs here:
-        container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
-            stream.pipe(process.stdout);
-        });
+        // container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
+        //     stream.pipe(process.stdout);
+        // });
         return container.id
     }
 
