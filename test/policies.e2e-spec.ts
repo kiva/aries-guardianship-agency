@@ -21,7 +21,12 @@ describe('Policies (e2e)', () => {
     let holderId;
     let holderApiKey;
     let invitation;
-    let connectionId;
+    let issuerConnectionId;
+    let holderConnectionId;
+    let schemaId;
+    let credentialDefinitionId;
+    const schemaName = "sample_schema";
+    const schemaVersion = "1.0";
     const issuerDid = "Th7MpTaRZVRYnPiabds81Y";
     const delayFunc = (ms: number) => {
         return new Promise( resolve => setTimeout(resolve, ms) );
@@ -77,10 +82,11 @@ describe('Policies (e2e)', () => {
             .post('/connections/create-invitation')
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
-                console.log(res.body);
+                console.log('create-invitation body:', res.body);
                 expect(res.status).toBe(200);
                 expect(res.body.invitation).toBeDefined();
                 invitation = res.body.invitation;
+                issuerConnectionId = res.body.connection_id;
             });
     }, 30000);
 
@@ -92,10 +98,10 @@ describe('Policies (e2e)', () => {
             .set('x-api-key', holderApiKey)
             .send(invitation)
             .expect((res) => {
-                console.log(res.body);
+                console.log('receive-invitation body:', res.body);
                 expect(res.status).toBe(200);
                 expect(res.body.connection_id).toBeDefined();
-                connectionId = res.body.connection_id;
+                holderConnectionId = res.body.connection_id;
             });
     });
 
@@ -114,8 +120,8 @@ describe('Policies (e2e)', () => {
     it('issuer creates schema', async () => {
         await delayFunc(15000);
         const data = {
-            schema_version: "1.0",
-            schema_name: "sample_schema",
+            schema_version: schemaVersion,
+            schema_name: schemaName,
             attributes: [
             "score"
             ]
@@ -126,8 +132,80 @@ describe('Policies (e2e)', () => {
             .send(data)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
-                Logger.warn('schema result', res.body);
+                try {
+                    expect(res.status).toBe(200);
+                    schemaId = res.body.schema_id;
+                } catch (e) {
+                    Logger.warn(`schema errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
+            });
+    }, 30000);
+
+    it ('issuer creates credential definition', async () => {
+        await delayFunc(15000);
+        const data = {
+            schema_id: schemaId,
+            support_revocation: true,
+            tag: 'issued_1'
+        };
+        const agentUrl = `http://localhost:${issuerAdminPort}`;
+        return request(agentUrl)
+            .post('/credential-definitions')
+            .send(data)
+            .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                Logger.warn('cred definition result', res.body);
                 expect(res.status).toBe(200);
+                credentialDefinitionId = res.body.credential_definition_id;
+            });
+    }, 30000);
+
+    it('issuer creates credential', async () => {
+        /*
+                        attributes: [
+                    {
+                        name: [ "score"],
+                        value: [ 750 ]
+                    }
+                ]
+            },
+         */
+        const data = {
+            trace: true,
+            cred_def_id: credentialDefinitionId,
+            credential_proposal: {
+            "@type": `did:sov:${issuerDid};spec/issue-credential/1.0/credential-preview`,
+                attributes: [
+                    {
+                        score: 750
+                    }
+                ]
+            },
+            schema_name: schemaName,
+            schema_version: schemaVersion,
+            schema_id: schemaId,
+            auto_remove: true,
+            issuer_did: issuerDid,
+            schema_issuer_did: issuerDid,
+            comment: "pleading the 5th",
+            connection_id: issuerConnectionId
+        };
+
+        Logger.warn(`issue-credential/send body request -> `, data);
+        const agentUrl = `http://localhost:${holderAdminPort}`;
+        return request(agentUrl)
+            .post('/issue-credential/send')
+            .send(data)
+            .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                try {
+                    Logger.warn(`issue-credential/send result -> ${res.status}`, res.body);
+                    expect(res.status).toBe(200);
+                } catch (e) {
+                    Logger.warn(`issue-credential/send errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
             });
     }, 30000);
 
