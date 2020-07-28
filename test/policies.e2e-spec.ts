@@ -25,9 +25,11 @@ describe('Policies (e2e)', () => {
     let holderConnectionId;
     let schemaId;
     let credentialDefinitionId;
-    const schemaName = "sample_schema";
-    const schemaVersion = "1.0";
-    const issuerDid = "Th7MpTaRZVRYnPiabds81Y";
+    let credentialExchangeId;
+    const schemaName = 'sample_schema';
+    const schemaVersion = '1.0';
+    const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
+    const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
     const delayFunc = (ms: number) => {
         return new Promise( resolve => setTimeout(resolve, ms) );
     };
@@ -53,6 +55,7 @@ describe('Policies (e2e)', () => {
                 expect(res.body.adminPort).toBeDefined();
                 issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
+                Logger.warn(`Issuer agent ID ${issuerId}`);
             });
     });
 
@@ -62,17 +65,17 @@ describe('Policies (e2e)', () => {
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
-            did: 'XTv4YCzYj8jqZgL1wVMGGL'
+            did: holderDid
         }
         return request(hostUrl)
             .post('/v1/manager')
             .send(data)
             .expect(201)
             .expect((res) => {
-                console.log(res.body);
                 expect(res.body.adminPort).toBeDefined();
                 holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
+                Logger.warn(`Holder agent ID ${holderId}`);
             });
     });
 
@@ -83,7 +86,6 @@ describe('Policies (e2e)', () => {
             .post('/connections/create-invitation')
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
-                console.log('create-invitation body:', res.body);
                 expect(res.status).toBe(200);
                 expect(res.body.invitation).toBeDefined();
                 invitation = res.body.invitation;
@@ -99,7 +101,6 @@ describe('Policies (e2e)', () => {
             .set('x-api-key', holderApiKey)
             .send(invitation)
             .expect((res) => {
-                console.log('receive-invitation body:', res.body);
                 expect(res.status).toBe(200);
                 expect(res.body.connection_id).toBeDefined();
                 holderConnectionId = res.body.connection_id;
@@ -107,13 +108,23 @@ describe('Policies (e2e)', () => {
     });
 
     it('make issuer did public', async() => {
-        await delayFunc(15000);
+        await delayFunc(5000);
         const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
             .post(`/wallet/did/public?did=${issuerDid}`)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
-                Logger.warn('make public did body:', res.body);
+                expect(res.status).toBe(200);
+            });
+    }, 30000);
+
+    it('make holder did public', async() => {
+        await delayFunc(5000);
+        const agentUrl = `http://localhost:${holderAdminPort}`;
+        return request(agentUrl)
+            .post(`/wallet/did/public?did=${holderDid}`)
+            .set('x-api-key', holderApiKey)
+            .expect((res) => {
                 expect(res.status).toBe(200);
             });
     }, 30000);
@@ -153,7 +164,6 @@ describe('Policies (e2e)', () => {
             .send(data)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
-                Logger.warn('cred definition result', res.body);
                 expect(res.status).toBe(200);
                 credentialDefinitionId = res.body.credential_definition_id;
             });
@@ -171,7 +181,6 @@ describe('Policies (e2e)', () => {
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
                 try {
-                    Logger.warn(`connections/send-message result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
                 } catch (e) {
                     Logger.warn(`connections/send-message errored result -> ${res.status}`, res.body);
@@ -196,15 +205,15 @@ describe('Policies (e2e)', () => {
             schema_name: schemaName,
             schema_version: schemaVersion,
             schema_id: schemaId,
-            auto_remove: true,
+            auto_remove: false,
             issuer_did: issuerDid,
             schema_issuer_did: issuerDid,
             comment: 'pleading the 5th',
             connection_id: issuerConnectionId
         };
 
-        Logger.warn(`issue-credential/send body request -> `, data);
         const agentUrl = `http://localhost:${issuerAdminPort}`;
+        Logger.warn(`For issuer ${issuerId} issue-credential/send body request '${agentUrl}' -> `, data);
         return request(agentUrl)
             .post('/issue-credential/send')
             .send(data)
@@ -213,8 +222,26 @@ describe('Policies (e2e)', () => {
                 try {
                     Logger.warn(`issue-credential/send result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
+                    credentialExchangeId = res.body.credential_exchange_id;
                 } catch (e) {
                     Logger.warn(`issue-credential/send errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
+            });
+    }, 30000);
+
+    it('tell the holder to save the credential offer', async () => {
+        await delayFunc(5000);
+        const agentUrl = `http://localhost:${holderAdminPort}`;
+        return request(agentUrl)
+            .post(`/issue-credential/records/${credentialExchangeId}/store`)
+            .set('x-api-key', holderApiKey)
+            .expect((res) => {
+                try {
+                    Logger.warn(`issue-credential/records/${credentialExchangeId}/store result -> ${res.status}`, res.body);
+                    expect(res.status).toBe(200);
+                } catch (e) {
+                    Logger.warn(`${agentUrl}/issue-credential/records/${credentialExchangeId}/store -> ${res.status}`, res.body);
                     throw e;
                 }
             });
@@ -239,5 +266,9 @@ describe('Policies (e2e)', () => {
             .send(data)
             .expect(200);
     });
-
+/*
+    it('done testing', async () => {
+        await delayFunc(5000);
+    }, 30000);
+ */
 });

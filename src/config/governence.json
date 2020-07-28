@@ -9,12 +9,15 @@
       "accept-invitation": "always"
     },
     "issue_credential": {
-
+      "something": "always"
     }
   },
   "SingleConnection": {
     "connections": {
       "accept-invitation": "once"
+    },
+    "issue_credential": {
+      "something": "always"
     }
   }
 }

@@ -27,7 +27,8 @@ export class IssueCredential implements IAgentResponseHandler {
         if (route !== 'topic' || topic !== 'issue_credential') {
             throw new ProtocolException('issue_credential',`${route}/${topic} is not valid.`);
         }
-        // TODO:  
+        // TODO:
+        Logger.info(`doing nothing for ${agentUrl}: route ${route}: topic ${topic}`);
         return;
     }
 }
