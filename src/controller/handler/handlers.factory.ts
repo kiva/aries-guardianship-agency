@@ -1,9 +1,10 @@
+import { CacheStore } from '@nestjs/common';
 import { ProtocolException } from 'protocol-common/protocol.exception';
 import { IAgentResponseHandler } from './agent.response.handler';
 import { Connections } from './connections';
 import { AgentGovernance } from '../agent.governance';
 import { Proofs } from './proof';
-import {CacheStore} from "@nestjs/common";
+import { IssueCredential } from './issue.credential';
 
 /*
     @TODO we want to replace this factory with nestjs injection at some point
@@ -18,6 +19,8 @@ export class HandlersFactory {
                 return new Connections(agentGovernance, cache);
             case 'proofs':
                 return new Proofs(agentGovernance, cache);
+            case 'issue-credential':
+                return new IssueCredential(agentGovernance, cache);
             default:
                 break;
         }

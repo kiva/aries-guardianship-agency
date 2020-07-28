@@ -160,10 +160,30 @@ describe('Policies (e2e)', () => {
             });
     }, 30000);
 
+    it('send basic message from issuer to holder', async () => {
+        await delayFunc(2000);
+        const data = {
+            content: 'hello holder, are you ready to receive your credentials?'
+        };
+        const agentUrl = `http://localhost:${issuerAdminPort}`;
+        return request(agentUrl)
+            .post(`/connections/${issuerConnectionId}/send-message`)
+            .send(data)
+            .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                try {
+                    Logger.warn(`connections/send-message result -> ${res.status}`, res.body);
+                    expect(res.status).toBe(200);
+                } catch (e) {
+                    Logger.warn(`connections/send-message errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
+            });
+    }, 30000);
+
     it('issuer creates credential', async () => {
         await delayFunc(5000);
         const data = {
-            trace: true,
             cred_def_id: credentialDefinitionId,
             credential_proposal: {
             "@type": `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,

@@ -7,6 +7,9 @@
   "permissive": {
     "connections": {
       "accept-invitation": "always"
+    },
+    "issue_credential": {
+
     }
   },
   "SingleConnection": {
