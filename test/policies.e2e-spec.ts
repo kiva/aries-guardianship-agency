@@ -42,7 +42,7 @@ describe('Policies (e2e)', () => {
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
-            seed: "000000000000000000000000Steward1",
+            seed: '000000000000000000000000Steward1',
             did: issuerDid
         }
         return request(hostUrl)
@@ -62,6 +62,8 @@ describe('Policies (e2e)', () => {
             walletId: 'walletId22',
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
+            seed: '000000000000000000000000000ncra1',
+            did: 'XTv4YCzYj8jqZgL1wVMGGL'
         }
         return request(hostUrl)
             .post('/v1/manager')
@@ -122,9 +124,7 @@ describe('Policies (e2e)', () => {
         const data = {
             schema_version: schemaVersion,
             schema_name: schemaName,
-            attributes: [
-            "score"
-            ]
+            attributes: [ 'score' ]
         };
         const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
@@ -175,10 +175,11 @@ describe('Policies (e2e)', () => {
             trace: true,
             cred_def_id: credentialDefinitionId,
             credential_proposal: {
-            "@type": `did:sov:${issuerDid};spec/issue-credential/1.0/credential-preview`,
+            "@type": `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
                 attributes: [
                     {
-                        score: 750
+                        name: "score",
+                        value: "750"
                     }
                 ]
             },
@@ -188,12 +189,12 @@ describe('Policies (e2e)', () => {
             auto_remove: true,
             issuer_did: issuerDid,
             schema_issuer_did: issuerDid,
-            comment: "pleading the 5th",
+            comment: 'pleading the 5th',
             connection_id: issuerConnectionId
         };
 
         Logger.warn(`issue-credential/send body request -> `, data);
-        const agentUrl = `http://localhost:${holderAdminPort}`;
+        const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
             .post('/issue-credential/send')
             .send(data)
@@ -208,6 +209,7 @@ describe('Policies (e2e)', () => {
                 }
             });
     }, 30000);
+
 
     it('Spin down agent 1', () => {
         const data = {
