@@ -50,10 +50,10 @@ describe('Policies (e2e)', () => {
             .send(data)
             .expect(201)
             .expect((res) => {
-                console.log(res.body);
                 expect(res.body.adminPort).toBeDefined();
                 issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
+                Logger.warn(`issuer agentId -> ${issuerId}:${issuerAdminPort}`);
             });
     });
 
@@ -114,13 +114,12 @@ describe('Policies (e2e)', () => {
             .post(`/wallet/did/public?did=${issuerDid}`)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
-                Logger.warn('schema result', res.body);
+                Logger.warn('make public did body:', res.body);
                 expect(res.status).toBe(200);
             });
     }, 30000);
 
     it('issuer creates schema', async () => {
-        await delayFunc(15000);
         const data = {
             schema_version: schemaVersion,
             schema_name: schemaName,
@@ -143,7 +142,7 @@ describe('Policies (e2e)', () => {
     }, 30000);
 
     it ('issuer creates credential definition', async () => {
-        await delayFunc(15000);
+        await delayFunc(1000);
         const data = {
             schema_id: schemaId,
             support_revocation: true,
@@ -162,15 +161,7 @@ describe('Policies (e2e)', () => {
     }, 30000);
 
     it('issuer creates credential', async () => {
-        /*
-                        attributes: [
-                    {
-                        name: [ "score"],
-                        value: [ 750 ]
-                    }
-                ]
-            },
-         */
+        await delayFunc(5000);
         const data = {
             trace: true,
             cred_def_id: credentialDefinitionId,
@@ -210,7 +201,7 @@ describe('Policies (e2e)', () => {
             });
     }, 30000);
 
-
+    /*
     it('Spin down agent 1', () => {
         const data = {
             agentId: issuerId
@@ -220,7 +211,7 @@ describe('Policies (e2e)', () => {
             .send(data)
             .expect(200);
     });
-
+    */
     it('Spin down agent 2', () => {
         const data = {
             agentId: holderId
