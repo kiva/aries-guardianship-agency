@@ -34,7 +34,9 @@ export class AgentManagerService {
      * TODO need to think through a few more cases - like how the public endpoints and ports will work
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
-    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number, seed?: string, controllerUrl?: string, alias?: string, autoConnect: boolean = true) {
+    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number,
+                             seed?: string, controllerUrl?: string, alias?: string, autoConnect: boolean = true,
+                             adminApiPort?: string) {
         const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey, autoConnect);
         if (runningData) {
             return runningData;
@@ -46,7 +48,7 @@ export class AgentManagerService {
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const agentId = alias || cryptoRandomString({ length: 32, type: 'hex' });
         // TODO: could it be possible the same port is randomly generated?
-        const adminPort = this.generateRandomPort();
+        const adminPort = adminApiPort || this.generateRandomPort();
         const httpPort = this.generateRandomPort();
 
         // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com

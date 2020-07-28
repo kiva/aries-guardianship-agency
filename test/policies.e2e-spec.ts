@@ -53,7 +53,6 @@ describe('Policies (e2e)', () => {
                 expect(res.body.adminPort).toBeDefined();
                 issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
-                Logger.warn(`issuer agentId -> ${issuerId}:${issuerAdminPort}`);
             });
     });
 
@@ -221,7 +220,6 @@ describe('Policies (e2e)', () => {
             });
     }, 30000);
 
-    /*
     it('Spin down agent 1', () => {
         const data = {
             agentId: issuerId
@@ -231,7 +229,7 @@ describe('Policies (e2e)', () => {
             .send(data)
             .expect(200);
     });
-    */
+
     it('Spin down agent 2', () => {
         const data = {
             agentId: holderId
