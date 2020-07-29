@@ -51,7 +51,8 @@ describe('Create Connections using policies (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: issuerDid,
+            adminApiPort: "1322"
         }
         return request(hostUrl)
             .post('/v1/manager')
@@ -72,7 +73,8 @@ describe('Create Connections using policies (e2e)', () => {
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
-            did: holderDid
+            did: holderDid,
+            adminApiPort: "1323"
         }
         return request(hostUrl)
             .post('/v1/manager')
@@ -129,16 +131,19 @@ describe('Create Connections using policies (e2e)', () => {
     });
 
     it('Issuer completes to connection invite', async () => {
-        await delayFunc(1000);
+        Logger.warn(`Holder did the 'accept'.  Now gonna wait then issuer will complete invitation`);
+        //await delayFunc(60000);
+        await delayFunc(3000);
+        Logger.warn(`done waiting`);
         const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
-            .post(`/connections/${issuerConnectionId}/accept-invitation`)
+            .post(`/connections/${issuerConnectionId}/accept-request`)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
                 expect(res.status).toBe(200);
                 expect(res.body.connection_id).toBeDefined();
             });
-    });
+    }, 75000);
 
     it('List Issuer connections', async () => {
         await delayFunc(1000);
