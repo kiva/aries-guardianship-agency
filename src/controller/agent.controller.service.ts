@@ -19,8 +19,7 @@ export class AgentControllerService {
         httpService: HttpService,
         @Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
         this.http = new ProtocolHttpService(httpService);
-        // TODO: the input to the constructor needs to come from something else
-        this.agentGovernance = new AgentGovernance('permissive');
+        this.agentGovernance = new AgentGovernance(process.env.POLICY_NAME);
     }
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
