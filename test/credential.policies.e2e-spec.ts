@@ -9,11 +9,14 @@ import {Logger} from "protocol-common/logger";
 
 
 /*
-    manually start aries agency
+    Integration test to show the gammit of the exchange of messages between
+    agents for connection, credential and proof protocols
+
+    Required: manually start aries agency prior to running tests
+    run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Issue and Prove credentials using policies (e2e)', () => {
     let app: INestApplication;
-    let hostUrl = 'http://localhost:3010'; // We probably won't keep this notion around, but if we do move to config
     let issuerAdminPort;
     let issuerId;
     let issuerApiKey;
@@ -27,6 +30,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     let credentialDefinitionId;
     let credentialExchangeId;
     let presentationExchangeId;
+    const hostUrl = 'http://localhost:3010';
     const schemaName = 'sample_schema';
     const schemaVersion = '1.0';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
