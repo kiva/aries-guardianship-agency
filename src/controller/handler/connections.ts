@@ -11,8 +11,7 @@ import { CacheStore } from '@nestjs/common';
  */
 export class Connections implements IAgentResponseHandler {
     private static CONNECTIONS_URL: string = 'connections';
-    private readonly http: ProtocolHttpService;
-    constructor(private readonly agentGovernance: AgentGovernance, private readonly cache: CacheStore) {
+    constructor(private readonly agentGovernance: AgentGovernance, private readonly http: ProtocolHttpService, private readonly cache: CacheStore) {
     }
 
     /*
@@ -38,37 +37,48 @@ export class Connections implements IAgentResponseHandler {
         topic will be "connections"
     */
     public async handlePost(agentUrl: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
+        const delay = (ms: number) => {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        };
+
         if (route !== 'topic' || topic !== 'connections') {
             throw new ProtocolException('Connections',`${route}/${topic} is not valid.`);
         }
 
-        if (body.state !== 'request') {
-            Logger.info(`${body.state} not applicable`);
-            return;
-        }
+        Logger.info(`nothing to do for route/topic: ${route}/${topic}`);
+        return;
 
-        if (AgentGovernance.PERMISSION_DENY === this.agentGovernance.getPermission("connections", "accept-invitation")) {
-            throw new ProtocolException('AgencyGovernance',`${topic} governance doesnt not allow.`);
-        }
+        // if (AgentGovernance.PERMISSION_DENY === this.agentGovernance.getPermission("connections", "accept-invitation")) {
+        //     throw new ProtocolException('AgencyGovernance',`${topic} governance doesnt not allow.`);
+        // }
 
         // if the agentUrl is in the cache then the agent has already accepted the request
-        if (this.cache.get<any>(agentUrl)) {
-            return;
+        // if (this.cache.get<any>(agentUrl)) {
+        //     return;
+        // }
+
+        // this webhook message indicates an agent received an connection
+        // invitation and we want to tell them to accept it, if the policy allows
+        if (body.state === 'invitation' && body.initiator === 'external') {
+            Logger.info(`will requesting agent to accept connection invite`);
+            await delay(2000);
+
+            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-request`;
+            const req: AxiosRequestConfig = {
+                method: 'POST',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                }
+            };
+
+            Logger.info(`requesting agent to accept connection invite ${req.url}`);
+            const res = await this.http.requestWithRetry(req);
+            return res;
         }
 
-        await this.cache.set(agentUrl, {  }, { ttl: 0});
-        let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-request`;
 
-        const req: AxiosRequestConfig = {
-            method: 'POST',
-            url,
-            headers: {
-                'x-api-key': adminApiKey,
-            }
-        };
-
-        Logger.log(`requesting agent to accept connection invite ${req.url}`);
-        const res = await this.http.requestWithRetry(req);
-        return res;
+        Logger.info(`nothing to do for route/topic: ${route}/${topic}`);
+        return;
     }
 }

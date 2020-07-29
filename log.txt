@@ -1,0 +1,228 @@
+
+
+agents created
+
+
+
+
+[info] 37   - 07-29 22:40:10.209 : 	POST /v1/controller/issuerAgent/topic/connections/ undefined
+[info] 37   - 07-29 22:40:10.210 : 	----- POST WEB HOOK START -----
+[info] 37   - 07-29 22:40:10.210 : 	issuerAgent/topic/connections - { invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  created_at: '2020-07-29 22:40:10.196395Z',
+  connection_id: '048e36bd-2494-4efa-944c-60d175604e0a',
+  routing_state: 'none',
+  accept: 'auto',
+  state: 'invitation',
+  invitation_mode: 'once',
+  updated_at: '2020-07-29 22:40:10.196395Z',
+  initiator: 'self' }
+[info] 37   - 07-29 22:40:10.210 : 	----- POST WEB HOOK END -----
+[info] 37   - 07-29 22:40:10.211 : 	AgentControllerService.handleRequest(issuerAgent, topic, connections) - { invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  created_at: '2020-07-29 22:40:10.196395Z',
+  connection_id: '048e36bd-2494-4efa-944c-60d175604e0a',
+  routing_state: 'none',
+  accept: 'auto',
+  state: 'invitation',
+  invitation_mode: 'once',
+  updated_at: '2020-07-29 22:40:10.196395Z',
+  initiator: 'self' }
+[warn] 37   - 07-29 22:40:10.212 : 	looking for handler topic connections
+[info] 37   - 07-29 22:40:10.213 : 	nothing to do for route/topic: topic/connections
+
+
+
+connection invite created
+
+
+
+
+[info] 37   - 07-29 22:40:20.244 : 	POST /v1/controller/holderAgent/topic/connections/ undefined
+[info] 37   - 07-29 22:40:20.244 : 	----- POST WEB HOOK START -----
+[info] 37   - 07-29 22:40:20.244 : 	holderAgent/topic/connections - { updated_at: '2020-07-29 22:40:20.228147Z',
+  invitation_mode: 'once',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  connection_id: '7930589a-adff-483f-8fea-7da375832d76',
+  routing_state: 'none',
+  their_label: 'issuerAgent',
+  created_at: '2020-07-29 22:40:20.228147Z',
+  state: 'invitation',
+  accept: 'manual',
+  initiator: 'external' }
+[info] 37   - 07-29 22:40:20.245 : 	----- POST WEB HOOK END -----
+[info] 37   - 07-29 22:40:20.245 : 	AgentControllerService.handleRequest(holderAgent, topic, connections) - { updated_at: '2020-07-29 22:40:20.228147Z',
+  invitation_mode: 'once',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  connection_id: '7930589a-adff-483f-8fea-7da375832d76',
+  routing_state: 'none',
+  their_label: 'issuerAgent',
+  created_at: '2020-07-29 22:40:20.228147Z',
+  state: 'invitation',
+  accept: 'manual',
+  initiator: 'external' }
+[warn] 37   - 07-29 22:40:20.246 : 	looking for handler topic connections
+[info] 37   - 07-29 22:40:20.246 : 	nothing to do for route/topic: topic/connections
+
+
+
+
+
+
+[info] 37   - 07-29 22:40:30.293 : 	POST /v1/controller/holderAgent/topic/connections/ undefined
+[info] 37   - 07-29 22:40:30.293 : 	----- POST WEB HOOK START -----
+[info] 37   - 07-29 22:40:30.293 : 	holderAgent/topic/connections - { updated_at: '2020-07-29 22:40:30.272537Z',
+  invitation_mode: 'once',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  connection_id: '7930589a-adff-483f-8fea-7da375832d76',
+  request_id: 'cbbe8e70-e93f-4337-8f99-b83ba3538d3b',
+  my_did: 'cEYhZRxjdux7HFBQNUxPt',
+  routing_state: 'none',
+  their_label: 'issuerAgent',
+  created_at: '2020-07-29 22:40:20.228147Z',
+  state: 'request',
+  accept: 'manual',
+  initiator: 'external' }
+[info] 37   - 07-29 22:40:30.294 : 	----- POST WEB HOOK END -----
+[info] 37   - 07-29 22:40:30.294 : 	AgentControllerService.handleRequest(holderAgent, topic, connections) - { updated_at: '2020-07-29 22:40:30.272537Z',
+  invitation_mode: 'once',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  connection_id: '7930589a-adff-483f-8fea-7da375832d76',
+  request_id: 'cbbe8e70-e93f-4337-8f99-b83ba3538d3b',
+  my_did: 'cEYhZRxjdux7HFBQNUxPt',
+  routing_state: 'none',
+  their_label: 'issuerAgent',
+  created_at: '2020-07-29 22:40:20.228147Z',
+  state: 'request',
+  accept: 'manual',
+  initiator: 'external' }
+[warn] 37   - 07-29 22:40:30.295 : 	looking for handler topic connections
+[info] 37   - 07-29 22:40:30.295 : 	nothing to do for route/topic: topic/connections
+[info] 37   - 07-29 22:40:30.327 : 	Router proxy to  - 'http://issuerAgent:5361'
+[info] 37   - 07-29 22:40:30.433 : 	POST /v1/controller/issuerAgent/topic/connections/ undefined
+[info] 37   - 07-29 22:40:30.433 : 	----- POST WEB HOOK START -----
+[info] 37   - 07-29 22:40:30.433 : 	issuerAgent/topic/connections - { their_did: 'cEYhZRxjdux7HFBQNUxPt',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  created_at: '2020-07-29 22:40:10.196395Z',
+  connection_id: '048e36bd-2494-4efa-944c-60d175604e0a',
+  their_label: 'holderAgent',
+  routing_state: 'none',
+  accept: 'auto',
+  state: 'request',
+  invitation_mode: 'once',
+  updated_at: '2020-07-29 22:40:30.419158Z',
+  initiator: 'self' }
+[info] 37   - 07-29 22:40:30.433 : 	----- POST WEB HOOK END -----
+[info] 37   - 07-29 22:40:30.434 : 	AgentControllerService.handleRequest(issuerAgent, topic, connections) - { their_did: 'cEYhZRxjdux7HFBQNUxPt',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  created_at: '2020-07-29 22:40:10.196395Z',
+  connection_id: '048e36bd-2494-4efa-944c-60d175604e0a',
+  their_label: 'holderAgent',
+  routing_state: 'none',
+  accept: 'auto',
+  state: 'request',
+  invitation_mode: 'once',
+  updated_at: '2020-07-29 22:40:30.419158Z',
+  initiator: 'self' }
+[warn] 37   - 07-29 22:40:30.435 : 	looking for handler topic connections
+[info] 37   - 07-29 22:40:30.435 : 	nothing to do for route/topic: topic/connections
+[info] 37   - 07-29 22:40:30.471 : 	POST /v1/controller/issuerAgent/topic/connections/ undefined
+[info] 37   - 07-29 22:40:30.472 : 	----- POST WEB HOOK START -----
+[info] 37   - 07-29 22:40:30.472 : 	issuerAgent/topic/connections - { my_did: 'Uo3z5sEYtBrs8AiTDUfAfH',
+  their_did: 'cEYhZRxjdux7HFBQNUxPt',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  created_at: '2020-07-29 22:40:10.196395Z',
+  connection_id: '048e36bd-2494-4efa-944c-60d175604e0a',
+  their_label: 'holderAgent',
+  routing_state: 'none',
+  accept: 'auto',
+  state: 'response',
+  invitation_mode: 'once',
+  updated_at: '2020-07-29 22:40:30.458129Z',
+  initiator: 'self' }
+[info] 37   - 07-29 22:40:30.472 : 	----- POST WEB HOOK END -----
+[info] 37   - 07-29 22:40:30.473 : 	AgentControllerService.handleRequest(issuerAgent, topic, connections) - { my_did: 'Uo3z5sEYtBrs8AiTDUfAfH',
+  their_did: 'cEYhZRxjdux7HFBQNUxPt',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  created_at: '2020-07-29 22:40:10.196395Z',
+  connection_id: '048e36bd-2494-4efa-944c-60d175604e0a',
+  their_label: 'holderAgent',
+  routing_state: 'none',
+  accept: 'auto',
+  state: 'response',
+  invitation_mode: 'once',
+  updated_at: '2020-07-29 22:40:30.458129Z',
+  initiator: 'self' }
+[warn] 37   - 07-29 22:40:30.474 : 	looking for handler topic connections
+[info] 37   - 07-29 22:40:30.474 : 	nothing to do for route/topic: topic/connections
+[info] 37   - 07-29 22:40:30.499 : 	Router proxy to  - 'http://holderAgent:6982'
+[info] 37   - 07-29 22:40:30.589 : 	POST /v1/controller/holderAgent/topic/connections/ undefined
+[info] 37   - 07-29 22:40:30.591 : 	----- POST WEB HOOK START -----
+[info] 37   - 07-29 22:40:30.592 : 	holderAgent/topic/connections - { their_did: 'Uo3z5sEYtBrs8AiTDUfAfH',
+  updated_at: '2020-07-29 22:40:30.578198Z',
+  invitation_mode: 'once',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  connection_id: '7930589a-adff-483f-8fea-7da375832d76',
+  request_id: 'cbbe8e70-e93f-4337-8f99-b83ba3538d3b',
+  my_did: 'cEYhZRxjdux7HFBQNUxPt',
+  routing_state: 'none',
+  their_label: 'issuerAgent',
+  created_at: '2020-07-29 22:40:20.228147Z',
+  state: 'response',
+  accept: 'manual',
+  initiator: 'external' }
+[info] 37   - 07-29 22:40:30.592 : 	----- POST WEB HOOK END -----
+[info] 37   - 07-29 22:40:30.592 : 	AgentControllerService.handleRequest(holderAgent, topic, connections) - { their_did: 'Uo3z5sEYtBrs8AiTDUfAfH',
+  updated_at: '2020-07-29 22:40:30.578198Z',
+  invitation_mode: 'once',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  connection_id: '7930589a-adff-483f-8fea-7da375832d76',
+  request_id: 'cbbe8e70-e93f-4337-8f99-b83ba3538d3b',
+  my_did: 'cEYhZRxjdux7HFBQNUxPt',
+  routing_state: 'none',
+  their_label: 'issuerAgent',
+  created_at: '2020-07-29 22:40:20.228147Z',
+  state: 'response',
+  accept: 'manual',
+  initiator: 'external' }
+[warn] 37   - 07-29 22:40:30.593 : 	looking for handler topic connections
+[info] 37   - 07-29 22:40:30.594 : 	nothing to do for route/topic: topic/connections
+
+
+
+
+
+
+
+
+
+[info] 37   - 07-29 22:40:40.381 : 	Router proxy to  - 'http://holderAgent:6982'
+[info] 37   - 07-29 22:40:40.437 : 	POST /v1/controller/holderAgent/topic/connections/ undefined
+[info] 37   - 07-29 22:40:40.437 : 	----- POST WEB HOOK START -----
+[info] 37   - 07-29 22:40:40.438 : 	holderAgent/topic/connections - { their_did: 'Uo3z5sEYtBrs8AiTDUfAfH',
+  updated_at: '2020-07-29 22:40:40.420426Z',
+  invitation_mode: 'once',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  connection_id: '7930589a-adff-483f-8fea-7da375832d76',
+  request_id: 'cbbe8e70-e93f-4337-8f99-b83ba3538d3b',
+  my_did: 'cEYhZRxjdux7HFBQNUxPt',
+  routing_state: 'none',
+  their_label: 'issuerAgent',
+  created_at: '2020-07-29 22:40:20.228147Z',
+  state: 'active',
+  accept: 'manual',
+  initiator: 'external' }
+[info] 37   - 07-29 22:40:40.438 : 	----- POST WEB HOOK END -----
+[info] 37   - 07-29 22:40:40.438 : 	AgentControllerService.handleRequest(holderAgent, topic, connections) - { their_did: 'Uo3z5sEYtBrs8AiTDUfAfH',
+  updated_at: '2020-07-29 22:40:40.420426Z',
+  invitation_mode: 'once',
+  invitation_key: 'GrsjDt6c1vUunbmaVgJV5smhMnYrXMWtcgLSWy26K2Xj',
+  connection_id: '7930589a-adff-483f-8fea-7da375832d76',
+  request_id: 'cbbe8e70-e93f-4337-8f99-b83ba3538d3b',
+  my_did: 'cEYhZRxjdux7HFBQNUxPt',
+  routing_state: 'none',
+  their_label: 'issuerAgent',
+  created_at: '2020-07-29 22:40:20.228147Z',
+  state: 'active',
+  accept: 'manual',
+  initiator: 'external' }
+[warn] 37   - 07-29 22:40:40.440 : 	looking for handler topic connections
+[info] 37   - 07-29 22:40:40.441 : 	nothing to do for route/topic: topic/connections

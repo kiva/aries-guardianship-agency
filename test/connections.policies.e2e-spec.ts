@@ -104,7 +104,10 @@ describe('Create Connections using policies (e2e)', () => {
     }, 30000);
 
     it('Holder receives to connection invite', async () => {
-        await delayFunc(1000);
+        //await delayFunc(1000);
+        Logger.warn(`Holder will receive the invitation`);
+        await delayFunc(10000);
+        Logger.warn(`done waiting`);
         const agentUrl = `http://localhost:${holderAdminPort}`;
         return request(agentUrl)
             .post('/connections/receive-invitation')
@@ -116,10 +119,15 @@ describe('Create Connections using policies (e2e)', () => {
                 holderConnectionId = res.body.connection_id;
                 Logger.warn(`holder created connection_id ${holderConnectionId}`);
             });
-    });
-
+    }, 60000);
+/*
+    // THIS IS REPLACED BY webhook connections handler
     it('Holder accepts to connection invite', async () => {
-        await delayFunc(1000);
+        //await delayFunc(1000);
+        Logger.warn(`Holder will accept the invitation`);
+        await delayFunc(10000);
+        Logger.warn(`done waiting`);
+
         const agentUrl = `http://localhost:${holderAdminPort}`;
         return request(agentUrl)
             .post(`/connections/${holderConnectionId}/accept-invitation`)
@@ -128,12 +136,13 @@ describe('Create Connections using policies (e2e)', () => {
                 expect(res.status).toBe(200);
                 expect(res.body.connection_id).toBeDefined();
             });
-    });
+    }, 30000);
 
+    // TODO: this is to be replaced by webhook connections handler
     it('Issuer completes to connection invite', async () => {
         Logger.warn(`Holder did the 'accept'.  Now gonna wait then issuer will complete invitation`);
-        //await delayFunc(60000);
-        await delayFunc(3000);
+        await delayFunc(10000);
+        // await delayFunc(3000);
         Logger.warn(`done waiting`);
         const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
@@ -144,7 +153,7 @@ describe('Create Connections using policies (e2e)', () => {
                 expect(res.body.connection_id).toBeDefined();
             });
     }, 75000);
-
+*/
     it('List Issuer connections', async () => {
         await delayFunc(1000);
         const agentUrl = `http://localhost:${issuerAdminPort}`;
