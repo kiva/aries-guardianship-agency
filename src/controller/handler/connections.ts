@@ -14,6 +14,20 @@ export class Connections implements IAgentResponseHandler {
     constructor(private readonly agentGovernance: AgentGovernance, private readonly http: ProtocolHttpService, private readonly cache: CacheStore) {
     }
 
+    private checkPolicyForAction(governanceKey: string, cacheKey: string) {
+        const permissionState = this.agentGovernance.peekPermission(Connections.CONNECTIONS_URL, governanceKey);
+
+        if (AgentGovernance.PERMISSION_DENY === permissionState) {
+            throw new ProtocolException('AgencyGovernance',`${governanceKey} governance doesnt not allow.`);
+        }
+
+        // if the cacheKey is in the cache then the agent has already accepted the request
+        // when we only allow once, there is no need to continue with this message
+        if (this.cache.get<any>(cacheKey) && permissionState === AgentGovernance.PERMISSION_ONCE) {
+            throw new ProtocolException('AgencyGovernance',`${governanceKey} governance has already been used.`);
+        }
+    }
+
     /*
        body is expected to be like this
        {
@@ -49,27 +63,16 @@ export class Connections implements IAgentResponseHandler {
             throw new ProtocolException('Connections',`${route}/${topic} is not valid.`);
         }
 
-        const governanceKey = `${body.state}-${body.initiator}`;
-        const cacheKey = `${agentId}-${governanceKey}`;
-        const permissionState = this.agentGovernance.peekPermission('connections', governanceKey);
-
-        if (AgentGovernance.PERMISSION_DENY === permissionState) {
-             throw new ProtocolException('AgencyGovernance',`${governanceKey} governance doesnt not allow.`);
-        }
-
-        // if the cacheKey is in the cache then the agent has already accepted the request
-        // when we only allow once, there is no need to continue with this message
-        if (this.cache.get<any>(cacheKey) && permissionState === AgentGovernance.PERMISSION_ONCE) {
-             return;
-        }
+        const cacheKey = `${agentId}-${body.state}-${body.initiator}`;
 
         // this webhook message indicates an agent received an connection
         // invitation and we want to tell them to accept it, if the policy allows
         if (body.state === 'invitation' && body.initiator === 'external') {
-            readPermission(governanceKey, cacheKey);
-            await delay(2000);
+            const action = 'accept-invitation';
+            this.checkPolicyForAction(action, cacheKey);
+            readPermission(action, cacheKey);
 
-            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-invitation`;
+            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,
@@ -86,10 +89,14 @@ export class Connections implements IAgentResponseHandler {
         // this webhook message indicates the receiving agent has accepted the invite and now
         // we need to instruct this agent to finish the steps of a connection
         if (body.state === 'request' && body.initiator === 'self') {
-            readPermission(governanceKey, cacheKey);
+            const action = 'accept-request';
+            this.checkPolicyForAction(action, cacheKey);
+            readPermission(action, cacheKey);
+            // at this point, the other participant in this conversation hasn't caught up with
+            // everything, so we hold our horses for a moment
             await delay(2000);
 
-            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-request`;
+            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,
