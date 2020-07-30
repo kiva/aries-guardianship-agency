@@ -46,6 +46,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Spin up agent 1 (issuer)', async () => {
         const data = {
+            alias: 'issuerAgent',
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
@@ -60,12 +61,12 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 expect(res.body.adminPort).toBeDefined();
                 issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
-                Logger.warn(`Issuer agent ID ${issuerId}`);
             });
     });
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
+            alias: 'holderAgent',
             walletId: 'walletId22',
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
@@ -80,7 +81,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 expect(res.body.adminPort).toBeDefined();
                 holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
-                Logger.warn(`Holder agent ID ${holderId}`);
             });
     });
 
@@ -113,7 +113,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('make issuer did public', async() => {
-        await delayFunc(5000);
+        await delayFunc(1000);
         const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
             .post(`/wallet/did/public?did=${issuerDid}`)

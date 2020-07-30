@@ -11,8 +11,7 @@ import { CacheStore } from '@nestjs/common';
  */
 export class IssueCredential implements IAgentResponseHandler {
     private static CONNECTIONS_URL: string = 'connections';
-    private readonly http: ProtocolHttpService;
-    constructor(private readonly agentGovernance: AgentGovernance, private readonly cache: CacheStore) {
+    constructor(private readonly agentGovernance: AgentGovernance, private readonly http: ProtocolHttpService, private readonly cache: CacheStore) {
     }
 
     /*
@@ -23,12 +22,12 @@ export class IssueCredential implements IAgentResponseHandler {
         Route will be "topic"
         topic will be "issue_credential"
     */
-    public async handlePost(agentUrl: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
+    public async handlePost(agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
         if (route !== 'topic' || topic !== 'issue_credential') {
             throw new ProtocolException('issue_credential',`${route}/${topic} is not valid.`);
         }
         // TODO:
-        Logger.info(`doing nothing for ${agentUrl}: route ${route}: topic ${topic}`);
+        Logger.info(`doing nothing for ${agentId}: route ${route}: topic ${topic}`);
         return;
     }
 }

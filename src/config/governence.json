@@ -6,18 +6,20 @@
   },
   "permissive": {
     "connections": {
-      "accept-invitation": "always"
+      "accept-invitation": "always",
+      "accept-request": "always"
     },
     "issue_credential": {
-      "something": "always"
+      "all": "always"
     }
   },
   "SingleConnection": {
     "connections": {
-      "accept-invitation": "once"
+      "accept-invitation": "once",
+      "accept-request": "once"
     },
     "issue_credential": {
-      "something": "always"
+      "all": "always"
     }
   }
 }

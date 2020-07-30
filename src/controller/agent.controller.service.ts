@@ -19,8 +19,7 @@ export class AgentControllerService {
         httpService: HttpService,
         @Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
         this.http = new ProtocolHttpService(httpService);
-        // TODO: the input to the constructor needs to come from something else
-        this.agentGovernance = new AgentGovernance('permissive');
+        this.agentGovernance = new AgentGovernance(process.env.POLICY_NAME);
     }
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
@@ -29,6 +28,6 @@ export class AgentControllerService {
         // @tothink http/https?  should this be from the env?
         const agentUrl = `http://${agentId}:${agent.adminPort}`;
 
-        return HandlersFactory.getHandler(this.agentGovernance, topic, this.cache).handlePost(agentUrl, agent.adminApiKey, route, topic, body);
+        return HandlersFactory.getHandler(this.agentGovernance, topic, this.http, this.cache).handlePost(agentUrl, agentId, agent.adminApiKey, route, topic, body);
     }
 }
