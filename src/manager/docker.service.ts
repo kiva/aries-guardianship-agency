@@ -61,7 +61,6 @@ export class DockerService implements IAgentManager {
                 '--webhook-url', config.webhookUrl,
                 // TODO For now we auto respond, eventually we will want more refined responses
                 '--log-level', 'debug',
-                '--auto-accept-invites',
                 '--auto-accept-requests',
                 '--auto-respond-messages',
                 '--auto-respond-credential-offer',
