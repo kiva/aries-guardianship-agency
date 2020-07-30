@@ -70,13 +70,30 @@ export class AgentGovernance {
         return false;
     }
 
-    public getPermission(topic: string, value: string): string {
+    // allows looking at a permission without making changes
+    public peekPermission(topic: string, value: string): string {
+        try {
+            const permission = this.policies[topic][value];
+            if (permission === undefined) {
+                return this.policies[AgentGovernance.ALL_KEY];
+            }
+            return permission;
+        } catch (e) {
+            return this.policies[AgentGovernance.ALL_KEY];
+        }
+    }
+
+    // once a permission is read, rules are applied to the permission
+    // (like in the case of 'once')
+    public readPermission(topic: string, value: string): string {
         try {
             const permission = this.policies[topic][value];
             if (permission === undefined) {
                 return this.policies[AgentGovernance.ALL_KEY];
             }
             // Here's how we enforce "once", change it to deny once its been read
+            // @tothink: this might create some problems because permissions are
+            // per agent, not global
             if (permission === AgentGovernance.PERMISSION_ONCE) {
                 this.policies[topic][value] = AgentGovernance.PERMISSION_DENY;
             }

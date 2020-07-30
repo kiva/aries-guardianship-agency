@@ -36,28 +36,37 @@ export class Connections implements IAgentResponseHandler {
         Route will be "topic"
         topic will be "connections"
     */
-    public async handlePost(agentUrl: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
+    public async handlePost(agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
         const delay = (ms: number) => {
             return new Promise(resolve => setTimeout(resolve, ms));
         };
+        const readPermission = (governanceKey: string, cacheKey: string) => {
+            this.agentGovernance.readPermission('connections', governanceKey);
+            this.cache.set(cacheKey, {});
+        }
 
         if (route !== 'topic' || topic !== 'connections') {
             throw new ProtocolException('Connections',`${route}/${topic} is not valid.`);
         }
 
-        // if (AgentGovernance.PERMISSION_DENY === this.agentGovernance.getPermission("connections", "accept-invitation")) {
-        //     throw new ProtocolException('AgencyGovernance',`${topic} governance doesnt not allow.`);
-        // }
+        const governanceKey = `${body.state}-${body.initiator}`;
+        const cacheKey = `${agentId}-${governanceKey}`;
+        const permissionState = this.agentGovernance.peekPermission('connections', governanceKey);
 
-        // if the agentUrl is in the cache then the agent has already accepted the request
-        // if (this.cache.get<any>(agentUrl)) {
-        //     return;
-        // }
+        if (AgentGovernance.PERMISSION_DENY === permissionState) {
+             throw new ProtocolException('AgencyGovernance',`${governanceKey} governance doesnt not allow.`);
+        }
+
+        // if the cacheKey is in the cache then the agent has already accepted the request
+        // when we only allow once, there is no need to continue with this message
+        if (this.cache.get<any>(cacheKey) && permissionState === AgentGovernance.PERMISSION_ONCE) {
+             return;
+        }
 
         // this webhook message indicates an agent received an connection
         // invitation and we want to tell them to accept it, if the policy allows
         if (body.state === 'invitation' && body.initiator === 'external') {
-            Logger.info(`will requesting agent to accept connection invite`);
+            readPermission(governanceKey, cacheKey);
             await delay(2000);
 
             let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-invitation`;
@@ -74,8 +83,10 @@ export class Connections implements IAgentResponseHandler {
             return res;
         }
 
+        // this webhook message indicates the receiving agent has accepted the invite and now
+        // we need to instruct this agent to finish the steps of a connection
         if (body.state === 'request' && body.initiator === 'self') {
-            Logger.info(`will requesting initiating agent to complete connection invite`);
+            readPermission(governanceKey, cacheKey);
             await delay(2000);
 
             let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-request`;

@@ -21,9 +21,9 @@ export class HandlersFactory {
             case 'connections':
                 return new Connections(agentGovernance, http, cache);
             case 'proofs':
-                return new Proofs(agentGovernance, cache);
+                return new Proofs(agentGovernance, http, cache);
             case 'issue_credential':
-                return new IssueCredential(agentGovernance, cache);
+                return new IssueCredential(agentGovernance, http, cache);
             default:
                 Logger.warn(`unhandled topic ${topic}`);
                 break;

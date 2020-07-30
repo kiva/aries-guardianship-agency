@@ -6,7 +6,8 @@
   },
   "permissive": {
     "connections": {
-      "accept-invitation": "always"
+      "invitation-external": "always",
+      "request-self": "always"
     },
     "issue_credential": {
       "something": "always"
@@ -14,7 +15,8 @@
   },
   "SingleConnection": {
     "connections": {
-      "accept-invitation": "once"
+      "invitation-external": "once",
+      "request-self": "once"
     },
     "issue_credential": {
       "something": "always"

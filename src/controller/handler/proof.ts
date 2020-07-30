@@ -8,13 +8,8 @@ import {AxiosRequestConfig} from "axios";
 
 export class Proofs implements IAgentResponseHandler {
     private static PROOFS_URL: string = 'proofs';
-    private readonly http: ProtocolHttpService;
 
-    constructor(private readonly agentGovernance: AgentGovernance, private readonly cache: CacheStore) {
-    }
-
-    public async handleGet(agentUrl: string, adminApiKey: string, route: string, topic: string): Promise<any> {
-        throw new NotImplementedException();
+    constructor(private readonly agentGovernance: AgentGovernance, private readonly http: ProtocolHttpService, private readonly cache: CacheStore) {
     }
 
     /*
@@ -39,7 +34,9 @@ export class Proofs implements IAgentResponseHandler {
         Route will be "topic"
         topic will be "????"
      */
-    public async handlePost(agentUrl: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
-        return 'success'; // TODO should we just return success? or something else?
+    public async handlePost(agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
+        // TODO:
+        Logger.info(`doing nothing for ${agentId}: route ${route}: topic ${topic}`);
+        return;
     }
 }
