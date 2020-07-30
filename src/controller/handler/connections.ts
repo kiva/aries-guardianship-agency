@@ -45,10 +45,6 @@ export class Connections implements IAgentResponseHandler {
             throw new ProtocolException('Connections',`${route}/${topic} is not valid.`);
         }
 
-        // REMOVE/COMMENT OUT TO Test webhook code below
-        Logger.info(`nothing to do for route/topic: ${route}/${topic}`);
-        return;
-
         // if (AgentGovernance.PERMISSION_DENY === this.agentGovernance.getPermission("connections", "accept-invitation")) {
         //     throw new ProtocolException('AgencyGovernance',`${topic} governance doesnt not allow.`);
         // }
@@ -64,7 +60,7 @@ export class Connections implements IAgentResponseHandler {
             Logger.info(`will requesting agent to accept connection invite`);
             await delay(2000);
 
-            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-request`;
+            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-invitation`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,
@@ -74,6 +70,24 @@ export class Connections implements IAgentResponseHandler {
             };
 
             Logger.info(`requesting agent to accept connection invite ${req.url}`);
+            const res = await this.http.requestWithRetry(req);
+            return res;
+        }
+
+        if (body.state === 'request' && body.initiator === 'self') {
+            Logger.info(`will requesting initiating agent to complete connection invite`);
+            await delay(2000);
+
+            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/accept-request`;
+            const req: AxiosRequestConfig = {
+                method: 'POST',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                }
+            };
+
+            Logger.info(`requesting initiating agent to complete connection invite ${req.url}`);
             const res = await this.http.requestWithRetry(req);
             return res;
         }

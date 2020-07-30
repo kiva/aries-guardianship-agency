@@ -26,13 +26,7 @@ describe('Create Connections using policies (e2e)', () => {
     let invitation;
     let issuerConnectionId;
     let holderConnectionId;
-    let schemaId;
-    let credentialDefinitionId;
-    let credentialExchangeId;
-    let presentationExchangeId;
     const hostUrl = 'http://localhost:3010';
-    const schemaName = 'sample_schema';
-    const schemaVersion = '1.0';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
     const delayFunc = (ms: number) => {
@@ -51,8 +45,7 @@ describe('Create Connections using policies (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid,
-            adminApiPort: "1322"
+            did: issuerDid
         }
         return request(hostUrl)
             .post('/v1/manager')
@@ -62,7 +55,6 @@ describe('Create Connections using policies (e2e)', () => {
                 expect(res.body.adminPort).toBeDefined();
                 issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
-                Logger.warn(`Issuer agent ID ${issuerId}:${issuerAdminPort}`);
             });
     });
 
@@ -73,8 +65,7 @@ describe('Create Connections using policies (e2e)', () => {
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
-            did: holderDid,
-            adminApiPort: "1323"
+            did: holderDid
         }
         return request(hostUrl)
             .post('/v1/manager')
@@ -84,12 +75,13 @@ describe('Create Connections using policies (e2e)', () => {
                 expect(res.body.adminPort).toBeDefined();
                 holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
-                Logger.warn(`Holder agent ID ${holderId}:${holderAdminPort}`);
             });
     });
 
     it('Create connection invite to holder from issuer', async () => {
-        await delayFunc(15000); // wait 15 sec
+        // gonna wait here to let the system catch up since since spawning agents
+        // also creates connections
+        await delayFunc(5000); // wait 15 sec
         const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
             .post('/connections/create-invitation')
@@ -104,10 +96,7 @@ describe('Create Connections using policies (e2e)', () => {
     }, 30000);
 
     it('Holder receives to connection invite', async () => {
-        //await delayFunc(1000);
-        Logger.warn(`Holder will receive the invitation`);
-        await delayFunc(10000);
-        Logger.warn(`done waiting`);
+        await delayFunc(5000);
         const agentUrl = `http://localhost:${holderAdminPort}`;
         return request(agentUrl)
             .post('/connections/receive-invitation')
@@ -120,61 +109,64 @@ describe('Create Connections using policies (e2e)', () => {
                 Logger.warn(`holder created connection_id ${holderConnectionId}`);
             });
     }, 60000);
-/*
-    // THIS IS REPLACED BY webhook connections handler
-    it('Holder accepts to connection invite', async () => {
-        //await delayFunc(1000);
-        Logger.warn(`Holder will accept the invitation`);
-        await delayFunc(10000);
-        Logger.warn(`done waiting`);
 
-        const agentUrl = `http://localhost:${holderAdminPort}`;
+    it('List Issuer connections', async () => {
+        await delayFunc(5000);
+        const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
-            .post(`/connections/${holderConnectionId}/accept-invitation`)
-            .set('x-api-key', holderApiKey)
+            .get(`/connections`)
+            .set('x-api-key', issuerApiKey)
             .expect((res) => {
                 expect(res.status).toBe(200);
-                expect(res.body.connection_id).toBeDefined();
+
+                let found: boolean = false;
+                res.body.results.forEach(conn => {
+                   if (conn.connection_id === issuerConnectionId) {
+                       found = true;
+                       expect(conn.state).toBe('response');
+                   }
+                });
+
+                expect(found).toBe(true);
             });
     }, 30000);
 
-    // TODO: this is to be replaced by webhook connections handler
-    it('Issuer completes to connection invite', async () => {
-        Logger.warn(`Holder did the 'accept'.  Now gonna wait then issuer will complete invitation`);
-        await delayFunc(10000);
-        // await delayFunc(3000);
-        Logger.warn(`done waiting`);
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
-            .post(`/connections/${issuerConnectionId}/accept-request`)
-            .set('x-api-key', issuerApiKey)
-            .expect((res) => {
-                expect(res.status).toBe(200);
-                expect(res.body.connection_id).toBeDefined();
-            });
-    }, 75000);
-*/
-    it('List Issuer connections', async () => {
-        await delayFunc(1000);
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
-            .get(`/connections`)
-            .set('x-api-key', issuerApiKey)
-            .expect((res) => {
-                expect(res.status).toBe(200);
-                Logger.warn(`issuerAgent Connections:`, res.body);
-            });
-    });
-
     it('List Holder connections', async () => {
-        await delayFunc(1000);
         const agentUrl = `http://localhost:${holderAdminPort}`;
         return request(agentUrl)
             .get(`/connections`)
             .set('x-api-key', holderApiKey)
             .expect((res) => {
                 expect(res.status).toBe(200);
-                Logger.warn(`holderAgent Connections:`, res.body);
+                let found: boolean = false;
+                res.body.results.forEach(conn => {
+                    if (conn.connection_id === holderConnectionId) {
+                        found = true;
+                        expect(conn.state).toBe('active');
+                    }
+                });
+
+                expect(found).toBe(true);
             });
+    });
+
+    it('Spin down agent 1', () => {
+        const data = {
+            agentId: issuerId
+        }
+        return request(hostUrl)
+            .delete('/v1/manager')
+            .send(data)
+            .expect(200);
+    });
+
+    it('Spin down agent 2', () => {
+        const data = {
+            agentId: holderId
+        }
+        return request(hostUrl)
+            .delete('/v1/manager')
+            .send(data)
+            .expect(200);
     });
 });
