@@ -26,4 +26,4 @@ workflows:
               only: /.*/
 
 orbs:
-  node: circleci/node@3.0.0
+  node: circleci/node@1.1.6
