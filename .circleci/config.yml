@@ -2,6 +2,9 @@ version: 2.1
 
 jobs:
   build-and-test:
+    executor:
+      name: node/default
+      tag: '8.12'
     steps:
       - checkout
       - run: npm install
@@ -15,7 +18,7 @@ jobs:
 
 workflows:
   # TODO: is there a deploy step
-  build-test-deploy:
+  build-and-test:
     jobs:
       - build-and-test:
           filters: # run for all branches AND tags
