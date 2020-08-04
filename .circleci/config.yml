@@ -2,8 +2,6 @@ version: 2.1
 
 jobs:
   build-and-test:
-    # machine:
-    #   docker_layer_caching: true
     steps:
       - checkout
       - run: npm install
@@ -13,6 +11,7 @@ jobs:
       - run:
           name: SKIPPING TESTS. Remaining integration tests have been ignored
           command: echo "Remaining integration tests have been ignored"
+
 
 workflows:
   # TODO: is there a deploy step
@@ -25,4 +24,3 @@ workflows:
 
 orbs:
   node: circleci/node@3.0.0
-  docker: circleci/docker@1.3.0
