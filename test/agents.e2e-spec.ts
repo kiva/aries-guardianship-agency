@@ -156,7 +156,7 @@ describe('Agency Integration Tests', () => {
             }
         };
         const agentGovernance: AgentGovernance = new AgentGovernance('somethingWrong', data);
-        expect(agentGovernance.getPermission('invalidTopic', 'invalidPermission') === 'deny');
+        expect(agentGovernance.readPermission('invalidTopic', 'invalidPermission') === 'deny');
     });
 
     it('Governance validate correctly adds all', () => {
@@ -169,12 +169,12 @@ describe('Agency Integration Tests', () => {
         };
         const agentGovernance: AgentGovernance = new AgentGovernance('somethingWrong', data);
         // all, all doesnt exist so it should return default of deny
-        expect(agentGovernance.getPermission('all','all') === 'deny');
+        expect(agentGovernance.readPermission('all','all') === 'deny');
     });
 
     it('Governance changes once permission to deny on use', () => {
         const agentGovernance: AgentGovernance = new AgentGovernance('permissive');
-        expect(agentGovernance.getPermission('Permissive', 'invitation') === 'once');
-        expect(agentGovernance.getPermission('Permissive', 'invitation') === 'deny');
+        expect(agentGovernance.readPermission('Permissive', 'invitation') === 'once');
+        expect(agentGovernance.readPermission('Permissive', 'invitation') === 'deny');
     });
 });
