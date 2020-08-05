@@ -18,7 +18,8 @@
     "start:hmr": "node dist/server",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "tslint -p tsconfig.json -c tslint.json --fix",
-    "test": "node -r dotenv/config node_modules/.bin/jest --runInBand"
+    "test": "node -r dotenv/config node_modules/.bin/jest --runInBand",
+    "smoke-test": "node -r dotenv/config node_modules/.bin/jest -t \"AppController\" && node -r dotenv/config node_modules/.bin/jest -t \"Smoke tests\""
   },
   "dependencies": {
     "protocol-common": "0.1.15",
