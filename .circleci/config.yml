@@ -28,8 +28,8 @@ jobs:
             docker-compose -f docker-compose.yml up -d
             sleep 150
             docker-compose -f docker-compose.yml logs
-      - run: docker exec -it aries-guardianship-agency_guardianship-agency_1 npm install
-      - run: docker exec -it aries-guardianship-agency_guardianship-agency_1 npm run test
+      - run: docker exec -it guardianship-agency_1 npm install
+      - run: docker exec -it guardianship-agency_1 npm run test
       - run:
           name: SKIPPING TESTS. Remaining integration tests have been ignored
           command: echo "Remaining integration tests have been ignored"
