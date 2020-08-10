@@ -10,6 +10,8 @@ jobs:
       - run: npm install
       - run: npm run smoke-test
       # TODO: spin up docker images so that the other tests will succeed
+      - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
+      - run: docker-compose -f docker-compose.yml build
       - run:
           name: SKIPPING TESTS. Remaining integration tests have been ignored
           command: echo "Remaining integration tests have been ignored"
