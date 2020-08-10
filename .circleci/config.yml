@@ -20,6 +20,15 @@ jobs:
       - run: cp dummy.env .env
       - run: docker-compose -f docker-compose.yml build
       - run:
+          name: Start docker compose and wait for readiness
+          command: |
+            set -x
+            docker-compose -f docker-compose.yml up -d
+            sleep 150
+            docker-compose -f docker-compose.yml logs
+      - run: docker exec -it guardianship-agency npm install
+      - run: docker exec -it guardianship-agency npm run test
+      - run:
           name: SKIPPING TESTS. Remaining integration tests have been ignored
           command: echo "Remaining integration tests have been ignored"
 
