@@ -18,6 +18,8 @@ jobs:
       # TODO: spin up docker images so that the other tests will succeed
       - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run: cp dummy.env .env
+      - run: npm install nodemon --save-dev
+      - run: npm install
       - run: docker-compose -f docker-compose.yml build
       - run:
           name: Start docker compose and wait for readiness
@@ -26,8 +28,8 @@ jobs:
             docker-compose -f docker-compose.yml up -d
             sleep 150
             docker-compose -f docker-compose.yml logs
-      - run: docker exec -it guardianship-agency npm install
-      - run: docker exec -it guardianship-agency npm run test
+      - run: docker exec -it aries-guardianship-agency_guardianship-agency_1 npm install
+      - run: docker exec -it aries-guardianship-agency_guardianship-agency_1 npm run test
       - run:
           name: SKIPPING TESTS. Remaining integration tests have been ignored
           command: echo "Remaining integration tests have been ignored"
