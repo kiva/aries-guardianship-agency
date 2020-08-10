@@ -2,8 +2,6 @@ version: 2.1
 
 jobs:
   build-and-test:
-    machine:
-      docker_layer_caching: true
     executor:
       name: node/default
       tag: '8.12'
@@ -11,13 +9,18 @@ jobs:
       - checkout
       - run: npm install
       - run: npm run smoke-test
+
+  integration-test:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
       # TODO: spin up docker images so that the other tests will succeed
       - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run: docker-compose -f docker-compose.yml build
       - run:
           name: SKIPPING TESTS. Remaining integration tests have been ignored
           command: echo "Remaining integration tests have been ignored"
-
 
 workflows:
   build-and-test:
@@ -26,6 +29,9 @@ workflows:
           filters: # run for all branches AND tags
             tags:
               only: /.*/
+      - integration-test:
+          requires:
+            - build-and-test
       - docker/publish:
           requires:
             - build-and-test
