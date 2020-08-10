@@ -6,7 +6,6 @@ version: '3.2'
 
 networks:
   agency-network:
-    name: agency-network
     driver: bridge
     ipam:
       driver: default
