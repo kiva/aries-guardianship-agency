@@ -22,6 +22,7 @@ services:
       args:
         pool_ip: '10.0.0.2'
     image: indy-pool
+    container_name: indy-pool
     working_dir: /home/indy
     ports:
       - "9701:9701"
@@ -38,6 +39,7 @@ services:
 
   wallets-db:
     image: postgres:11
+    container_name: wallets-db
     command: postgres
     env_file:
       - .env
@@ -55,6 +57,7 @@ services:
       - .env
     command: npm run start:debug
     image: guardianship-agency
+    container_name: guardianship-agency
     working_dir: /www
     ports:
       - "3010:3010"
