@@ -19,14 +19,14 @@ jobs:
       - run: cp dummy.env .env
       - run: npm install nodemon --save-dev
       - run: npm install
-      - run: docker-compose -f docker-compose.yml build
+      - run: docker-compose -f docker-compose.ci.yml build
       - run:
           name: Start docker compose and wait for readiness
           command: |
             set -x
-            docker-compose -f docker-compose.yml up -d
+            docker-compose -f docker-compose.ci.yml up -d
             sleep 150
-            docker-compose -f docker-compose.yml logs
+            docker-compose -f docker-compose.ci.yml logs
             docker exec -it guardianship-agency npm install
       # - run: docker exec -it guardianship-agency npm run test
       - run:
