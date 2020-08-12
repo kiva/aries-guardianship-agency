@@ -6,7 +6,7 @@ import { Connections } from './connections';
 import { AgentGovernance } from '../agent.governance';
 import { Proofs } from './proof';
 import { IssueCredential } from './issue.credential';
-import {ProtocolHttpService} from "protocol-common/protocol.http.service";
+import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 
 /*
     @TODO we want to replace this factory with nestjs injection at some point

@@ -1,11 +1,5 @@
-import request, {agent} from 'supertest';
-import {INestApplication} from "@nestjs/common";
-import {Test} from "@nestjs/testing";
-import {AppService} from "../src/app/app.service";
-import {AppController} from "../src/app/app.controller";
-import { AppModule } from '../src/app/app.module';
-import { AgentGovernance } from '../src/controller/agent.governance';
-import {Logger} from "protocol-common/logger";
+import request from 'supertest';
+import { Logger } from 'protocol-common/logger';
 
 
 /*
@@ -16,7 +10,6 @@ import {Logger} from "protocol-common/logger";
     run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Create Connections using policies (e2e)', () => {
-    let app: INestApplication;
     let issuerAdminPort;
     let issuerId;
     let issuerApiKey;
@@ -46,7 +39,7 @@ describe('Create Connections using policies (e2e)', () => {
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
             did: issuerDid
-        }
+        };
         return request(hostUrl)
             .post('/v1/manager')
             .send(data)
@@ -66,7 +59,7 @@ describe('Create Connections using policies (e2e)', () => {
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
             did: holderDid
-        }
+        };
         return request(hostUrl)
             .post('/v1/manager')
             .send(data)
@@ -153,7 +146,7 @@ describe('Create Connections using policies (e2e)', () => {
     it('Spin down agent 1', () => {
         const data = {
             agentId: issuerId
-        }
+        };
         return request(hostUrl)
             .delete('/v1/manager')
             .send(data)
@@ -163,7 +156,7 @@ describe('Create Connections using policies (e2e)', () => {
     it('Spin down agent 2', () => {
         const data = {
             agentId: holderId
-        }
+        };
         return request(hostUrl)
             .delete('/v1/manager')
             .send(data)

@@ -1,11 +1,6 @@
-import request, {agent} from 'supertest';
-import {INestApplication} from "@nestjs/common";
-import {Test} from "@nestjs/testing";
-import {AppService} from "../src/app/app.service";
-import {AppController} from "../src/app/app.controller";
-import { AppModule } from '../src/app/app.module';
-import { AgentGovernance } from '../src/controller/agent.governance';
-import {Logger} from "protocol-common/logger";
+import request from 'supertest';
+import { INestApplication } from '@nestjs/common';
+import { Logger } from 'protocol-common/logger';
 
 
 /*
@@ -16,7 +11,6 @@ import {Logger} from "protocol-common/logger";
     run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Issue and Prove credentials using policies (e2e)', () => {
-    let app: INestApplication;
     let issuerAdminPort;
     let issuerId;
     let issuerApiKey;
@@ -52,7 +46,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
             did: issuerDid
-        }
+        };
         return request(hostUrl)
             .post('/v1/manager')
             .send(data)
@@ -72,7 +66,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
             did: holderDid
-        }
+        };
         return request(hostUrl)
             .post('/v1/manager')
             .send(data)
@@ -188,11 +182,11 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         const data = {
             cred_def_id: credentialDefinitionId,
             credential_proposal: {
-            "@type": `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
+            '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
                 attributes: [
                     {
-                        name: "score",
-                        value: "750"
+                        name: 'score',
+                        value: '750'
                     }
                 ]
             },
@@ -232,7 +226,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 name: 'Proof of Score',
                 version: '1.0',
                 requested_attributes: {
-                    "0_name_uuid": {
+                    '0_name_uuid': {
                         name: 'score',
                         restrictions: [
                             {
@@ -242,7 +236,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     }
                 },
                 requested_predicates: {
-                    "0_score_GE_uuid": {
+                    '0_score_GE_uuid': {
                         name: 'score',
                         p_type: '>=',
                         p_value: 50,
@@ -283,7 +277,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 try {
                     Logger.warn(`${agentUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
-                    // TODO: update once a bug in acapy is fixed as it doesn't complete this step so the state returned is 'request_sent' not 'verified'
+                    // TODO: update once an acapy bug is fixed as it doesn't complete this step so the state returned is 'request_sent' not 'verified'
                     expect(res.body.state).toBe('request_sent');
                 } catch (e) {
                     Logger.warn(`${agentUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);
@@ -295,7 +289,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     it('Spin down agent 1', () => {
         const data = {
             agentId: issuerId
-        }
+        };
         return request(hostUrl)
             .delete('/v1/manager')
             .send(data)
@@ -305,7 +299,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     it('Spin down agent 2', () => {
         const data = {
             agentId: holderId
-        }
+        };
         return request(hostUrl)
             .delete('/v1/manager')
             .send(data)

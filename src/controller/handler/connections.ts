@@ -54,10 +54,10 @@ export class Connections implements IAgentResponseHandler {
         const delay = (ms: number) => {
             return new Promise(resolve => setTimeout(resolve, ms));
         };
-        const readPermission = (governanceKey: string, cacheKey: string) => {
+        const readPermission = (governanceKey: string, _cacheKey: string) => {
             this.agentGovernance.readPermission('connections', governanceKey);
-            this.cache.set(cacheKey, {});
-        }
+            this.cache.set(_cacheKey, {});
+        };
 
         if (route !== 'topic' || topic !== 'connections') {
             throw new ProtocolException('Connections',`${route}/${topic} is not valid.`);
@@ -72,7 +72,7 @@ export class Connections implements IAgentResponseHandler {
             this.checkPolicyForAction(action, cacheKey);
             readPermission(action, cacheKey);
 
-            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
+            const url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,
@@ -96,7 +96,7 @@ export class Connections implements IAgentResponseHandler {
             // everything, so we hold our horses for a moment
             await delay(2000);
 
-            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
+            const url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,

@@ -1,4 +1,3 @@
-import { AxiosRequestConfig } from 'axios';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';

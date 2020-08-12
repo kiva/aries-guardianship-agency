@@ -1,10 +1,8 @@
-import {CacheStore, NotImplementedException} from '@nestjs/common';
+import { CacheStore } from '@nestjs/common';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { Logger } from 'protocol-common/logger';
-import { ProtocolException } from 'protocol-common/protocol.exception';
 import { IAgentResponseHandler } from './agent.response.handler';
 import { AgentGovernance } from '../agent.governance';
-import {AxiosRequestConfig} from "axios";
 
 export class Proofs implements IAgentResponseHandler {
     private static PROOFS_URL: string = 'proofs';

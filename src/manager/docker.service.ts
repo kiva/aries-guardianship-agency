@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import Dockerode from 'dockerode';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
@@ -80,7 +80,7 @@ export class DockerService implements IAgentManager {
         // container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
         //     stream.pipe(process.stdout);
         // });
-        return container.id
+        return container.id;
     }
 
     /**
