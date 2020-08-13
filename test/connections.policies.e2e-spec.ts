@@ -49,7 +49,7 @@ describe('Create Connections using policies (e2e)', () => {
                 issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
             });
-    });
+    }, 10000);
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
@@ -69,7 +69,7 @@ describe('Create Connections using policies (e2e)', () => {
                 holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
             });
-    });
+    }, 10000);
 
     it('Create connection invite to holder from issuer', async () => {
         // gonna wait here to let the system catch up since since spawning agents

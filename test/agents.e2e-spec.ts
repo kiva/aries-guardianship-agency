@@ -41,7 +41,7 @@ describe('Agency Integration Tests', () => {
                 adminPort1 = res.body.adminPort;
                 agentId1 = res.body.agentId;
             });
-    });
+    }, 10000);
 
     it('Spin up agent 2', async () => {
         const data = {
@@ -59,7 +59,7 @@ describe('Agency Integration Tests', () => {
                 adminPort2 = res.body.adminPort;
                 agentId2 = res.body.agentId;
             });
-    });
+    }, 10000);
 
     it('Get connection data from agent 1', async () => {
         await delayFunc(15000); // wait 20 sec
