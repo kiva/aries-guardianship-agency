@@ -1,5 +1,5 @@
 import { Get, Controller } from '@nestjs/common';
-import { HttpConstants } from '@kiva/protocol-common/http-context/http.constants';
+import { HttpConstants } from 'protocol-common/http-context/http.constants';
 import { AgentConfig } from '../manager/agent.config';
 
 /**

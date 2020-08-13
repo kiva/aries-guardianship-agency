@@ -1,15 +1,15 @@
 import { Injectable, INestApplication } from '@nestjs/common';
 import { json } from 'body-parser';
-import { HttpConstants } from '@kiva/protocol-common/http-context/http.constants';
+import { HttpConstants } from 'protocol-common/http-context/http.constants';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ProtocolExceptionFilter } from '@kiva/protocol-common/protocol.exception.filter';
-import { Logger } from '@kiva/protocol-common/logger';
-import { LoggingInterceptor } from '@kiva/protocol-common/logging.interceptor';
-import { DatadogLogger } from '@kiva/protocol-common/datadog.logger';
-import { Constants } from '@kiva/protocol-common/constants';
-import { traceware } from '@kiva/protocol-common/tracer';
+import { ProtocolExceptionFilter } from 'protocol-common/protocol.exception.filter';
+import { Logger } from 'protocol-common/logger';
+import { LoggingInterceptor } from 'protocol-common/logging.interceptor';
+import { DatadogLogger } from 'protocol-common/datadog.logger';
+import { Constants } from 'protocol-common/constants';
+import { traceware } from 'protocol-common/tracer';
 
 /**
  * The Root Application Service

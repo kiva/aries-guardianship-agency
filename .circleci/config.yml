@@ -1,0 +1,61 @@
+version: 2.1
+
+jobs:
+  build-and-test:
+    executor:
+      name: node/default
+      tag: '8.12'
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm run smoke-test
+
+  integration-test:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
+      - run: cp dummy.env .env
+      - run: npm install nodemon --save-dev
+      - run: npm install
+      - run: docker-compose -f docker-compose.ci.yml build
+      - run:
+          name: Start docker compose and wait for readiness
+          command: |
+            set -x
+            docker-compose -f docker-compose.ci.yml up -d
+            sleep 150
+            docker-compose -f docker-compose.ci.yml logs
+            docker exec -it guardianship-agency npm install
+      # - run: docker exec -it guardianship-agency npm run test
+      - run:
+          name: SKIPPING TESTS. Remaining integration tests have been ignored
+          command: echo "Remaining integration tests have been ignored"
+
+workflows:
+  build-and-test:
+    jobs:
+      - build-and-test:
+          filters: # run for all branches AND tags
+            tags:
+              only: /.*/
+      - integration-test:
+         requires:
+           - build-and-test
+      - docker/publish:
+          requires:
+            - build-and-test
+          filters: # only run for semver tagged versions
+            tags:
+              only: /^([0-9]+)\.([0-9]+)\.([0-9]+)/
+            branches:
+              ignore: /.*/
+          update-description: true
+          dockerfile: ./docker/Dockerfile.production
+          image: kivaprotocol/aries-guardianship-agency
+          tag: << pipeline.git.tag >>
+
+orbs:
+  node: circleci/node@1.1.6
+  docker: circleci/docker@1.3.0

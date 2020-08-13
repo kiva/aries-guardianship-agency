@@ -1,8 +1,4 @@
 import request from 'supertest';
-import { Test } from '@nestjs/testing';
-import { INestApplication, Logger } from '@nestjs/common';
-import { AppService } from '../src/app/app.service';
-import { AppModule } from '../src/app/app.module';
 
 /**
  * These tests probably won't stay around, I just wanted to get something going
@@ -10,8 +6,7 @@ import { AppModule } from '../src/app/app.module';
  * TODO better tests
  */
 describe('Agency Integration Tests', () => {
-    let app: INestApplication;
-    let hostUrl = 'http://localhost:3010'; // We probably won't keep this notion around, but if we do move to config
+    const hostUrl = 'http://localhost:3010'; // We probably won't keep this notion around, but if we do move to config
     let adminPort1;
     let agentId1;
     let adminApiKey1;
@@ -27,7 +22,7 @@ describe('Agency Integration Tests', () => {
         adminApiKey2 = 'adminApiKey';
         delayFunc = (ms: number) => {
             return new Promise( resolve => setTimeout(resolve, ms) );
-        }
+        };
     });
 
     it('Spin up agent 1', async () => {
@@ -35,7 +30,7 @@ describe('Agency Integration Tests', () => {
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey: adminApiKey1,
-        }
+        };
         return request(hostUrl)
             .post('/v1/manager')
             .send(data)
@@ -46,14 +41,14 @@ describe('Agency Integration Tests', () => {
                 adminPort1 = res.body.adminPort;
                 agentId1 = res.body.agentId;
             });
-    });
+    }, 10000);
 
     it('Spin up agent 2', async () => {
         const data = {
             walletId: 'walletId22',
             walletKey: 'walletId22',
             adminApiKey: adminApiKey2,
-        }
+        };
         return request(hostUrl)
             .post('/v1/manager')
             .send(data)
@@ -64,7 +59,7 @@ describe('Agency Integration Tests', () => {
                 adminPort2 = res.body.adminPort;
                 agentId2 = res.body.agentId;
             });
-    });
+    }, 10000);
 
     it('Get connection data from agent 1', async () => {
         await delayFunc(15000); // wait 20 sec
@@ -100,7 +95,7 @@ describe('Agency Integration Tests', () => {
         const agentUrl = `http://localhost:${adminPort2}`;
         const data = {
             comment: 'string'
-        }
+        };
         return request(agentUrl)
             .post(`/connections/${connectionId}/send-ping`)
             .set('Content-Type', 'application/json')
@@ -117,7 +112,7 @@ describe('Agency Integration Tests', () => {
     it('Spin down agent 1', () => {
         const data = {
             agentId: agentId1
-        }
+        };
         return request(hostUrl)
             .delete('/v1/manager')
             .send(data)
@@ -127,11 +122,10 @@ describe('Agency Integration Tests', () => {
     it('Spin down agent 2', () => {
         const data = {
             agentId: agentId2
-        }
+        };
         return request(hostUrl)
             .delete('/v1/manager')
             .send(data)
             .expect(200);
     });
-
 });

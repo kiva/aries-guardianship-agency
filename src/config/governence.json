@@ -1,0 +1,25 @@
+{
+  "comment": "The default section is required.  The others are defined as needed. So in this example, Permissive and SierraLeone as user defined sections. The valid values for keys in a section are always, once, deny",
+  "default" : {
+    "comment": "this section is the default which will apply when a policy requested is missing or when an action in a policy is missing",
+    "all": "deny"
+  },
+  "permissive": {
+    "connections": {
+      "accept-invitation": "always",
+      "accept-request": "always"
+    },
+    "issue_credential": {
+      "all": "always"
+    }
+  },
+  "SingleConnection": {
+    "connections": {
+      "accept-invitation": "once",
+      "accept-request": "once"
+    },
+    "issue_credential": {
+      "all": "always"
+    }
+  }
+}

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import Dockerode from 'dockerode';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
@@ -61,13 +61,14 @@ export class DockerService implements IAgentManager {
                 '--webhook-url', config.webhookUrl,
                 // TODO For now we auto respond, eventually we will want more refined responses
                 '--log-level', 'debug',
-                '--auto-accept-invites',
                 '--auto-accept-requests',
                 '--auto-respond-messages',
                 '--auto-respond-credential-offer',
                 '--auto-store-credential',
                 '--auto-respond-presentation-request',
-                // TODO if we want to support local DID's we can use '--wallet-local-did',
+                '--auto-respond-presentation-proposal',
+                '--auto-verify-presentation',
+                '--wallet-local-did', // TODO this could be an arg on the config
             ],
         };
         if (config.seed) {
@@ -76,10 +77,10 @@ export class DockerService implements IAgentManager {
         const container = await this.dockerode.createContainer(containerOptions);
         await container.start();
         // Comment this in if we want to see docker logs here:
-        container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
-            stream.pipe(process.stdout);
-        });
-        return container.id
+        // container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
+        //     stream.pipe(process.stdout);
+        // });
+        return container.id;
     }
 
     /**
