@@ -57,22 +57,22 @@ export class Connections implements IAgentResponseHandler {
         const readPermission = (governanceKey: string, cacheKey: string) => {
             this.agentGovernance.readPermission('connections', governanceKey);
             this.cache.set(cacheKey, {});
-        }
+        };
 
         if (route !== 'topic' || topic !== 'connections') {
             throw new ProtocolException('Connections',`${route}/${topic} is not valid.`);
         }
 
-        const cacheKey = `${agentId}-${body.state}-${body.initiator}`;
+        const templatedCacheKey = `${agentId}-${body.state}-${body.initiator}`;
 
         // this webhook message indicates an agent received an connection
         // invitation and we want to tell them to accept it, if the policy allows
         if (body.state === 'invitation' && body.initiator === 'external') {
             const action = 'accept-invitation';
-            this.checkPolicyForAction(action, cacheKey);
-            readPermission(action, cacheKey);
+            this.checkPolicyForAction(action, templatedCacheKey);
+            readPermission(action, templatedCacheKey);
 
-            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
+            const url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,
@@ -90,13 +90,13 @@ export class Connections implements IAgentResponseHandler {
         // we need to instruct this agent to finish the steps of a connection
         if (body.state === 'request' && body.initiator === 'self') {
             const action = 'accept-request';
-            this.checkPolicyForAction(action, cacheKey);
-            readPermission(action, cacheKey);
+            this.checkPolicyForAction(action, templatedCacheKey);
+            readPermission(action, templatedCacheKey);
             // at this point, the other participant in this conversation hasn't caught up with
             // everything, so we hold our horses for a moment
             await delay(2000);
 
-            let url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
+            const url: string = agentUrl + `/${Connections.CONNECTIONS_URL}/${body.connection_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,

@@ -26,7 +26,7 @@ export class AgentRouterService {
             const url = await this.getUrl(agentId);
             Logger.log('Router proxy to ', url); // TODO remove this log eventually, still useful now
             return url;
-        }
+        };
     }
 
 }
