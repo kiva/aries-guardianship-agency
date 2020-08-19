@@ -36,6 +36,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
         holderApiKey = 'adminApiKey';
+        jest.setTimeout(60000);
     });
 
     it('Spin up agent 1 (issuer)', async () => {
@@ -45,7 +46,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: issuerDid,
+            adminApiPort: '5001'
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -65,7 +67,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
-            did: holderDid
+            did: holderDid,
+            adminApiPort: '5002'
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -90,7 +93,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 invitation = res.body.invitation;
                 issuerConnectionId = res.body.connection_id;
             });
-    }, 30000);
+    });
 
     it('Holder responds to connection invite', async () => {
         await delayFunc(1000);
@@ -115,7 +118,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect((res) => {
                 expect(res.status).toBe(200);
             });
-    }, 30000);
+    });
 
     it('issuer creates schema', async () => {
         const data = {
@@ -137,13 +140,13 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     throw e;
                 }
             });
-    }, 30000);
+    });
 
     it ('issuer creates credential definition', async () => {
         await delayFunc(1000);
         const data = {
             schema_id: schemaId,
-            support_revocation: true,
+            support_revocation: false,
             tag: 'issued_1'
         };
         const agentUrl = `http://localhost:${issuerAdminPort}`;
@@ -155,7 +158,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 expect(res.status).toBe(200);
                 credentialDefinitionId = res.body.credential_definition_id;
             });
-    }, 30000);
+    });
 
     it('send basic message from issuer to holder', async () => {
         await delayFunc(2000);
@@ -175,7 +178,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     throw e;
                 }
             });
-    }, 30000);
+    });
 
     it('issuer creates credential', async () => {
         await delayFunc(5000);
@@ -216,7 +219,20 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     throw e;
                 }
             });
-    }, 30000);
+    });
+
+    it('Holder checks on credential', async () => {
+        await delayFunc(5000);
+        const agentUrl = `http://localhost:${holderAdminPort}`;
+        return request(agentUrl)
+            .get('/credentials')
+            .set('x-api-key', holderApiKey)
+            .send(invitation)
+            .expect((res) => {
+                expect(res.status).toBe(200);
+                expect(res.body.results.length).toBeGreaterThan(0);
+            });
+    });
 
     it('prover proves holders credential', async () => {
         const data = {
@@ -226,7 +242,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 name: 'Proof of Score',
                 version: '1.0',
                 requested_attributes: {
-                    '0_name_uuid': {
+                    'score': {
                         name: 'score',
                         restrictions: [
                             {
@@ -235,18 +251,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                         ]
                     }
                 },
-                requested_predicates: {
-                    '0_score_GE_uuid': {
-                        name: 'score',
-                        p_type: '>=',
-                        p_value: 50,
-                        restrictions: [
-                            {
-                                cred_def_id: credentialDefinitionId
-                            }
-                        ]
-                    }
-                }
+                requested_predicates: {}
             }
         };
         const agentUrl = `http://localhost:${issuerAdminPort}`;
@@ -265,10 +270,10 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     throw e;
                 }
             });
-    }, 30000);
+    });
 
     it('verify proof is proved', async () => {
-        await delayFunc(5000);
+        await delayFunc(6000);
         const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
             .get(`/present-proof/records/${presentationExchangeId}`)
@@ -277,14 +282,14 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 try {
                     Logger.warn(`${agentUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
-                    // TODO: update once an acapy bug is fixed as it doesn't complete this step so the state returned is 'request_sent' not 'verified'
-                    expect(res.body.state).toBe('request_sent');
+                    expect(res.body.state).toBe('verified');
+                    expect(res.body.presentation.requested_proof.revealed_attrs.score.raw).toBe("750");
                 } catch (e) {
                     Logger.warn(`${agentUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);
                     throw e;
                 }
             });
-    }, 30000);
+    });
 
     it('Spin down agent 1', () => {
         const data = {

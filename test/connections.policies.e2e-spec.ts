@@ -38,7 +38,8 @@ describe('Create Connections using policies (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: issuerDid,
+            adminApiPort: '5001'
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -58,7 +59,8 @@ describe('Create Connections using policies (e2e)', () => {
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
-            did: holderDid
+            did: holderDid,
+            adminApiPort: '5002'
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -103,6 +105,26 @@ describe('Create Connections using policies (e2e)', () => {
             });
     }, 60000);
 
+    it('send basic message from issuer to holder', async () => {
+        await delayFunc(2000);
+        const data = {
+            content: 'hello holder, are you ready to receive your credentials?'
+        };
+        const agentUrl = `http://localhost:${issuerAdminPort}`;
+        return request(agentUrl)
+            .post(`/connections/${issuerConnectionId}/send-message`)
+            .send(data)
+            .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                try {
+                    expect(res.status).toBe(200);
+                } catch (e) {
+                    Logger.warn(`connections/send-message errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
+            });
+    }, 30000);
+
     it('List Issuer connections', async () => {
         await delayFunc(5000);
         const agentUrl = `http://localhost:${issuerAdminPort}`;
@@ -116,7 +138,7 @@ describe('Create Connections using policies (e2e)', () => {
                 res.body.results.forEach(conn => {
                    if (conn.connection_id === issuerConnectionId) {
                        found = true;
-                       expect(conn.state).toBe('response');
+                       expect(conn.state).toBe('active');
                    }
                 });
 
