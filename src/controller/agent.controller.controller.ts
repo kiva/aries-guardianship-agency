@@ -24,8 +24,9 @@ export class AgentControllerController {
     ): Promise<any> {
         Logger.log('----- GET WEB HOOK START -----');
         Logger.log(`${agentId}/${route}/${subroute}`, body);
+        const value = await this.agentControllerService.handleRequest(agentId, route, subroute, body);
         Logger.log('----- GET WEB HOOK END -----');
-        return await this.agentControllerService.handleRequest(agentId, route, subroute, body);
+        return value;
     }
 
     @Post(':agentId/:route/:subroute')
@@ -37,8 +38,9 @@ export class AgentControllerController {
     ): Promise<any> {
         Logger.log('----- POST WEB HOOK START -----');
         Logger.log(`${agentId}/${route}/${subroute}`, body);
+        const value = await this.agentControllerService.handleRequest(agentId, route, subroute, body);
         Logger.log('----- POST WEB HOOK END -----');
-        return await this.agentControllerService.handleRequest(agentId, route, subroute, body);
+        return value;
     }
 
 }
