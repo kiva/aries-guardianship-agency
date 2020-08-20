@@ -81,7 +81,7 @@ export class AgentManagerService {
         // when autoCorrect is not defined or null, treat it as true
         if (autoConnect === true) {
             // TODO for right now let's delay and then initiate the connection
-            await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey);
+            await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
             connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
         }
 
@@ -138,7 +138,7 @@ export class AgentManagerService {
     /**
      * TODO move to it's own class and pass in the http object
      */
-    private async pingConnectionWithRetry(agentId: string, adminPort: string, adminApiKey: string, durationMS: number = 10000) : Promise<any> {
+    private async pingConnectionWithRetry(agentId: string, adminPort: string, adminApiKey: string, durationMS: number) : Promise<any> {
         Logger.info(`pingConnectionWithRetry`);
         const compute = (l , r) => {
             let result = l.getTime() - r.getTime();
