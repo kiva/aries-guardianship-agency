@@ -18,7 +18,7 @@
       "accept-invitation": "once",
       "accept-request": "once"
     },
-    "issue_credential": {
+    "issue-credential": {
       "store": "always"
     }
   }
