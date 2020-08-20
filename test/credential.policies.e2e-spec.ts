@@ -159,7 +159,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 credentialDefinitionId = res.body.credential_definition_id;
             });
     });
-
+/*
     it('send basic message from issuer to holder', async () => {
         await delayFunc(2000);
         const data = {
@@ -179,7 +179,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 }
             });
     });
-
+*/
     it('issuer creates credential', async () => {
         await delayFunc(5000);
         const data = {

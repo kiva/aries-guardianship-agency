@@ -14,9 +14,11 @@ export class AgentGovernance {
     private static ALL_KEY = 'all';
     private static COMMENT_SECTION = 'comment';
     private readonly policies = { };
+    public policyName: string = '';
 
     constructor(policyName: string, source: any = data) {
         // flatten out the data between default and the named policy into a single policy
+        this.policyName = policyName;
         this.policies = {...source.default, ...source[policyName]};
         this.validate();
     }
