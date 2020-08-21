@@ -44,6 +44,8 @@ services:
     command: postgres
     env_file:
       - .env
+    volumes:
+      - ./resources/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - agency-network
     depends_on:
