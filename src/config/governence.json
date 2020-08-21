@@ -9,8 +9,8 @@
       "accept-invitation": "always",
       "accept-request": "always"
     },
-    "issue_credential": {
-      "all": "always"
+    "issue-credential": {
+      "store": "always"
     }
   },
   "SingleConnection": {
@@ -18,8 +18,8 @@
       "accept-invitation": "once",
       "accept-request": "once"
     },
-    "issue_credential": {
-      "all": "always"
+    "issue-credential": {
+      "store": "always"
     }
   }
 }
