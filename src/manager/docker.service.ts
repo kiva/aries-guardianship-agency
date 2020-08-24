@@ -62,7 +62,7 @@ export class DockerService implements IAgentManager {
                 // TODO For now we auto respond, eventually we will want more refined responses
                 '--log-level', 'debug',
                 '--auto-respond-messages',
-                '--auto-respond-credential-proposal',
+                // status offer_sent
                 '--auto-respond-credential-offer',
                 '--auto-respond-credential-request',
                 '--auto-respond-presentation-request',
