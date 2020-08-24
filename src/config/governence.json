@@ -19,7 +19,7 @@
       "accept-request": "once"
     },
     "issue-credential": {
-      "store": "always"
+      "store": "once"
     }
   }
 }
