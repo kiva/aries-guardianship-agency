@@ -64,7 +64,6 @@ export class DockerService implements IAgentManager {
                 '--auto-respond-messages',
                 // status offer_sent
                 '--auto-respond-credential-offer',
-                '--auto-respond-credential-request',
                 '--auto-respond-presentation-request',
                 '--auto-respond-presentation-proposal',
                 '--auto-verify-presentation',
