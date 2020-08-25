@@ -66,8 +66,6 @@ export class DockerService implements IAgentManager {
                 '--auto-respond-credential-offer',
                 // request_sent
                 '--auto-respond-presentation-request',
-                // presentation_received
-                '--auto-verify-presentation',
                 '--wallet-local-did', // TODO this could be an arg on the config
             ],
         };

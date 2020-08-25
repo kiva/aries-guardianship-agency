@@ -20,7 +20,7 @@ export class HandlersFactory {
         switch (topic) {
             case 'connections':
                 return new Connections(agentGovernance, http, cache);
-            case 'proofs':
+            case 'present_proof':
                 return new Proofs(agentGovernance, http, cache);
             case 'issue_credential':
                 return new IssueCredential(agentGovernance, http, cache);
