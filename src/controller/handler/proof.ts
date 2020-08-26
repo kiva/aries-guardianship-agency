@@ -1,10 +1,10 @@
 import { CacheStore } from '@nestjs/common';
+import { AxiosRequestConfig } from 'axios';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
+import { ProtocolException } from 'protocol-common/protocol.exception';
 import { Logger } from 'protocol-common/logger';
 import { IAgentResponseHandler } from './agent.response.handler';
 import { AgentGovernance } from '../agent.governance';
-import { ProtocolException } from "protocol-common/protocol.exception";
-import { AxiosRequestConfig } from "axios";
 
 export class Proofs implements IAgentResponseHandler {
     private static PROOFS_URL: string = 'present-proof';
@@ -23,33 +23,6 @@ export class Proofs implements IAgentResponseHandler {
         if (await this.cache.get<any>(cacheKey) && permissionState === AgentGovernance.PERMISSION_ONCE) {
             throw new ProtocolException('AgencyGovernance',`${governanceKey} governance has already been used.`);
         }
-    }
-
-    /*
-        ref: https://github.com/hyperledger/aries-cloudagent-python/blob/master/aries_cloudagent/protocols/present_proof/v1_0/util/indy.py
-
-        returns something like this:
-        {
-          "requested_attributes": {
-            "score": {
-              "cred_id": "credential-id-goes-here",
-              "revealed": true,
-              "timestamp": 1597351440 // current epoch time
-            }
-          },
-          "requested_predicates": {},
-          "trace": false,
-          "self_attested_attributes": {}
-        }
-    */
-    private buildSendPresentationBody(): any {
-        const req_creds = {
-            'self_attested_attributes': {},
-            'requested_attributes': {},
-            'requested_predicates': {},
-        };
-
-        return req_creds;
     }
 
     /*
@@ -91,47 +64,10 @@ export class Proofs implements IAgentResponseHandler {
             throw new ProtocolException('present_proof',`${route}/${topic} is not valid.`);
         }
 
-        const delay = (ms: number) => {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        };
         const readPermission = async (governanceKey: string, cacheKey: string) => {
             this.agentGovernance.readPermission(Proofs.PROOFS_URL, governanceKey);
             await this.cache.set(cacheKey, {});
         };
-        /*
-        if (body.role === 'prover' && body.state === 'request_received') {
-            const action = 'send-presentation';
-            const templatedCacheKey = `${agentId}-${body.role}-${body.presentation_exchange_id}`;
-            // await this.checkPolicyForAction(action, templatedCacheKey);
-            // await readPermission(action, templatedCacheKey);
-            // present-proof/records/{id}/credentials
-            let url: string = agentUrl + `/${Proofs.PROOFS_URL}/records/${body.presentation_exchange_id}/credentials`;
-            let req: AxiosRequestConfig = {
-                method: 'GET',
-                url,
-                headers: {
-                    'x-api-key': adminApiKey,
-                }
-            };
-            Logger.info(`requesting holder to present proof ${req.url}`);
-            const res = await this.http.requestWithRetry(req);
-            Logger.warn(`GETTING CREDENTIAL:`, res.data);
-            Logger.warn(`DATA: ${JSON.stringify(res.data)}`);
-
-            // await delay(2000);
-            url = agentUrl + `/${Proofs.PROOFS_URL}/records/${body.presentation_exchange_id}/${action}`;
-            req = {
-                method: 'POST',
-                url,
-                headers: {
-                    'x-api-key': adminApiKey,
-                }
-            };
-            Logger.info(`requesting holder to present proof ${req.url}`);
-            // res = await this.http.requestWithRetry(req);
-            // return res.data;
-        }
-        */
 
         if (body.role === 'verifier' && body.state === 'presentation_received') {
             const action: string = 'verify-presentation';
