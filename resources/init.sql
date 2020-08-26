@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS tags_encrypted(
         ON UPDATE CASCADE
 );
 CREATE INDEX IF NOT EXISTS ix_tags_encrypted_name ON tags_encrypted(wallet_id, name);
-CREATE INDEX IF NOT EXISTS ix_tags_encrypted_value ON tags_encrypted(wallet_id, md5(value));
+CREATE INDEX IF NOT EXISTS ix_tags_encrypted_value ON tags_encrypted(wallet_id, sha256(value));
 CREATE INDEX IF NOT EXISTS ix_tags_encrypted_wallet_id_item_id ON tags_encrypted(wallet_id, item_id);
 
 CREATE TABLE IF NOT EXISTS tags_plaintext(
