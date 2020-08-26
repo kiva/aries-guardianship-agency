@@ -4,7 +4,7 @@ import { ProtocolException } from 'protocol-common/protocol.exception';
 import { IAgentResponseHandler } from './agent.response.handler';
 import { AgentGovernance } from '../agent.governance';
 import { CacheStore } from '@nestjs/common';
-import { AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig } from 'axios';
 
 /*
     Acapy webhooks handler for input received from the url [webhookurl]/v1/controller/topic/connections
