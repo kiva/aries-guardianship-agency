@@ -215,26 +215,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    it('send basic message before proving credential', async () => {
-        await delayFunc(2000);
-        const data = {
-            content: 'basic message before proving credential'
-        };
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
-            .post(`/connections/${issuerConnectionId}/send-message`)
-            .send(data)
-            .set('x-api-key', issuerApiKey)
-            .expect((res) => {
-                try {
-                    expect(res.status).toBe(200);
-                } catch (e) {
-                    Logger.warn(`connections/send-message errored result -> ${res.status}`, res.body);
-                    throw e;
-                }
-            });
-    });
-
     it('prover proves holders credential', async () => {
         const data = {
             connection_id: issuerConnectionId,
