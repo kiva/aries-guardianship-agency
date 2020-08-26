@@ -11,6 +11,9 @@
     },
     "issue-credential": {
       "store": "always"
+    },
+    "present-proof": {
+      "verify-presentation": "always"
     }
   },
   "SingleConnection": {
@@ -19,7 +22,10 @@
       "accept-request": "once"
     },
     "issue-credential": {
-      "store": "always"
+      "store": "once"
+    },
+    "present-proof": {
+      "verify-presentation": "once"
     }
   }
 }

@@ -159,27 +159,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 credentialDefinitionId = res.body.credential_definition_id;
             });
     });
-/*
-    it('send basic message from issuer to holder', async () => {
-        await delayFunc(2000);
-        const data = {
-            content: 'hello holder, are you ready to receive your credentials?'
-        };
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
-            .post(`/connections/${issuerConnectionId}/send-message`)
-            .send(data)
-            .set('x-api-key', issuerApiKey)
-            .expect((res) => {
-                try {
-                    expect(res.status).toBe(200);
-                } catch (e) {
-                    Logger.warn(`connections/send-message errored result -> ${res.status}`, res.body);
-                    throw e;
-                }
-            });
-    });
-*/
+
     it('issuer creates credential', async () => {
         await delayFunc(5000);
         const data = {
@@ -221,16 +201,17 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    it('Holder checks on credential', async () => {
+    it('Affirm Issuer credential status', async () => {
         await delayFunc(5000);
-        const agentUrl = `http://localhost:${holderAdminPort}`;
+        const agentUrl = `http://localhost:${issuerAdminPort}`;
         return request(agentUrl)
-            .get('/credentials')
+            .get('/issue-credential/records')
             .set('x-api-key', holderApiKey)
             .send(invitation)
             .expect((res) => {
                 expect(res.status).toBe(200);
-                expect(res.body.results.length).toBeGreaterThan(0);
+                expect(res.body.results.length).toBe(1);
+                expect(res.body.results[0].state).toBe('credential_acked');
             });
     });
 
