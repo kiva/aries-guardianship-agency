@@ -27,8 +27,7 @@ jobs:
             docker-compose -f docker-compose.ci.yml up -d
             sleep 150
             docker-compose -f docker-compose.ci.yml logs
-            docker exec -it guardianship-agency npm install
-            sleep 150
+            sleep 300
             npm run test-test
       - run:
           name: SKIPPING TESTS. Remaining integration tests have been ignored
