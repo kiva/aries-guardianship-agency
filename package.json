@@ -19,7 +19,8 @@
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "tslint -p tsconfig.json -c tslint.json --fix",
     "test": "node -r dotenv/config node_modules/.bin/jest --runInBand",
-    "smoke-test": "node -r dotenv/config node_modules/.bin/jest -t \"AppController\" && node -r dotenv/config node_modules/.bin/jest -t \"Smoke tests\""
+    "smoke-test": "node -r dotenv/config node_modules/.bin/jest -t \"AppController\" && node -r dotenv/config node_modules/.bin/jest -t \"Smoke tests\"",
+    "test-test": "node -r dotenv/config node_modules/.bin/jest -t \"connections\""
   },
   "dependencies": {
     "@nestjs/common": "^7.4.2",
