@@ -16,7 +16,11 @@ jobs:
     steps:
       - checkout
       - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
-      - run: cp dummy.env .env
+      - run:
+          name: setup environment
+          command: |
+            cp dummy.env .env
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
       - run:
           name: node npm setup
           command: |
