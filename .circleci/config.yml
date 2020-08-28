@@ -17,12 +17,19 @@ jobs:
       - checkout
       - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run: cp dummy.env .env
-      - run: npm install nodemon --save-dev
-      - run: npm install
-      - run: docker-compose -f docker-compose.ci.yml build
+      - run:
+          - name: node npm setup
+          - command: |
+              npm install nodemon --save-dev
+              npm install
+              nvm install v8.17.0
+              node -v
+              nvm alias default v8.17.0
       - run:
           name: Start docker compose and wait for readiness
           command: |
+            docker network create --driver=bridge --subnet=10.0.0.0/24 agency-network
+            docker-compose -f docker-compose.ci.yml build
             set -x
             docker-compose -f docker-compose.ci.yml up -d
             sleep 150
@@ -30,6 +37,7 @@ jobs:
             npm install
             sleep 300
             npm run test-test
+            # docker exec -it guardianship-agency npm run test-test
       - run:
           name: SKIPPING TESTS. Remaining integration tests have been ignored
           command: echo "Remaining integration tests have been ignored"
