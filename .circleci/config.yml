@@ -32,6 +32,8 @@ jobs:
       - run:
           name: Start docker compose and wait for readiness
           command: |
+            docker network ls
+            docker network rm project_agency-network
             docker network create --driver=bridge --subnet=10.0.0.0/24 agency-network
             docker-compose -f docker-compose.ci.yml build
             set -x
