@@ -34,7 +34,6 @@ jobs:
             docker-compose -f docker-compose.ci.yml up -d
             sleep 150
             docker-compose -f docker-compose.ci.yml logs
-            npm install
             sleep 300
             npm run test-test
             # docker exec -it guardianship-agency npm run test-test
