@@ -32,6 +32,10 @@ jobs:
           name: setup docker environments
           command: |
             docker network ls
+            # this is a hack to fix a problem with docker network names and
+            # circle ci.  once circle ci supports docker 3.5 where we can
+            # set the name in the docker files the call to this script
+            # can be removed
             ./fix_networks.sh
             docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run:
@@ -43,12 +47,12 @@ jobs:
             docker-compose -f docker-compose.ci.yml up -d
             sleep 150
             docker-compose -f docker-compose.ci.yml logs
+      - run:
+          name: Running ONE integration test. Remaining integration tests have been ignored
+          command: |
             sleep 300
             npm run test-test
-            # docker exec -it guardianship-agency npm run test-test
-      - run:
-          name: SKIPPING TESTS. Remaining integration tests have been ignored
-          command: echo "Remaining integration tests have been ignored"
+            echo "Remaining integration tests have been ignored"
 
 workflows:
   build-and-test:

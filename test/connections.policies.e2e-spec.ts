@@ -29,6 +29,7 @@ describe('Create Connections using policies (e2e)', () => {
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
         holderApiKey = 'adminApiKey';
+        jest.setTimeout(60000);
     });
 
     it('Spin up agent 1 (issuer)', async () => {
@@ -50,7 +51,7 @@ describe('Create Connections using policies (e2e)', () => {
                 issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
             });
-    }, 10000);
+    });
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
@@ -71,8 +72,8 @@ describe('Create Connections using policies (e2e)', () => {
                 holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
             });
-    }, 10000);
-
+    });
+/*
     it('Create connection invite to holder from issuer', async () => {
         // gonna wait here to let the system catch up since since spawning agents
         // also creates connections
@@ -88,7 +89,7 @@ describe('Create Connections using policies (e2e)', () => {
                 issuerConnectionId = res.body.connection_id;
                 Logger.warn(`issuer created connection_id ${issuerConnectionId}`);
             });
-    }, 30000);
+    });
 
     it('Holder receives to connection invite', async () => {
         await delayFunc(5000);
@@ -103,7 +104,7 @@ describe('Create Connections using policies (e2e)', () => {
                 holderConnectionId = res.body.connection_id;
                 Logger.warn(`holder created connection_id ${holderConnectionId}`);
             });
-    }, 60000);
+    });
 
     it('send basic message from issuer to holder', async () => {
         await delayFunc(2000);
@@ -123,7 +124,7 @@ describe('Create Connections using policies (e2e)', () => {
                     throw e;
                 }
             });
-    }, 30000);
+    });
 
     it('List Issuer connections', async () => {
         await delayFunc(5000);
@@ -164,8 +165,9 @@ describe('Create Connections using policies (e2e)', () => {
                 expect(found).toBe(true);
             });
     });
-
+*/
     it('Spin down agent 1', () => {
+        await delayFunc(10000);
         const data = {
             agentId: issuerId
         };
