@@ -30,10 +30,14 @@ jobs:
               node -v
               nvm alias default v8.17.0
       - run:
+          name: setup network
+          command: |
+            docker network ls
+            ./circleci/fix_networks.sh
+      - run:
           name: Start docker compose and wait for readiness
           command: |
             docker network ls
-            docker network create --driver=bridge --subnet=10.0.0.0/24 agency-network
             docker-compose -f docker-compose.ci.yml build
             set -x
             docker-compose -f docker-compose.ci.yml up -d
