@@ -166,7 +166,7 @@ describe('Create Connections using policies (e2e)', () => {
             });
     });
 */
-    it('Spin down agent 1', () => {
+    it('Spin down agent 1', async () => {
         await delayFunc(10000);
         const data = {
             agentId: issuerId
@@ -177,7 +177,8 @@ describe('Create Connections using policies (e2e)', () => {
             .expect(200);
     });
 
-    it('Spin down agent 2', () => {
+    it('Spin down agent 2', async () => {
+        await delayFunc(1000);
         const data = {
             agentId: holderId
         };
