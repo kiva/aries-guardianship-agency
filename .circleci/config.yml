@@ -15,9 +15,8 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-      - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run:
-          name: setup environment
+          name: setup shell environment
           command: |
             cp dummy.env .env
             echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
@@ -30,10 +29,11 @@ jobs:
               node -v
               nvm alias default v8.17.0
       - run:
-          name: setup network
+          name: setup docker environments
           command: |
             docker network ls
-            ./circleci/fix_networks.sh
+            ./fix_networks.sh
+            docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run:
           name: Start docker compose and wait for readiness
           command: |
