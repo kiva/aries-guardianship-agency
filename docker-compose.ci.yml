@@ -55,10 +55,9 @@ services:
   guardianship-agency:
     build:
       context: ./
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.production
     env_file:
       - .env
-    command: npm run start:debug
     image: guardianship-agency
     container_name: guardianship-agency
     working_dir: /www
@@ -67,7 +66,6 @@ services:
     expose: 
       - "3010"
     volumes:
-      - ./:/www
       - //var/run/docker.sock:/var/run/docker.sock
     networks:
       - agency-network
