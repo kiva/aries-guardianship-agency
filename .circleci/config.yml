@@ -45,12 +45,14 @@ jobs:
             docker-compose -f docker-compose.ci.yml build
             set -x
             docker-compose -f docker-compose.ci.yml up -d
-            sleep 150
+            # wait one minute to make sure  guardianship-agency spins up (its a little slow)
+            sleep 60
             docker-compose -f docker-compose.ci.yml logs
       - run:
           name: Running ONE integration test. Remaining integration tests have been ignored
           command: |
-            sleep 300
+            # another one minute wait
+            sleep 60
             npm run test-test
             echo "Remaining integration tests have been ignored"
 
