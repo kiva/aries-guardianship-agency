@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-if [ ! -z $(docker network ls --filter name=project_agency-network --format="{{ .Name }}") ] ; then
-     docker network rm project_agency-network ;
+if [ ! -z $(docker network ls --filter name=agency --format="{{ .Name }}") ] ; then
+     docker network rm $(docker network ls --filter name=agency --format='{{.Name}}')
 fi
 
 if [ -z $(docker network ls --filter name=agency-network --format="{{ .Name }}") ] ; then
