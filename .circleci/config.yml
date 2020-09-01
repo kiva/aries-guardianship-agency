@@ -30,8 +30,8 @@ jobs:
             docker exec -it guardianship-agency npm install
       # - run: docker exec -it guardianship-agency npm run test
       - run:
-          name: SKIPPING TESTS. Remaining integration tests have been ignored
-          command: echo "Remaining integration tests have been ignored"
+          name: Running e2e tests
+          command: npm run test -f connections
 
 workflows:
   build-and-test:

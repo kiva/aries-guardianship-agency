@@ -177,6 +177,7 @@ export class AgentManagerService {
                 }
             } catch (e) {
                 // Do nothing and try again
+                Logger.log(e.message);
             }
             Logger.info(`pingConnectionWithRetry is retrying`);
         }
