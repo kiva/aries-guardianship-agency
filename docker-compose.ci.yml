@@ -4,16 +4,8 @@
 version: '3.2'
 
 networks:
-  default:
-    external:
-      name: agency-network
   agency-network:
-      driver: bridge
-      ipam:
-        driver: default
-        config:
-          -
-            subnet: 10.0.0.0/24
+    external: true
 
 services:
       # indy pool needs a static ip configured in the pool_transactions_genesis so need to start it first
