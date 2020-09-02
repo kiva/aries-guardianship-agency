@@ -33,7 +33,7 @@ describe('Create Connections using policies (e2e)', () => {
 
     it('Spin up agent 1 (issuer)', async () => {
         const data = {
-            alias: 'issuerAgent',
+            alias: 'issuer',
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
@@ -50,11 +50,11 @@ describe('Create Connections using policies (e2e)', () => {
                 issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
             });
-    }, 10000);
+    }, 15000);
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
-            alias: 'holderAgent',
+            alias: 'holder',
             walletId: 'walletId22',
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
@@ -71,7 +71,7 @@ describe('Create Connections using policies (e2e)', () => {
                 holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
             });
-    }, 10000);
+    }, 15000);
 
     it('Create connection invite to holder from issuer', async () => {
         // gonna wait here to let the system catch up since since spawning agents

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import Dockerode from 'dockerode';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
+import { Logger } from 'protocol-common/logger';
 
 /**
  *
@@ -74,10 +75,18 @@ export class DockerService implements IAgentManager {
         }
         const container = await this.dockerode.createContainer(containerOptions);
         await container.start();
-        // Comment this in if we want to see docker logs here:
-        // container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
-        //     stream.pipe(process.stdout);
-        // });
+
+        // Log the first few lines so we can see if there's an issue with the agent
+        let logCount = 0;
+        container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
+            Logger.log('Starting agent:');
+            stream.on('data', (chunk: Buffer) => {
+                if (logCount < 5) {
+                    Logger.log('Agent: ' + chunk.toString());
+                    logCount++;
+                }
+            });
+        });
         return container.id;
     }
 

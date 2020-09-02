@@ -1,11 +1,17 @@
 # Docker compose for production/ci to spin up agency + indy ledger + postgres wallets db within this repo
 # Note ensure the following env params are set
 # WALLET_DB_HOST=wallets-db
-version: '3.2'
+version: '3.5'
 
 networks:
-  agency-network:
-    external: true
+    agency-network:
+      name: agency-network
+      driver: bridge
+      ipam:
+        driver: default
+        config:
+          -
+            subnet: 10.0.0.0/24
 
 services:
       # indy pool needs a static ip configured in the pool_transactions_genesis so need to start it first
@@ -37,6 +43,8 @@ services:
     command: postgres
     env_file:
       - .env
+    volumes:
+      - ./resources/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - agency-network
     depends_on:

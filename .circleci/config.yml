@@ -13,6 +13,7 @@ jobs:
   integration-test:
     machine:
       docker_layer_caching: true
+      image: ubuntu-1604:201903-01
     steps:
       - checkout
       - run:
@@ -36,7 +37,6 @@ jobs:
             # circle ci.  once circle ci supports docker 3.5 where we can
             # set the name in the docker files the call to this script
             # can be removed
-            ./fix_networks.sh
             docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run:
           name: Start docker compose and wait for readiness
@@ -48,11 +48,10 @@ jobs:
             sleep 20
             docker-compose -f docker-compose.ci.yml logs
       - run:
-          name: Running ONE integration test on prod image. Remaining integration tests have been ignored
+          name: Running integration tests
           command: |
             sleep 5
-            npm run test -f prod
-            echo "Remaining integration tests have been ignored"
+            npm run test
 
 workflows:
   build-and-test:
