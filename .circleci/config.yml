@@ -10,7 +10,7 @@ jobs:
       - run: npm install
       - run: npm run smoke-test
 
-integration-test:
+  integration-test:
     machine:
       docker_layer_caching: true
     steps:
