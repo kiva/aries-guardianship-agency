@@ -8,12 +8,16 @@ WORKDIR /tmp/
 COPY package.json package-lock.json tsconfig.json ./
 RUN npm install
 COPY src/ src/
+COPY resources/ resources/
 RUN npm run build
 
 FROM node:carbon-alpine
 WORKDIR /www
 COPY --from=node_modules /tmp/node_modules ./node_modules
 COPY --from=dist /tmp/dist ./dist
-RUN adduser -S app
-USER app
+COPY --from=dist /tmp/resources ./resources
+# TODO commenting this out for now since the user root needs access to /var/run/docker.sock
+# Eventually figure out how to grant just that permission
+# RUN adduser -S app
+# USER app
 CMD ["node", "dist/main.js"]

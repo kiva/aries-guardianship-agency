@@ -15,23 +15,44 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-      - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
-      - run: cp dummy.env .env
-      - run: npm install nodemon --save-dev
-      - run: npm install
-      - run: docker-compose -f docker-compose.ci.yml build
+      - run:
+          name: setup shell environment
+          command: |
+            cp dummy.env .env
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: node npm setup
+          command: |
+              npm install nodemon --save-dev
+              npm install
+              nvm install v8.17.0
+              node -v
+              nvm alias default v8.17.0
+      - run:
+          name: setup docker environments
+          command: |
+            docker network ls
+            # this is a hack to fix a problem with docker network names and
+            # circle ci.  once circle ci supports docker 3.5 where we can
+            # set the name in the docker files the call to this script
+            # can be removed
+            ./fix_networks.sh
+            docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run:
           name: Start docker compose and wait for readiness
           command: |
+            docker network ls
+            docker-compose -f docker-compose.ci.yml build
             set -x
             docker-compose -f docker-compose.ci.yml up -d
-            sleep 150
+            sleep 20
             docker-compose -f docker-compose.ci.yml logs
-            docker exec -it guardianship-agency npm install
-      # - run: docker exec -it guardianship-agency npm run test
       - run:
-          name: SKIPPING TESTS. Remaining integration tests have been ignored
-          command: echo "Remaining integration tests have been ignored"
+          name: Running ONE integration test on prod image. Remaining integration tests have been ignored
+          command: |
+            sleep 5
+            npm run test -f prod
+            echo "Remaining integration tests have been ignored"
 
 workflows:
   build-and-test:
