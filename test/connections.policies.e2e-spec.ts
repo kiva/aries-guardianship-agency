@@ -33,7 +33,7 @@ describe('Create Connections using policies (e2e)', () => {
 
     it('Spin up agent 1 (issuer)', async () => {
         const data = {
-            alias: 'issuerAgent',
+            alias: '10.0.0.5',
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
@@ -54,7 +54,7 @@ describe('Create Connections using policies (e2e)', () => {
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
-            alias: 'holderAgent',
+            alias: '10.0.0.6',
             walletId: 'walletId22',
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
