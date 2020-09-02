@@ -54,7 +54,6 @@ jobs:
             npm run test -f prod
             sleep 1
             npm run test -f connection
-            echo "Remaining integration tests have been ignored"
 
 workflows:
   build-and-test:
