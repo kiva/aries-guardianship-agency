@@ -11,6 +11,9 @@ jobs:
       - run: npm run smoke-test
 
   integration-test:
+    executor:
+        name: node/default
+        tag: '8.12'
     machine:
       docker_layer_caching: true
     steps:
