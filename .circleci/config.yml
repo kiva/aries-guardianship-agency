@@ -15,6 +15,7 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
+      - run: echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
       - run: |
         node -v
         nvm install v8.17.0
