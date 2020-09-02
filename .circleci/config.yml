@@ -15,11 +15,10 @@ jobs:
       docker_layer_caching: true
     steps:
       - checkout
-      - run: ./fix_networks.sh
       - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run: cp dummy.env .env
-      - run: npm install nodemon --save-dev
       - run: npm install
+      - run: ./fix_networks.sh
       - run: docker-compose -f docker-compose.ci.yml build
       - run:
           name: Start docker compose and wait for readiness
