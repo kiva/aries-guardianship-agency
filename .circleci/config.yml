@@ -11,13 +11,16 @@ jobs:
       - run: npm run smoke-test
 
   integration-test:
-    executor:
-      name: node/default
-      tag: '8.12'
     machine:
       docker_layer_caching: true
     steps:
       - checkout
+      - run: |
+        node -v
+        nvm install v8.17.0
+        node -v
+        nvm alias default v8.17.0
+        node -v
       - run: docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
       - run: cp dummy.env .env
       - run: npm install
