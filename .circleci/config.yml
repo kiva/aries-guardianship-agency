@@ -48,12 +48,10 @@ jobs:
             sleep 20
             docker-compose -f docker-compose.ci.yml logs
       - run:
-          name: Running ONE integration test on prod image. Remaining integration tests have been ignored
+          name: Running integration tests
           command: |
             sleep 5
-            npm run test -f prod
-            sleep 1
-            npm run test -f connection
+            npm run test
 
 workflows:
   build-and-test:
