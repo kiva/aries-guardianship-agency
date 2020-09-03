@@ -1,7 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { inspect } from 'util';
-
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+import { K8sService } from '../src/manager/k8s.service';
 
 /**
  * Launches an agent in k8s with a given config
@@ -11,7 +10,8 @@ export class Launcher {
     public static async launch(agentK8sConfig: any): Promise<void> {
         try {
             Logger.log(`Launching agent: ${agentK8sConfig.id}`);
-            await this.launchInner(agentK8sConfig);
+            var launchResult = await this.launchInner(agentK8sConfig);
+            Logger.log('returned: ${launchResult}');
             Logger.log('-------Success-------');
         } catch (e) {
             if (e.response && e.response.data) {
@@ -24,9 +24,9 @@ export class Launcher {
         }
     }
 
-    private static async launchInner(agentK8sConfig): Promise<void> {
-        sleep(500);
-        return;
+    private static async launchInner(agentK8sConfig): Promise<string> {
+        var k = new K8sService();
+        return k.startAgent(agentK8sConfig);
     }
 
 }
