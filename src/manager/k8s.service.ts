@@ -69,6 +69,21 @@ export class K8sService implements IAgentManager {
       return ready;
     }
 
+
+    /** 
+     * launchAgent will be used to test the k8s API functionality because the
+     * AgentConfig type requires more dependencies than I can point a stick
+     * at and it's just too complex and complicated to actually use.
+     * /
+    public async launchAgent(config: any): Promise<string> {
+        throw new Error('Not implemented');
+        // Create secret
+        // Create pod using secret
+        // Create service pointing to deployment
+        // Optional: wait for pods to be ready
+        // Return service object including URL
+    }
+
     /**
      * TODO implement
      */

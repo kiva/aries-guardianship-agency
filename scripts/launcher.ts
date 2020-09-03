@@ -26,7 +26,7 @@ export class Launcher {
 
     private static async launchInner(agentK8sConfig): Promise<string> {
         var k = new K8sService();
-        return k.startAgent(agentK8sConfig);
+        return k.launchAgent(agentK8sConfig);
     }
 
 }
