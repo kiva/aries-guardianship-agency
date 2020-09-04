@@ -10,8 +10,8 @@ export class Launcher {
     public static async launch(agentK8sConfig: any): Promise<void> {
         try {
             Logger.log(`Launching agent: ${agentK8sConfig.id}`);
-            var launchResult = await this.launchInner(agentK8sConfig);
-            Logger.log('returned: ${launchResult}');
+            const launchResult = await this.launchInner(agentK8sConfig);
+            Logger.log(`returned: ${launchResult}`);
             Logger.log('-------Success-------');
         } catch (e) {
             if (e.response && e.response.data) {
@@ -25,7 +25,7 @@ export class Launcher {
     }
 
     private static async launchInner(agentK8sConfig): Promise<string> {
-        var k = new K8sService();
+        const k = new K8sService();
         return k.launchAgent(agentK8sConfig);
     }
 
