@@ -24,7 +24,8 @@ export class K8sService implements IAgentManager {
     }
 
     async createSecret(id: string): Promise<any> {
-      // TODO: build secret
+      // TODO: get specific secret data requirements
+      // TODO: make this idempotent (right now if the secret exists this throws an error)
       const res = await this.kapi.createNamespacedSecret(this.namespace, {
         apiVersion: 'v1',
         kind: 'Secret',
@@ -36,10 +37,49 @@ export class K8sService implements IAgentManager {
       return res.body;
     }
 
-    async createPod(): Promise<any> {
-      // TODO: build pod
-      const pod = new V1Pod();
-      const res = await this.kapi.createNamespacedPod(this.namespace, pod);
+    async createPod(id: string): Promise<any> {
+      const res = await this.kapi.createNamespacedPod(this.namespace, {
+        apiVersion: 'v1',
+        kind: 'Pod',
+        metadata: {name: `agent-${id}`},
+        spec: {
+          containers: [{
+            name: `agent-${id}`,
+            envFrom: [{ secretRef: {name: `agent-${id}`} }],
+            image: 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2', // TODO: get this from src/config/env.json
+            ports: [{
+              name: 'http',
+              containerPort: 3010, // TODO: get this from src/config/env.json
+            }],
+            // TODO: get the following from src/config/env.json? or other declarative source
+            resources: {
+              limits: {
+                'cpu': '1100m',
+                'memory': '607164212'
+              },
+              requests: {
+                'cpu': '1100m',
+                'memory': '607164212'
+              }
+            },
+            livenessProbe: {
+              httpGet: {
+                path: '/healthz',
+                port: { name: 'http' }, // This is broken
+                scheme: 'HTTP'
+              },
+              timeoutSeconds: 10
+            },
+            readinessProbe: {
+              httpGet: {
+                path: '/healthz',
+                port: { name: 'http' }, // This is broken
+                scheme: 'HTTP'
+              }
+            }
+          }],
+        }
+      });
       return res.body;
     }
 
@@ -83,6 +123,7 @@ export class K8sService implements IAgentManager {
      */
     public async launchAgent(config: any): Promise<string> {
         await this.createSecret(config.id);
+        await this.createPod(config.id);
         return config.id;
         // throw new Error('Not implemented');
         // Create secret
