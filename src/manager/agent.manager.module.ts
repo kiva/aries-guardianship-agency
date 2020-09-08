@@ -12,9 +12,6 @@ import { GlobalCacheModule } from '../app/global.cache.module';
         HttpModule,
     ],
     controllers: [AgentManagerController],
-    providers: [
-        AgentManagerService,
-        HttpService,
-    ],
+    providers: [AgentManagerService],
 })
 export class AgentManagerModule {}
