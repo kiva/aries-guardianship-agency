@@ -78,10 +78,11 @@ export class DockerService implements IAgentManager {
 
         // Log the first few lines so we can see if there's an issue with the agent
         let logCount = 0;
+        const agentLogLength = process.env.AGENT_LOG_LENGTH || 100;
         container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
             Logger.log('Starting agent:');
             stream.on('data', (chunk: Buffer) => {
-                if (logCount < 5) {
+                if (logCount < agentLogLength) {
                     Logger.log('Agent: ' + chunk.toString());
                     logCount++;
                 }

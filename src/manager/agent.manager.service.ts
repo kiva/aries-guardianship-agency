@@ -17,7 +17,14 @@ export class AgentManagerService {
     private readonly DEFAULT_TTL_SECONDS: number = 3600;
     private manager: IAgentManager;
 
-    constructor(@Inject(CACHE_MANAGER) private readonly cache: CacheStore) {
+    // TODO expose a non-retry call to ProtocolHttpService so we don't need to keep both
+    private http: ProtocolHttpService;
+
+    constructor(
+        private readonly httpService: HttpService,
+        @Inject(CACHE_MANAGER) private readonly cache: CacheStore
+    ) {
+        this.http = new ProtocolHttpService(httpService);
         // TODO move this logic to an agent manager factory, which can be injected via a module
         // We can also use env type to infer this
         if (process.env.MANAGER_TYPE === 'DOCKER') {
@@ -121,7 +128,6 @@ export class AgentManagerService {
      * TODO error handling
      */
     private async createConnection(agentId: string, adminPort: string, adminApiKey: string) {
-        const http = new ProtocolHttpService(new HttpService());
         const url = `http://${agentId}:${adminPort}/connections/create-invitation`;
         const req: any = {
             method: 'POST',
@@ -131,7 +137,7 @@ export class AgentManagerService {
             },
         };
 
-        const res = await http.requestWithRetry(req);
+        const res = await this.http.requestWithRetry(req);
         return res.data.invitation;
     }
 
@@ -148,9 +154,6 @@ export class AgentManagerService {
             return result;
         };
 
-        // TODO we should either add a non-retry call to ProtocolHttpService, or make the existing requestWithRetry more configurable to be used here
-        // const http = new ProtocolHttpService(new HttpService());
-        const http = new HttpService();
         const url = `http://${agentId}:${adminPort}/status`;
         Logger.info(`agent admin url is ${url}`);
         const req: any = {
@@ -167,10 +170,11 @@ export class AgentManagerService {
             // no point in rushing this
             await this.delay(1000);
 
+            // TODO we should either add a non-retry call to ProtocolHttpService, or make the existing requestWithRetry more configurable
             // attempt a status check, if successful call it good and return
             // otherwise retry until duration is exceeded
             try {
-                const res = await http.request(req).toPromise();
+                const res = await this.httpService.request(req).toPromise();
                 if (res.status === 200) {
                     Logger.info(`agent ${agentId} is up and responding`);
                     return;
