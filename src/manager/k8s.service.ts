@@ -51,6 +51,7 @@ export class K8sService implements IAgentManager {
               name: 'http',
               containerPort: 3010, // TODO: get this from src/config/env.json
             }],
+            command: ['start'],
             // TODO: get the following from src/config/env.json? or other declarative source
             resources: {
               limits: {
@@ -61,21 +62,21 @@ export class K8sService implements IAgentManager {
                 'cpu': '1100m',
                 'memory': '607164212'
               }
-            },
-            livenessProbe: {
-              httpGet: {
-                path: '/healthz',
-                port: { name: 'http' }, // This is broken
-                scheme: 'HTTP'
-              },
-              timeoutSeconds: 10
-            },
-            readinessProbe: {
-              httpGet: {
-                path: '/healthz',
-                port: { name: 'http' }, // This is broken
-                scheme: 'HTTP'
-              }
+            // }, // TODO: fix port object issue
+            // livenessProbe: {
+            //   httpGet: {
+            //     path: '/healthz',
+            //     port: { name: 'http', port: 3010 }, // This is broken
+            //     scheme: 'HTTP'
+            //   },
+            //   timeoutSeconds: 10
+            // },
+            // readinessProbe: {
+            //   httpGet: {
+            //     path: '/healthz',
+            //     port: { name: 'http', port: 3010 }, // This is broken
+            //     scheme: 'HTTP'
+            //   }
             }
           }],
         }
