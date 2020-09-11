@@ -9,6 +9,7 @@ import { KubeConfig, CoreV1Api, V1Secret, V1Deployment, V1Pod, V1Service, V1PodC
 @Injectable()
 export class K8sService implements IAgentManager {
 
+    // TODO: AWS user (secret key) and k8s config
     newKubeClient = (): CoreV1Api => {
         const kc = new KubeConfig();
         kc.loadFromDefault();
@@ -23,25 +24,32 @@ export class K8sService implements IAgentManager {
       return res.body;
     }
 
-    async createSecret(id: string): Promise<any> {
-      // TODO: get specific secret data requirements
-      // TODO: make this idempotent (right now if the secret exists this throws an error)
-      const res = await this.kapi.createNamespacedSecret(this.namespace, {
-        apiVersion: 'v1',
-        kind: 'Secret',
-        metadata: {name: `agent-${id}`},
-        stringData: {
-          'test': 'secretval',
-        }
-      });
-      return res.body;
-    }
+    // async createSecret(id: string): Promise<any> {
+    //   // TODO: get specific secret data requirements
+    //   // TODO: make this idempotent (right now if the secret exists this throws an error)
+    //   const res = await this.kapi.createNamespacedSecret(this.namespace, {
+    //     apiVersion: 'v1',
+    //     kind: 'Secret',
+    //     metadata: {name: `agent-${id}`},
+    //     stringData: {
+    //       'test': 'secretval',
+    //     }
+    //   });
+    //   return res.body;
+    // }
 
     async createPod(id: string): Promise<any> {
+      const port: any = 3010;
       const res = await this.kapi.createNamespacedPod(this.namespace, {
         apiVersion: 'v1',
         kind: 'Pod',
-        metadata: {name: `agent-${id}`},
+        metadata: {
+          name: `agent-${id}`,
+          labels: {
+            'app.kubernetes.io/instance': `agent-${id}`,
+            'app.kubernetes.io/name': `agent-${id}`
+          }
+        },
         spec: {
           containers: [{
             name: `agent-${id}`,
@@ -49,9 +57,9 @@ export class K8sService implements IAgentManager {
             image: 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2', // TODO: get this from src/config/env.json
             ports: [{
               name: 'http',
-              containerPort: 3010, // TODO: get this from src/config/env.json
+              containerPort: 3010 // TODO: get this from src/config/env.json
             }],
-            command: ['start'],
+            command: ['start'], // <-- Secrets go here
             // TODO: get the following from src/config/env.json? or other declarative source
             resources: {
               limits: {
@@ -62,21 +70,21 @@ export class K8sService implements IAgentManager {
                 'cpu': '1100m',
                 'memory': '607164212'
               }
-            // }, // TODO: fix port object issue
-            // livenessProbe: {
-            //   httpGet: {
-            //     path: '/healthz',
-            //     port: { name: 'http', port: 3010 }, // This is broken
-            //     scheme: 'HTTP'
-            //   },
-            //   timeoutSeconds: 10
-            // },
-            // readinessProbe: {
-            //   httpGet: {
-            //     path: '/healthz',
-            //     port: { name: 'http', port: 3010 }, // This is broken
-            //     scheme: 'HTTP'
-            //   }
+            },
+            livenessProbe: {
+              httpGet: {
+                path: '/healthz',
+                port,
+                scheme: 'HTTP'
+              },
+              timeoutSeconds: 10
+            },
+            readinessProbe: {
+              httpGet: {
+                path: '/healthz',
+                port,
+                scheme: 'HTTP'
+              }
             }
           }],
         }
@@ -84,10 +92,24 @@ export class K8sService implements IAgentManager {
       return res.body;
     }
 
-    async createService(): Promise<any> {
-      // TODO: build service
-      const service = new V1Service();
-      const res = await this.kapi.createNamespacedService(this.namespace, service);
+    async createService(id: string): Promise<any> {
+      const res = await this.kapi.createNamespacedService(this.namespace, {
+        apiVersion: 'v1',
+        kind: 'Service',
+        metadata: {
+          name: `agent-${id}`
+        },
+        spec: {
+          ports: [{
+            name: 'http',
+            port: 3010
+          }],
+          selector: {
+            'app.kubernetes.io/instance': `agent-${id}`,
+            'app.kubernetes.io/name': `agent-${id}`,
+          }
+        }
+      });
       return res.body;
     }
 
@@ -123,13 +145,11 @@ export class K8sService implements IAgentManager {
      * at and it's just too complex and complicated to actually use.
      */
     public async launchAgent(config: any): Promise<string> {
-        await this.createSecret(config.id);
+        // await this.createSecret(config.id);
         await this.createPod(config.id);
+        await this.createService(config.id);
         return config.id;
         // throw new Error('Not implemented');
-        // Create secret
-        // Create pod using secret
-        // Create service pointing to deployment
         // Optional: wait for pods to be ready
         // Return service object including URL
     }
