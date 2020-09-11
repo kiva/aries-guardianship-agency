@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { KubeConfig, CoreV1Api, V1Secret, V1Deployment, V1Pod, V1Service, V1PodCondition } from '@kubernetes/client-node';
+import { Logger } from 'protocol-common/logger';
 
 /**
  * Starts and stops agents within a kubernetes environment
@@ -13,32 +14,17 @@ export class K8sService implements IAgentManager {
     newKubeClient = (): CoreV1Api => {
         const kc = new KubeConfig();
         kc.loadFromDefault();
-        return kc.makeApiClient(CoreV1Api);
+        const k = kc.makeApiClient(CoreV1Api);
+        return k;
     }
-
-    kapi = this.newKubeClient();
 
     namespace = 'kiva-protocol'; // TODO: get this from config
-    async listPods(): Promise<any> {
-      const res = await this.kapi.listNamespacedPod(this.namespace);
-      return res.body;
-    }
+    // TODO: make this crash the server if there is no k8s config or the k8s API connection fails
+    kapi = this.newKubeClient();
 
-    // async createSecret(id: string): Promise<any> {
-    //   // TODO: get specific secret data requirements
-    //   // TODO: make this idempotent (right now if the secret exists this throws an error)
-    //   const res = await this.kapi.createNamespacedSecret(this.namespace, {
-    //     apiVersion: 'v1',
-    //     kind: 'Secret',
-    //     metadata: {name: `agent-${id}`},
-    //     stringData: {
-    //       'test': 'secretval',
-    //     }
-    //   });
-    //   return res.body;
-    // }
-
-    async createPod(id: string): Promise<any> {
+    async createPod(config: AgentConfig, id: string): Promise<any> {
+      const inboundTransportSplit = config.inboundTransport.split(' ');
+      const adminSplit = config.admin.split(' ');
       const port: any = 3010;
       const res = await this.kapi.createNamespacedPod(this.namespace, {
         apiVersion: 'v1',
@@ -59,7 +45,32 @@ export class K8sService implements IAgentManager {
               name: 'http',
               containerPort: 3010 // TODO: get this from src/config/env.json
             }],
-            command: ['start'], // <-- Secrets go here
+            command: [
+              'start',
+              '--inbound-transport', inboundTransportSplit[0],  inboundTransportSplit[1], inboundTransportSplit[2],
+              '--outbound-transport', config.outboundTransport,
+              '--ledger-pool-name', config.ledgerPoolName,
+              '--genesis-transactions', config.genesisTransactions,
+              '--wallet-type', config.walletType,
+              '--wallet-storage-type', config.walletStorageType,
+              '--endpoint', config.endpoint,
+              '--wallet-name', config.walletName,
+              '--wallet-key', config.walletKey,
+              '--wallet-storage-config', config.walletStorageConfig,
+              '--wallet-storage-creds', config.walletStorageCreds,
+              '--admin', adminSplit[0], adminSplit[1],
+              '--admin-api-key', config.adminApiKey,
+              '--label', config.label,
+              '--webhook-url', config.webhookUrl,
+              // TODO For now we auto respond, eventually we will want more refined responses
+              '--log-level', 'debug',
+              '--auto-respond-messages',
+              // status offer_sent
+              '--auto-respond-credential-offer',
+              // request_sent
+              '--auto-respond-presentation-request',
+              '--wallet-local-did', // TODO this could be an arg on the config
+            ],
             // TODO: get the following from src/config/env.json? or other declarative source
             resources: {
               limits: {
@@ -92,7 +103,7 @@ export class K8sService implements IAgentManager {
       return res.body;
     }
 
-    async createService(id: string): Promise<any> {
+    async createService(config: AgentConfig, id: string): Promise<any> {
       const res = await this.kapi.createNamespacedService(this.namespace, {
         apiVersion: 'v1',
         kind: 'Service',
@@ -138,32 +149,27 @@ export class K8sService implements IAgentManager {
       return ready;
     }
 
-
-    /**
-     * launchAgent will be used to test the k8s API functionality because the
-     * AgentConfig type requires more dependencies than I can point a stick
-     * at and it's just too complex and complicated to actually use.
-     */
-    public async launchAgent(config: any): Promise<string> {
-        // await this.createSecret(config.id);
-        await this.createPod(config.id);
-        await this.createService(config.id);
-        return config.id;
-        // throw new Error('Not implemented');
-        // Optional: wait for pods to be ready
-        // Return service object including URL
-    }
-
     /**
      * TODO implement
      */
     public async startAgent(config: AgentConfig): Promise<string> {
-        throw new Error('Not implemented');
-        // Create secret
-        // Create pod using secret
-        // Create service pointing to deployment
-        // Optional: wait for pods to be ready
-        // Return service object including URL
+        Logger.log(`====== starting k8s agent =======`);
+        Logger.log(`====== NOTE: the service doesn't know whether the k8s config is correct at this point so if this call fails it may be because of that ======`);
+
+        // TODO: id = random
+        const id = `42`;
+        await this.createPod(config, id);
+
+        Logger.log(`====== created pod =======`);
+
+        await this.createService(config, id);
+
+        Logger.log(`====== created service =======`);
+
+        // TODO: wait for pods to be ready and time out
+
+        // TODO: Return service object including URL
+        return `x`;
     }
 
     /**

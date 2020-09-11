@@ -23,6 +23,7 @@ export class AgentManagerService {
         if (process.env.MANAGER_TYPE === 'DOCKER') {
             this.manager = new DockerService();
         } else if (process.env.MANAGER_TYPE === 'K8S') {
+            Logger.log(`====== USING K8S ========`);
             this.manager = new K8sService();
         } else {
             throw new Error('Invalid config for MANAGER_TYPE');
