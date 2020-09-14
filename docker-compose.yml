@@ -51,15 +51,15 @@ services:
       - indy-pool
     tty: true
 
-  guardianship-agency:
+  aries-guardianship-agency:
     build:
       context: ./
       dockerfile: docker/Dockerfile
     env_file:
       - .env
     command: npm run start:debug
-    image: guardianship-agency
-    container_name: guardianship-agency
+    image: aries-guardianship-agency
+    container_name: aries-guardianship-agency
     working_dir: /www
     ports:
       - "3010:3010"
