@@ -164,6 +164,14 @@ export class K8sService implements IAgentManager {
       return ready;
     }
 
+    async deleteService(id: string): Promise<any> {
+      await this.kapi.deleteNamespacedService(`agent-${id}`, this.namespace);
+    }
+
+    async deletePod(id: string): Promise<any> {
+      await this.kapi.deleteNamespacedPod(`agent-${id}`, this.namespace);
+    }
+
     /**
      * startAgent
      */
@@ -176,10 +184,10 @@ export class K8sService implements IAgentManager {
     }
 
     /**
-     * TODO implement
+     * stopAgent
      */
     public async stopAgent(id: string): Promise<void> {
-        throw new Error('Not implemented');
-        // TODO: await this.deletePod(id)
+        await this.deleteService(id);
+        await this.deletePod(id);
     }
 }
