@@ -164,11 +164,11 @@ export class K8sService implements IAgentManager {
       return ready;
     }
 
-    async deleteService(id: string): Promise<any> {
+    async deleteService(id: string): Promise<void> {
       await this.kapi.deleteNamespacedService(`agent-${id}`, this.namespace);
     }
 
-    async deletePod(id: string): Promise<any> {
+    async deletePod(id: string): Promise<void> {
       await this.kapi.deleteNamespacedPod(`agent-${id}`, this.namespace);
     }
 
