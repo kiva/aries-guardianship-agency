@@ -22,6 +22,7 @@
     "smoke-test": "node -r dotenv/config node_modules/.bin/jest -t \"AppController\" && node -r dotenv/config node_modules/.bin/jest -t \"Smoke tests\""
   },
   "dependencies": {
+    "@kubernetes/client-node": "^0.12.0",
     "@nestjs/common": "^7.4.2",
     "@nestjs/core": "^7.4.2",
     "@nestjs/platform-express": "^7.4.2",
@@ -33,7 +34,7 @@
     "class-validator": "^0.12.2",
     "cls-hooked": "^4.2.2",
     "crypto-js": "^4.0.0",
-    "crypto-random-string": "^3.2.0",
+    "crypto-random-string": "^3.3.0",
     "dd-trace": "^0.24.0",
     "dockerode": "^3.2.1",
     "dotenv": "^8.2.0",
