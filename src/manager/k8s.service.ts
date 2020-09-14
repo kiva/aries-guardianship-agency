@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
-import { KubeConfig, CoreV1Api, V1Secret, V1Deployment, V1Pod, V1Service, V1PodCondition } from '@kubernetes/client-node';
-import { Logger } from 'protocol-common/logger';
+import { KubeConfig, CoreV1Api, V1PodCondition } from '@kubernetes/client-node';
 import { readFile } from 'fs';
 import cryptoRandomString from 'crypto-random-string';
 
@@ -12,22 +11,24 @@ import cryptoRandomString from 'crypto-random-string';
 @Injectable()
 export class K8sService implements IAgentManager {
 
+    private kapi : CoreV1Api = this.newKubeClient();
+    private namespace : string = this.getNamespace();
+
     // newKubeClient
     // This configuration is only available if you run the server on a filesystem provisioned with a k8s client.
     // When running in k8s, this config will be available via the configured k8s service account of the pod.
     // Locally, this config is provided via ~/.kube/config.
-    newKubeClient = (): CoreV1Api => {
+    private newKubeClient(): CoreV1Api {
         const kc = new KubeConfig();
         kc.loadFromDefault();
         const k = kc.makeApiClient(CoreV1Api);
         return k;
     }
-    kapi = this.newKubeClient();
 
     // getNamespace
     // This will work in k8s when the service account is set up correctly.
     // Locally this will fail, unless you create this file at the correct path.
-    getNamespace = (): string => {
+    private getNamespace(): string {
       let namespace = 'default';
       readFile('/var/run/secrets/kubernetes.io/serviceaccount/namespace','utf8', (err,data) => {
         if (err) throw err;
@@ -35,9 +36,8 @@ export class K8sService implements IAgentManager {
       });
       return namespace;
     }
-    namespace = this.getNamespace();
 
-    async createPod(config: AgentConfig, id: string): Promise<any> {
+    private async createPod(config: AgentConfig, id: string): Promise<any> {
       const inboundTransportSplit = config.inboundTransport.split(' ');
       const adminSplit = config.admin.split(' ');
       const port: any = 3010;
@@ -118,7 +118,7 @@ export class K8sService implements IAgentManager {
       return res.body;
     }
 
-    async createService(config: AgentConfig, id: string): Promise<any> {
+    private async createService(config: AgentConfig, id: string): Promise<any> {
       const res = await this.kapi.createNamespacedService(this.namespace, {
         apiVersion: 'v1',
         kind: 'Service',
@@ -140,7 +140,7 @@ export class K8sService implements IAgentManager {
     }
 
     // Check to see if pod is ready
-    async isReadyPod(name: string): Promise<boolean> {
+    private async isReadyPod(name: string): Promise<boolean> {
       const res = await this.kapi.readNamespacedPodStatus(name, this.namespace);
       const isStatus = (item: V1PodCondition, index: number, array: V1PodCondition[]): boolean => {
         return item.status === 'True';
@@ -164,11 +164,11 @@ export class K8sService implements IAgentManager {
       return ready;
     }
 
-    async deleteService(id: string): Promise<void> {
+    private async deleteService(id: string): Promise<void> {
       await this.kapi.deleteNamespacedService(`agent-${id}`, this.namespace);
     }
 
-    async deletePod(id: string): Promise<void> {
+    private async deletePod(id: string): Promise<void> {
       await this.kapi.deleteNamespacedPod(`agent-${id}`, this.namespace);
     }
 
