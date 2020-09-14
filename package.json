@@ -45,6 +45,7 @@
     "fs": "0.0.1-security",
     "helmet": "^3.23.3",
     "http-proxy-middleware": "^1.0.5",
+    "isomorphic-ws": "^4.0.1",
     "jaeger-client": "^3.18.0",
     "jwks-rsa": "^1.8.1",
     "opentracing": "^0.14.4",
