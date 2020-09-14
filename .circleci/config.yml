@@ -37,7 +37,7 @@ jobs:
             # circle ci.  once circle ci supports docker 3.5 where we can
             # set the name in the docker files the call to this script
             # can be removed
-            docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
+            docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4
       - run:
           name: Start docker compose and wait for readiness
           command: |

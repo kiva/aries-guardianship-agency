@@ -23,7 +23,7 @@ Note the very first time you run this you need to ensure you have the latest aca
 
 # Check `src/config/env.json` for the most up to date version:
 ```
- docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.2
+ docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4
 ```
 The main docker-compose will spin up the agency, a local indy ledger, and a postgres wallets db to connect to:
 ```
