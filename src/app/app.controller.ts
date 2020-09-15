@@ -1,4 +1,4 @@
-import { Get, Controller, Logger } from '@nestjs/common';
+import { Get, Controller } from '@nestjs/common';
 import { HttpConstants } from 'protocol-common/http-context/http.constants';
 import { AgentConfig } from '../manager/agent.config';
 
