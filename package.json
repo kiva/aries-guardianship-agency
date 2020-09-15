@@ -54,7 +54,8 @@
     "rxjs": "^6.6.2",
     "swagger-ui-express": "^4.1.4",
     "typescript": "^3.9.7",
-    "winston-loggly-bulk": "^3.1.1"
+    "winston-loggly-bulk": "^3.1.1",
+    "ws": "^7.3.1"
   },
   "devDependencies": {
     "@nestjs/testing": "^7.4.2",
