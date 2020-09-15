@@ -3,7 +3,6 @@ import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { KubeConfig, CoreV1Api, V1PodCondition } from '@kubernetes/client-node';
 import { readFile } from 'fs';
-import cryptoRandomString from 'crypto-random-string';
 
 /**
  * Starts and stops agents within a kubernetes environment
@@ -37,7 +36,7 @@ export class K8sService implements IAgentManager {
       return namespace;
     }
 
-    private async createPod(config: AgentConfig, id: string): Promise<any> {
+    private async createPod(config: AgentConfig): Promise<any> {
       const inboundTransportSplit = config.inboundTransport.split(' ');
       const adminSplit = config.admin.split(' ');
       const port: any = 3010;
@@ -45,22 +44,26 @@ export class K8sService implements IAgentManager {
         apiVersion: 'v1',
         kind: 'Pod',
         metadata: {
-          name: `agent-${id}`,
+          name: config.label,
           labels: {
-            'app.kubernetes.io/instance': `agent-${id}`,
-            'app.kubernetes.io/name': `agent-${id}`
+            'app.kubernetes.io/instance': config.label,
+            'app.kubernetes.io/name': config.label,
+            'agent': 'true'
           }
         },
         spec: {
           containers: [{
-            name: `agent-${id}`,
-            envFrom: [{ secretRef: {name: `agent-${id}`} }],
-            image: 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4', // TODO: get this from src/config/env.json
+            name: config.label,
+            image: process.env.AGENT_DOCKER_IMAGE,
             ports: [{
               name: 'http',
-              containerPort: 3010 // TODO: get this from src/config/env.json
-            }],
-            command: [
+              containerPort: parseInt(config.httpPort, 10)
+              },
+              {
+                name: 'admin',
+                containerPort: parseInt(config.adminPort, 10)
+              }],
+                command: [
               'start',
               '--inbound-transport', inboundTransportSplit[0],  inboundTransportSplit[1], inboundTransportSplit[2],
               '--outbound-transport', config.outboundTransport,
@@ -118,21 +121,25 @@ export class K8sService implements IAgentManager {
       return res.body;
     }
 
-    private async createService(config: AgentConfig, id: string): Promise<any> {
+    private async createService(config: AgentConfig): Promise<any> {
       const res = await this.kapi.createNamespacedService(this.namespace, {
         apiVersion: 'v1',
         kind: 'Service',
         metadata: {
-          name: `agent-${id}`
+          name: config.label
         },
         spec: {
           ports: [{
             name: 'http',
-            port: 3010
+            port: parseInt(config.httpPort, 10)
+          },
+          {
+            name: 'admin',
+            port: parseInt(config.adminPort, 10)
           }],
           selector: {
-            'app.kubernetes.io/instance': `agent-${id}`,
-            'app.kubernetes.io/name': `agent-${id}`,
+            'app.kubernetes.io/instance': config.label,
+            'app.kubernetes.io/name': config.label,
           }
         }
       });
@@ -165,22 +172,21 @@ export class K8sService implements IAgentManager {
     }
 
     private async deleteService(id: string): Promise<void> {
-      await this.kapi.deleteNamespacedService(`agent-${id}`, this.namespace);
+      await this.kapi.deleteNamespacedService(id, this.namespace);
     }
 
     private async deletePod(id: string): Promise<void> {
-      await this.kapi.deleteNamespacedPod(`agent-${id}`, this.namespace);
+      await this.kapi.deleteNamespacedPod(id, this.namespace);
     }
 
     /**
      * startAgent
      */
     public async startAgent(config: AgentConfig): Promise<string> {
-        const id = cryptoRandomString({length: 10, type: 'alphanumeric'});
-        await this.createPod(config, id);
-        await this.createService(config, id);
+        await this.createPod(config);
+        await this.createService(config);
         // TODO: wait for pods to be ready and time out
-        return id;
+        return config.label;
     }
 
     /**
