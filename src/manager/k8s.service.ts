@@ -59,7 +59,7 @@ export class K8sService implements IAgentManager {
                 name: 'admin',
                 containerPort: parseInt(config.adminPort, 10)
               }],
-                command: [
+                args: [
               'start',
               '--inbound-transport', inboundTransportSplit[0],  inboundTransportSplit[1], inboundTransportSplit[2],
               '--outbound-transport', config.outboundTransport,
