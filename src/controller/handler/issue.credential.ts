@@ -1,10 +1,11 @@
+import { CacheStore } from '@nestjs/common';
+import { AxiosRequestConfig } from 'axios';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
+import { ProtocolUtility } from 'protocol-common/protocol.utility';
 import { IAgentResponseHandler } from './agent.response.handler';
 import { AgentGovernance } from '../agent.governance';
-import { CacheStore } from '@nestjs/common';
-import { AxiosRequestConfig } from 'axios';
 
 /*
     Acapy webhooks handler for input received from the url [webhookurl]/v1/controller/topic/connections
@@ -59,9 +60,6 @@ export class IssueCredential implements IAgentResponseHandler {
             throw new ProtocolException('issue_credential',`${route}/${topic} is not valid.`);
         }
 
-        const delay = (ms: number) => {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        };
         const readPermission = async (governanceKey: string, cacheKey: string) => {
             this.agentGovernance.readPermission(IssueCredential.ISSUE_CREDENTIALS_URL, governanceKey);
             await this.cache.set(cacheKey, {});
@@ -73,7 +71,7 @@ export class IssueCredential implements IAgentResponseHandler {
             await this.checkPolicyForAction(action, templatedCacheKey);
             await readPermission(action, templatedCacheKey);
 
-            await delay(2000);
+            await ProtocolUtility.delay(2000);
             const url: string = agentUrl + `/${IssueCredential.ISSUE_CREDENTIALS_URL}/records/${body.credential_exchange_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',

@@ -1,10 +1,11 @@
 import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nestjs/common';
-import { DockerService } from './docker.service';
-import { IAgentManager } from './agent.manager.interface';
 import cryptoRandomString from 'crypto-random-string';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
+import { ProtocolUtility } from 'protocol-common/protocol.utility';
+import { DockerService } from './docker.service';
+import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
 
@@ -117,13 +118,6 @@ export class AgentManagerService {
     }
 
     /**
-     * TODO rather than a fixed delay, we should respond to something from the agent which indicates that it's up
-     */
-    private delay(ms: number) {
-        return new Promise( resolve => setTimeout(resolve, ms) );
-    }
-
-    /**
      * TODO move to it's own class and pass in the http object
      * TODO error handling
      */
@@ -168,7 +162,7 @@ export class AgentManagerService {
         const startOf = new Date();
         while (durationMS > compute(new Date(), startOf)) {
             // no point in rushing this
-            await this.delay(1000);
+            await ProtocolUtility.delay(1000);
 
             // TODO we should either add a non-retry call to ProtocolHttpService, or make the existing requestWithRetry more configurable
             // attempt a status check, if successful call it good and return
