@@ -98,6 +98,10 @@ export class K8sService implements IAgentManager {
             },
             livenessProbe: {
               httpGet: {
+                httpHeaders: [{
+                  name: 'x-api-key',
+                  value: config.adminApiKey
+                }],
                 path: '/status',
                 port: healthCheckPort,
                 scheme: 'HTTP'
@@ -106,6 +110,10 @@ export class K8sService implements IAgentManager {
             },
             readinessProbe: {
               httpGet: {
+                httpHeaders: [{
+                  name: 'x-api-key',
+                  value: config.adminApiKey
+                }],
                 path: '/status',
                 port: healthCheckPort,
                 scheme: 'HTTP'
