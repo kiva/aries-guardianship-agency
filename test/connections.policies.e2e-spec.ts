@@ -20,6 +20,7 @@ describe('Create Connections using policies (e2e)', () => {
     let issuerConnectionId;
     let holderConnectionId;
     const hostUrl = 'http://localhost:3010';
+    const routeUrlPath = '/v1/router/admin';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
     const delayFunc = (ms: number) => {
@@ -147,7 +148,7 @@ describe('Create Connections using policies (e2e)', () => {
     }, 30000);
 
     it('List Holder connections', async () => {
-        const agentUrl = `http://localhost:${holderAdminPort}`;
+        const agentUrl = `${hostUrl}${routeUrlPath}`;
         return request(agentUrl)
             .get(`/connections`)
             .set('x-api-key', holderApiKey)
