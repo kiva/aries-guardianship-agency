@@ -28,7 +28,7 @@ export class AgentRouterModule implements NestModule {
                 target: 'target', // Note createProxyMiddleware complains if there's no target, this gets overridden by router
                 router: this.routerService.getRouter(),
                 pathRewrite: {
-                    '^/v1/router/admin/[^/]+/?': '' // Remove the /v1/router/admin and agentId parts and pass the rest onto the agent
+                    '^/v1/router/admin/[^/]+/[^/]+/?': '' // Remove the /v1/router/admin and agentId parts and pass the rest onto the agent
                 }
             },
         )).forRoutes('*');

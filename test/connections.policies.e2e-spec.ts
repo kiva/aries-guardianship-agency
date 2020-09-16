@@ -148,7 +148,7 @@ describe('Create Connections using policies (e2e)', () => {
     }, 30000);
 
     it('List Holder connections', async () => {
-        const agentUrl = `${hostUrl}${routeUrlPath}`;
+        const agentUrl = `${hostUrl}${routeUrlPath}/${holderId}`;
         return request(agentUrl)
             .get(`/connections`)
             .set('x-api-key', holderApiKey)
