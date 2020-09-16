@@ -23,12 +23,12 @@ export class AgentRouterModule implements NestModule {
      * TODO figure out how to handle case where there is no agent - queue their messages?
      */
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(createProxyMiddleware('/v1/router',
+        consumer.apply(createProxyMiddleware('/v1/router/agent',
             {
                 target: 'target', // Note createProxyMiddleware complains if there's no target, this gets overridden by router
                 router: this.routerService.getRouter(),
                 pathRewrite: {
-                    '^/v1/router/[^/]+/?': '' // Remove the /v1/router and agentId parts and pass the rest onto the agent
+                    '^/v1/router/agent/[^/]+/?': '' // Remove the /v1/router/agent and agentId parts and pass the rest onto the agent
                 }
             },
         )).forRoutes('*');

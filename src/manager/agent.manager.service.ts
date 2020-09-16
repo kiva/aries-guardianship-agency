@@ -61,7 +61,7 @@ export class AgentManagerService {
 
         // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com
         // Locally we don't have that public url so we need to reference the docker container for the agency
-        const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${agentId}`;
+        const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/agent/${agentId}`;
 
         // TODO the webhook url should be a private one just on the network between the agent and the controller
         // since we don't want to expose the admin api publicly. Both locally and remotely this will be the docker container for the agency
