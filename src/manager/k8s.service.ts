@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { KubeConfig, CoreV1Api, V1PodCondition } from '@kubernetes/client-node';
-import { readFile } from 'fs';
+import { readFileSync } from 'fs';
 
 /**
  * Starts and stops agents within a kubernetes environment
@@ -28,12 +28,8 @@ export class K8sService implements IAgentManager {
     // This will work in k8s when the service account is set up correctly.
     // Locally this will fail, unless you create this file at the correct path.
     private getNamespace(): string {
-      let namespace = 'default';
-      readFile('/var/run/secrets/kubernetes.io/serviceaccount/namespace','utf8', (err,data) => {
-        if (err) throw err;
-        namespace = data;
-      });
-      return namespace;
+      const data = readFileSync('/var/run/secrets/kubernetes.io/serviceaccount/namespace','utf8');
+      return data.toString();
     }
 
     private async createPod(config: AgentConfig): Promise<any> {
