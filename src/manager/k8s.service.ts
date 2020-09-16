@@ -122,7 +122,10 @@ export class K8sService implements IAgentManager {
         apiVersion: 'v1',
         kind: 'Service',
         metadata: {
-          name: config.label
+          name: config.label,
+          labels: {
+            'agent': 'true'
+          }
         },
         spec: {
           ports: [{
