@@ -35,7 +35,7 @@ export class K8sService implements IAgentManager {
     private async createPod(config: AgentConfig): Promise<any> {
       const inboundTransportSplit = config.inboundTransport.split(' ');
       const adminSplit = config.admin.split(' ');
-      const healthCheckPort : any = parseInt(config.adminPort, 10);
+      const healthCheckPort : any = parseInt(config.httpPort, 10);
       const res = await this.kapi.createNamespacedPod(this.namespace, {
         apiVersion: 'v1',
         kind: 'Pod',
@@ -98,11 +98,7 @@ export class K8sService implements IAgentManager {
             },
             livenessProbe: {
               httpGet: {
-                httpHeaders: [{
-                  name: 'x-api-key',
-                  value: config.adminApiKey
-                }],
-                path: '/status',
+                path: '/',
                 port: healthCheckPort,
                 scheme: 'HTTP'
               },
@@ -110,11 +106,7 @@ export class K8sService implements IAgentManager {
             },
             readinessProbe: {
               httpGet: {
-                httpHeaders: [{
-                  name: 'x-api-key',
-                  value: config.adminApiKey
-                }],
-                path: '/status',
+                path: '/',
                 port: healthCheckPort,
                 scheme: 'HTTP'
               }
