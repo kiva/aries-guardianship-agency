@@ -22,7 +22,7 @@ export class AgentRouterService {
     public getRouter() {
         return async (req) => {
             const parts = req.path.split('/');
-            const agentId = parts[3];
+            const agentId = parts[4];
             const url = await this.getUrl(agentId);
             Logger.log('Router proxy to ', url); // TODO remove this log eventually, still useful now
             return url;
