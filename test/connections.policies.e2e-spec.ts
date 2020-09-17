@@ -93,7 +93,7 @@ describe('Create Connections using policies (e2e)', () => {
     it('Holder receives to connection invite', async () => {
         await delayFunc(5000);
         // const agentUrl = `http://localhost:${holderAdminPort}`;
-        const agentUrl = `${hostUrl}${routeUrlPath}/${issuerId}`;
+        const agentUrl = `${hostUrl}${routeUrlPath}/${holderId}`;
         return request(agentUrl)
             .post('/connections/receive-invitation')
             .set('x-api-key', holderApiKey)
@@ -165,7 +165,7 @@ describe('Create Connections using policies (e2e)', () => {
                 expect(found).toBe(true);
             });
     });
-*/
+
     it('Spin down agent 1', () => {
         const data = {
             agentId: issuerId
@@ -185,4 +185,5 @@ describe('Create Connections using policies (e2e)', () => {
             .send(data)
             .expect(200);
     });
+*/
 });
