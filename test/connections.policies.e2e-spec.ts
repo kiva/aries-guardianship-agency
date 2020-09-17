@@ -10,15 +10,15 @@ import { Logger } from 'protocol-common/logger';
     run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Create Connections using policies (e2e)', () => {
-    let issuerAdminPort;
     let issuerId;
     let issuerApiKey;
-    let holderAdminPort;
     let holderId;
     let holderApiKey;
     let invitation;
     let issuerConnectionId;
     let holderConnectionId;
+    let issuerRoute;
+    let holderRoute;
     const hostUrl = 'http://localhost:3010';
     const routeUrlPath = '/v1/router/admin';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
@@ -48,8 +48,9 @@ describe('Create Connections using policies (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 expect(res.body.adminPort).toBeDefined();
-                issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
+                issuerRoute = `${hostUrl}${routeUrlPath}/${issuerId}`;
+                Logger.warn(`issuer URL route is ${issuerRoute}`);
             });
     }, 15000);
 
@@ -69,8 +70,9 @@ describe('Create Connections using policies (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 expect(res.body.adminPort).toBeDefined();
-                holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
+                holderRoute = `${hostUrl}${routeUrlPath}/${holderId}`;
+                Logger.warn(`holder URL route is ${holderRoute}`);
             });
     }, 15000);
 
@@ -78,8 +80,7 @@ describe('Create Connections using policies (e2e)', () => {
         // gonna wait here to let the system catch up since since spawning agents
         // also creates connections
         await delayFunc(5000); // wait 15 sec
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerRoute)
             .post('/connections/create-invitation')
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
@@ -90,11 +91,10 @@ describe('Create Connections using policies (e2e)', () => {
                 Logger.warn(`issuer created connection_id ${issuerConnectionId}`);
             });
     }, 30000);
-
+/*
     it('Holder receives to connection invite', async () => {
         await delayFunc(5000);
-        const agentUrl = `http://localhost:${holderAdminPort}`;
-        return request(agentUrl)
+        return request(holderRoute)
             .post('/connections/receive-invitation')
             .set('x-api-key', holderApiKey)
             .send(invitation)
@@ -111,8 +111,7 @@ describe('Create Connections using policies (e2e)', () => {
         const data = {
             content: 'hello holder, are you ready to receive your credentials?'
         };
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerRoute)
             .post(`/connections/${issuerConnectionId}/send-message`)
             .send(data)
             .set('x-api-key', issuerApiKey)
@@ -128,8 +127,7 @@ describe('Create Connections using policies (e2e)', () => {
 
     it('List Issuer connections', async () => {
         await delayFunc(5000);
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerRoute)
             .get(`/connections`)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
@@ -148,8 +146,7 @@ describe('Create Connections using policies (e2e)', () => {
     }, 30000);
 
     it('List Holder connections', async () => {
-        const agentUrl = `${hostUrl}${routeUrlPath}/${holderId}`;
-        return request(agentUrl)
+        return request(holderRoute)
             .get(`/connections`)
             .set('x-api-key', holderApiKey)
             .expect((res) => {
@@ -165,7 +162,7 @@ describe('Create Connections using policies (e2e)', () => {
                 expect(found).toBe(true);
             });
     });
-
+*/
     it('Spin down agent 1', () => {
         const data = {
             agentId: issuerId
