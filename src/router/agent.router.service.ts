@@ -47,7 +47,7 @@ export class AgentRouterService {
             let url: string = '';
             if (route === 'admin') {
                 Logger.warn(`3 ${parts[3]} 4 ${parts[4]} 5 ${parts[5]}`);
-                url = `${await this.getAdminUrl(agentId)}/${this.completeUrl(5, parts)}`;
+                url = `${await this.getAdminUrl(agentId)}${this.completeUrl(5, parts)}`;
             }else {
                 url = await this.getUrl(agentId);
             }
