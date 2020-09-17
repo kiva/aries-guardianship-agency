@@ -37,7 +37,7 @@ export class AgentRouterService {
             let url: string = '';
             if (route === 'admin') {
                 const passOnUrl = req.url.slice(req.url.indexOf(agentId) + agentId.length);
-                url = `${await this.getAdminUrl(agentId)}${passOnUrl}`;
+                url = `${await this.getAdminUrl(agentId)}`;
                 Logger.warn(`rerouting ${req.url} to ${url}`);
             }else {
                 url = await this.getUrl(agentId);
