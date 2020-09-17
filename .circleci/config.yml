@@ -37,16 +37,16 @@ jobs:
           name: Start docker compose and wait for readiness
           command: |
             docker network ls
-            docker-compose -f docker-compose.ci.yml build
+            docker-compose -f docker-compose.yml build
             set -x
-            docker-compose -f docker-compose.ci.yml up -d
+            docker-compose -f docker-compose.yml up -d
             sleep 20
-            docker-compose -f docker-compose.ci.yml logs
+            docker-compose -f docker-compose.yml logs
       - run:
           name: Running integration tests
           command: |
             sleep 5
-            npm run test
+             docker exec -ti aries-guardianship-agency sh -c "npm run test"
 
 workflows:
   build-and-test:
