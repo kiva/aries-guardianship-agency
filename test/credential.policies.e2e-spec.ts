@@ -46,8 +46,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid,
-            adminApiPort: '5001'
+            did: issuerDid
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -68,8 +67,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
-            did: holderDid,
-            adminApiPort: '5002'
+            did: holderDid
         };
         return request(hostUrl)
             .post('/v1/manager')
