@@ -10,7 +10,7 @@ import * as fsStore from 'cache-manager-fs-hash';
     imports: [CacheModule.register({
         store: fsStore,
         path:'/tmp/diskcache',
-        ttl: 31536000, // one year
+        ttl: parseInt(process.env.DEFAULT_CACHE_TTL, 10),
         max: 1000
     })],
     exports: [CacheModule]
