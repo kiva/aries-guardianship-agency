@@ -10,13 +10,11 @@ export class AgentRouterService {
     /**
      * Inject dependencies
      */
-    constructor(@Inject(CACHE_MANAGER) private readonly cache: CacheStore) { }
+    constructor() { }
 
     public async getUrl(agentId: string) {
-        const agent: any = await this.cache.get(agentId);
-        // TODO handle case where the agent isn't in the cache/storage
         // TODO make http configurable, in case we every want to enable https without or docker/k8s network
-        return 'http://' + agentId + ':' + agent.httpPort;
+        return 'http://' + agentId + ':' + process.env.AGENT_HTTP_PORT;
     }
 
     public getRouter() {

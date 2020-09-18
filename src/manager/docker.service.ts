@@ -22,7 +22,6 @@ export class DockerService implements IAgentManager {
     /**
      * Start an agent with the given params using the expose docker api
      * TODO I don't think this handles errors properly if the agent fails to spin up
-     * TODO investigate how to do port bindings so that we can reuse the same port number internally within the docker network (ie not expose on mac)
      */
     public async startAgent(config: AgentConfig): Promise<string> {
         const inboundTransportSplit = config.inboundTransport.split(' ');
@@ -31,10 +30,6 @@ export class DockerService implements IAgentManager {
             Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
             name: config.label,
-            ExposedPorts: {
-                [`${config.adminPort}/tcp`]: {},
-                [`${config.httpPort}/tcp`]: {}
-            },
             HostConfig: {
                 AutoRemove: true,
                 NetworkMode: process.env.NETWORK_NAME,

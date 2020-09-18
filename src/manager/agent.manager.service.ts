@@ -1,10 +1,11 @@
 import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nestjs/common';
-import { DockerService } from './docker.service';
-import { IAgentManager } from './agent.manager.interface';
 import cryptoRandomString from 'crypto-random-string';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
+import { ProtocolUtility } from 'protocol-common/protocol.utility';
+import { DockerService } from './docker.service';
+import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
 
@@ -54,9 +55,8 @@ export class AgentManagerService {
         // TODO Long term we should have a proper DB store for permanent agents (or figure out a way to avoid having to save agent data all together)
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const agentId = alias || cryptoRandomString({ length: 32, type: 'hex' });
-        // TODO: could it be possible the same port is randomly generated?
-        const adminPort = adminApiPort || this.generateRandomPort();
-        const httpPort = this.generateRandomPort();
+        const adminPort = process.env.AGENT_ADMIN_PORT;
+        const httpPort = process.env.AGENT_HTTP_PORT;
 
         // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com
         // Locally we don't have that public url so we need to reference the docker container for the agency
@@ -108,22 +108,6 @@ export class AgentManagerService {
     }
 
     /**
-     * TODO not sure if we'll keep this around because it doesn't guarantee port overlaps, and also, ports are only really important when
-     * testing on a mac. We deployed in k8s all agents can have the same ports and its file
-     * Generates a random port between 5000-9999
-     */
-    private generateRandomPort(): string {
-        return (Math.floor(5000 + Math.random() * 5000)).toString();
-    }
-
-    /**
-     * TODO rather than a fixed delay, we should respond to something from the agent which indicates that it's up
-     */
-    private delay(ms: number) {
-        return new Promise( resolve => setTimeout(resolve, ms) );
-    }
-
-    /**
      * TODO move to it's own class and pass in the http object
      * TODO error handling
      */
@@ -168,7 +152,7 @@ export class AgentManagerService {
         const startOf = new Date();
         while (durationMS > compute(new Date(), startOf)) {
             // no point in rushing this
-            await this.delay(1000);
+            await ProtocolUtility.delay(1000);
 
             // TODO we should either add a non-retry call to ProtocolHttpService, or make the existing requestWithRetry more configurable
             // attempt a status check, if successful call it good and return
