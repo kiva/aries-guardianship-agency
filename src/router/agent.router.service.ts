@@ -14,7 +14,7 @@ export class AgentRouterService {
 
     public async getUrl(agentId: string) {
         // TODO make http configurable, in case we every want to enable https without or docker/k8s network
-        return 'http://' + agentId + ':' + '5000';
+        return 'http://' + agentId + ':' + process.env.AGENT_HTTP_PORT;
     }
 
     public getRouter() {

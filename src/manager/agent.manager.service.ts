@@ -55,8 +55,8 @@ export class AgentManagerService {
         // TODO Long term we should have a proper DB store for permanent agents (or figure out a way to avoid having to save agent data all together)
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const agentId = alias || cryptoRandomString({ length: 32, type: 'hex' });
-        const adminPort = '5001';
-        const httpPort = '5000';
+        const adminPort = process.env.AGENT_ADMIN_PORT;
+        const httpPort = process.env.AGENT_HTTP_PORT;
 
         // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com
         // Locally we don't have that public url so we need to reference the docker container for the agency
