@@ -1,10 +1,10 @@
 import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nestjs/common';
-import { DockerService } from './docker.service';
-import { IAgentManager } from './agent.manager.interface';
 import cryptoRandomString from 'crypto-random-string';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
+import { DockerService } from './docker.service';
+import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
 
@@ -55,8 +55,8 @@ export class AgentManagerService {
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const agentId = alias || cryptoRandomString({ length: 32, type: 'hex' });
         // TODO: could it be possible the same port is randomly generated?
-        const adminPort = adminApiPort || this.generateRandomPort();
-        const httpPort = this.generateRandomPort();
+        const adminPort = '5001';
+        const httpPort = '5000';
 
         // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com
         // Locally we don't have that public url so we need to reference the docker container for the agency

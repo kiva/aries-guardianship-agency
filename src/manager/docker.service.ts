@@ -31,10 +31,6 @@ export class DockerService implements IAgentManager {
             Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
             name: config.label,
-            ExposedPorts: {
-                [`${config.adminPort}/tcp`]: {},
-                [`${config.httpPort}/tcp`]: {}
-            },
             HostConfig: {
                 AutoRemove: true,
                 NetworkMode: process.env.NETWORK_NAME,
