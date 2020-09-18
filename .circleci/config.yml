@@ -7,8 +7,18 @@ jobs:
       tag: '8.12'
     steps:
       - checkout
-      - run: npm install
-      - run: npm run smoke-test
+      - run:
+          name: npm install
+          command: |
+            npm install
+      - run:
+          name: run linter
+          command: |
+            npm run lint
+      - run:
+          name: run smoke test
+          command: |
+            npm run smoke-test
 
   integration-test:
     machine:
