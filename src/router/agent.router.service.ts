@@ -13,7 +13,6 @@ export class AgentRouterService {
     constructor() { }
 
     public async getUrl(agentId: string) {
-        // TODO handle case where the agent isn't in the cache/storage
         // TODO make http configurable, in case we every want to enable https without or docker/k8s network
         return 'http://' + agentId + ':' + '5000';
     }
