@@ -11,10 +11,10 @@ import { Logger } from 'protocol-common/logger';
     run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Issue and Prove credentials using policies (e2e)', () => {
-    let issuerAdminPort;
+    let issuerUrl;
     let issuerId;
     let issuerApiKey;
-    let holderAdminPort;
+    let holderUrl;
     let holderId;
     let holderApiKey;
     let invitation;
@@ -55,8 +55,9 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 expect(res.body.adminPort).toBeDefined();
-                issuerAdminPort = res.body.adminPort;
+                const issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
+                issuerUrl = `http://${issuerId}:${issuerAdminPort}`;
             });
     });
 
@@ -76,15 +77,15 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 expect(res.body.adminPort).toBeDefined();
-                holderAdminPort = res.body.adminPort;
+                const holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
+                holderUrl = `http://${holderId}:${holderAdminPort}`;
             });
     });
 
     it('Create connection invite to holder from issuer', async () => {
         await delayFunc(15000); // wait 15 sec
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerUrl)
             .post('/connections/create-invitation')
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
@@ -97,8 +98,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Holder responds to connection invite', async () => {
         await delayFunc(1000);
-        const agentUrl = `http://localhost:${holderAdminPort}`;
-        return request(agentUrl)
+        return request(holderUrl)
             .post('/connections/receive-invitation')
             .set('x-api-key', holderApiKey)
             .send(invitation)
@@ -111,8 +111,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('make issuer did public', async() => {
         await delayFunc(1000);
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerUrl)
             .post(`/wallet/did/public?did=${issuerDid}`)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
@@ -126,8 +125,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             schema_name: schemaName,
             attributes: [ 'score' ]
         };
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerUrl)
             .post('/schemas')
             .send(data)
             .set('x-api-key', issuerApiKey)
@@ -149,8 +147,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             support_revocation: false,
             tag: 'issued_1'
         };
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerUrl)
             .post('/credential-definitions')
             .send(data)
             .set('x-api-key', issuerApiKey)
@@ -183,9 +180,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             connection_id: issuerConnectionId
         };
 
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        Logger.warn(`For issuer ${issuerId} issue-credential/send body request '${agentUrl}' -> `, data);
-        return request(agentUrl)
+        Logger.warn(`For issuer ${issuerId} issue-credential/send body request '${issuerUrl}' -> `, data);
+        return request(issuerUrl)
             .post('/issue-credential/send')
             .send(data)
             .set('x-api-key', issuerApiKey)
@@ -203,8 +199,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Affirm Issuer credential status', async () => {
         await delayFunc(5000);
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerUrl)
             .get('/issue-credential/records')
             .set('x-api-key', holderApiKey)
             .send(invitation)
@@ -235,9 +230,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 requested_predicates: {}
             }
         };
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        Logger.warn(`For issuer ${issuerId} /present-proof/send-request body request '${agentUrl}' -> `, data);
-        return request(agentUrl)
+        Logger.warn(`For issuer ${issuerId} /present-proof/send-request body request '${issuerUrl}' -> `, data);
+        return request(issuerUrl)
             .post('/present-proof/send-request')
             .send(data)
             .set('x-api-key', issuerApiKey)
@@ -255,18 +249,17 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('verify proof is proved', async () => {
         await delayFunc(6000);
-        const agentUrl = `http://localhost:${issuerAdminPort}`;
-        return request(agentUrl)
+        return request(issuerUrl)
             .get(`/present-proof/records/${presentationExchangeId}`)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
                 try {
-                    Logger.warn(`${agentUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
+                    Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
                     expect(res.body.state).toBe('verified');
-                    expect(res.body.presentation.requested_proof.revealed_attrs.score.raw).toBe("750");
+                    expect(res.body.presentation.requested_proof.revealed_attrs.score.raw).toBe('750');
                 } catch (e) {
-                    Logger.warn(`${agentUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);
+                    Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);
                     throw e;
                 }
             });
