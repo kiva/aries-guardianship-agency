@@ -28,93 +28,99 @@ export class K8sService implements IAgentManager {
     // This will work in k8s when the service account is set up correctly.
     // Locally this will fail, unless you create this file at the correct path.
     private getNamespace(): string {
-      const data = readFileSync('/var/run/secrets/kubernetes.io/serviceaccount/namespace','utf8');
-      return data.toString();
+        const data = readFileSync('/var/run/secrets/kubernetes.io/serviceaccount/namespace','utf8');
+        return data.toString();
     }
 
     private async createPod(config: AgentConfig): Promise<any> {
-      const inboundTransportSplit = config.inboundTransport.split(' ');
-      const adminSplit = config.admin.split(' ');
-      const healthCheckPort : any = parseInt(config.httpPort, 10);
-      const res = await this.kapi.createNamespacedPod(this.namespace, {
-        apiVersion: 'v1',
-        kind: 'Pod',
-        metadata: {
-          name: config.label,
-          labels: {
-            'app.kubernetes.io/instance': config.label,
-            'app.kubernetes.io/name': config.label,
-            'agent': 'true'
-          }
-        },
-        spec: {
-          containers: [{
-            name: config.label,
-            image: process.env.AGENT_DOCKER_IMAGE,
-            ports: [{
-              name: 'http',
-              containerPort: parseInt(config.httpPort, 10)
-              },
-              {
-                name: 'admin',
-                containerPort: parseInt(config.adminPort, 10)
-              }],
-                args: [
-              'start',
-              '--inbound-transport', inboundTransportSplit[0],  inboundTransportSplit[1], inboundTransportSplit[2],
-              '--outbound-transport', config.outboundTransport,
-              '--ledger-pool-name', config.ledgerPoolName,
-              '--genesis-transactions', config.genesisTransactions,
-              '--wallet-type', config.walletType,
-              '--wallet-storage-type', config.walletStorageType,
-              '--endpoint', config.endpoint,
-              '--wallet-name', config.walletName,
-              '--wallet-key', config.walletKey,
-              '--wallet-storage-config', config.walletStorageConfig,
-              '--wallet-storage-creds', config.walletStorageCreds,
-              '--admin', adminSplit[0], adminSplit[1],
-              '--admin-api-key', config.adminApiKey,
-              '--label', config.label,
-              '--webhook-url', config.webhookUrl,
-              // TODO For now we auto respond, eventually we will want more refined responses
-              '--log-level', 'debug',
-              '--auto-respond-messages',
-              // status offer_sent
-              '--auto-respond-credential-offer',
-              // request_sent
-              '--auto-respond-presentation-request',
-              '--wallet-local-did', // TODO this could be an arg on the config
-            ],
-            // TODO: get the following from src/config/env.json? or other declarative source
-            resources: {
-              limits: {
-                'cpu': '1100m',
-                'memory': '607164212'
-              },
-              requests: {
-                'cpu': '1100m',
-                'memory': '607164212'
-              }
+        const inboundTransportSplit = config.inboundTransport.split(' ');
+        const adminSplit = config.admin.split(' ');
+        const healthCheckPort : any = parseInt(config.httpPort, 10);
+        const podOptions = {
+            apiVersion: 'v1',
+            kind: 'Pod',
+            metadata: {
+                name: config.label,
+                labels: {
+                    'app.kubernetes.io/instance': config.label,
+                    'app.kubernetes.io/name': config.label,
+                    'agent': 'true'
+                }
             },
-            livenessProbe: {
-              httpGet: {
-                path: '/',
-                port: healthCheckPort,
-                scheme: 'HTTP'
-              },
-              timeoutSeconds: 10
-            },
-            readinessProbe: {
-              httpGet: {
-                path: '/',
-                port: healthCheckPort,
-                scheme: 'HTTP'
-              }
+            spec: {
+                containers: [{
+                    name: config.label,
+                    image: process.env.AGENT_DOCKER_IMAGE,
+                    ports: [
+                        {
+                            name: 'http',
+                            containerPort: parseInt(config.httpPort, 10)
+                        },
+                        {
+                            name: 'admin',
+                            containerPort: parseInt(config.adminPort, 10)
+                        }
+                    ],
+                    args: [
+                        'start',
+                        '--inbound-transport', inboundTransportSplit[0],  inboundTransportSplit[1], inboundTransportSplit[2],
+                        '--outbound-transport', config.outboundTransport,
+                        '--ledger-pool-name', config.ledgerPoolName,
+                        '--genesis-transactions', config.genesisTransactions,
+                        '--wallet-type', config.walletType,
+                        '--wallet-storage-type', config.walletStorageType,
+                        '--endpoint', config.endpoint,
+                        '--wallet-name', config.walletName,
+                        '--wallet-key', config.walletKey,
+                        '--wallet-storage-config', config.walletStorageConfig,
+                        '--wallet-storage-creds', config.walletStorageCreds,
+                        '--admin', adminSplit[0], adminSplit[1],
+                        '--admin-api-key', config.adminApiKey,
+                        '--label', config.label,
+                        '--webhook-url', config.webhookUrl,
+                        // TODO For now we auto respond, eventually we will want more refined responses
+                        '--log-level', 'debug',
+                        '--auto-respond-messages',
+                        // status offer_sent
+                        '--auto-respond-credential-offer',
+                        // request_sent
+                        '--auto-respond-presentation-request',
+                        '--wallet-local-did', // TODO this could be an arg on the config
+                    ],
+                    // TODO: get the following from src/config/env.json? or other declarative source
+                    resources: {
+                        limits: {
+                            'cpu': '1100m',
+                            'memory': '607164212'
+                        },
+                        requests: {
+                            'cpu': '1100m',
+                            'memory': '607164212'
+                        }
+                    },
+                    livenessProbe: {
+                        httpGet: {
+                            path: '/',
+                            port: healthCheckPort,
+                            scheme: 'HTTP'
+                        },
+                        timeoutSeconds: 10
+                    },
+                    readinessProbe: {
+                        httpGet: {
+                            path: '/',
+                            port: healthCheckPort,
+                            scheme: 'HTTP'
+                        }
+                    }
+                }],
             }
-          }],
+        };
+        if (config.seed) {
+            podOptions.spec.containers[0].args.push('--seed', config.seed);
         }
-      });
-      return res.body;
+        const res = await this.kapi.createNamespacedPod(this.namespace, podOptions);
+        return res.body;
     }
 
     private async createService(config: AgentConfig): Promise<any> {
