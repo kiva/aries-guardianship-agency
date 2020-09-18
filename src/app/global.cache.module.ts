@@ -3,13 +3,14 @@ import * as fsStore from 'cache-manager-fs-hash';
 
 /**
  * TODO right now we're using a file system cache for simplicity, at some point we should switch to redis or something
+ * TODO we'll probably remove the cache entirely soon
  */
 @Global()
 @Module({
     imports: [CacheModule.register({
         store: fsStore,
         path:'/tmp/diskcache',
-        ttl: 3600, // TODO make these configs
+        ttl: parseInt(process.env.DEFAULT_CACHE_TTL, 10),
         max: 1000
     })],
     exports: [CacheModule]
