@@ -73,7 +73,7 @@ export class AgentManagerService {
         // @tothink move this caching to db
         // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
         Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1)}`);
-        await this.cache.set(agentId, { containerId, adminPort, httpPort, adminApiKey, ttl }, {ttl: (ttl === 0 ? ttl : ttl + 1)});
+        await this.cache.set(agentId, { containerId, adminApiKey, ttl }, {ttl: (ttl === 0 ? ttl : ttl + 1)});
 
         // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
         if (ttl > 0) {
@@ -92,19 +92,17 @@ export class AgentManagerService {
             connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
         }
 
-        return { agentId, containerId, adminPort, httpPort, connectionData };
+        return { agentId, connectionData };
     }
 
     /**
      * TODO we should probably respond with something
      */
     public async spinDownAgent(agentId: string) {
-        // TODO: do we need to remove this entry
-        const agent: any = await this.cache.get(agentId);
+        Logger.log('Spinning down agent', agentId);
         await this.cache.del(agentId);
-        Logger.log('Spinning down agent', agent);
         // TODO handle case were agent not there
-        await this.manager.stopAgent(agent.containerId);
+        await this.manager.stopAgent(agentId);
     }
 
     /**
@@ -183,12 +181,9 @@ export class AgentManagerService {
             Logger.log(agentData);
             if (agentData && autoConnect === true) {
                 // TODO need error handling if this call fails
-                const connectionData = await this.createConnection(agentId, agentData.adminPort, adminApiKey);
+                const connectionData = await this.createConnection(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey);
                 return {
                     agentId,
-                    containerId: agentData.containerId,
-                    adminPort: agentData.adminPort,
-                    httpPort: agentData.httpPort,
                     connectionData
                 };
             }

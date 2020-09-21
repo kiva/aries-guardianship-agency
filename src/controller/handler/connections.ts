@@ -51,9 +51,6 @@ export class Connections implements IAgentResponseHandler {
         topic will be "connections"
     */
     public async handlePost(agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
-        const delay = (ms: number) => {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        };
         const readPermission = async (governanceKey: string, cacheKey: string) => {
             this.agentGovernance.readPermission('connections', governanceKey);
             await this.cache.set(cacheKey, {});
