@@ -24,7 +24,7 @@ export class AgentControllerService {
         Logger.info(`AgentControllerService.handleRequest(${agentId}, ${route}, ${topic})`, body);
         const agent: any = await this.cache.get(agentId);
         // @tothink http/https?  should this be from the env?
-        const agentUrl = `http://${agentId}:${agent.adminPort}`;
+        const agentUrl = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}`;
 
         return await HandlersFactory.getHandler(this.agentGovernance, topic, this.http, this.cache)
             .handlePost(agentUrl, agentId, agent.adminApiKey, route, topic, body);

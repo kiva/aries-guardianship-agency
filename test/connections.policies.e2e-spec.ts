@@ -19,6 +19,7 @@ describe('Create Connections using policies (e2e)', () => {
     let invitation;
     let issuerConnectionId;
     let holderConnectionId;
+    const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const hostUrl = 'http://localhost:3010';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
@@ -45,10 +46,8 @@ describe('Create Connections using policies (e2e)', () => {
             .send(data)
             .expect(201)
             .expect((res) => {
-                expect(res.body.adminPort).toBeDefined();
-                const issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
-                issuerUrl = `http://${issuerId}:${issuerAdminPort}`;
+                issuerUrl = `http://${issuerId}:${agentAdminPort}`;
             });
     }, 15000);
 
@@ -66,10 +65,8 @@ describe('Create Connections using policies (e2e)', () => {
             .send(data)
             .expect(201)
             .expect((res) => {
-                expect(res.body.adminPort).toBeDefined();
-                const holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
-                holderUrl = `http://${holderId}:${holderAdminPort}`;
+                holderUrl = `http://${holderId}:${agentAdminPort}`;
             });
     }, 15000);
 

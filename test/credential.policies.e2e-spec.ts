@@ -24,6 +24,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     let credentialDefinitionId;
     let credentialExchangeId;
     let presentationExchangeId;
+    const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const hostUrl = 'http://localhost:3010';
     const schemaName = 'sample_schema';
     const schemaVersion = '1.0';
@@ -53,10 +54,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .send(data)
             .expect(201)
             .expect((res) => {
-                expect(res.body.adminPort).toBeDefined();
-                const issuerAdminPort = res.body.adminPort;
                 issuerId = res.body.agentId;
-                issuerUrl = `http://${issuerId}:${issuerAdminPort}`;
+                issuerUrl = `http://${issuerId}:${agentAdminPort}`;
             });
     });
 
@@ -74,10 +73,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .send(data)
             .expect(201)
             .expect((res) => {
-                expect(res.body.adminPort).toBeDefined();
-                const holderAdminPort = res.body.adminPort;
                 holderId = res.body.agentId;
-                holderUrl = `http://${holderId}:${holderAdminPort}`;
+                holderUrl = `http://${holderId}:${agentAdminPort}`;
             });
     });
 
