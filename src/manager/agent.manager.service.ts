@@ -181,7 +181,7 @@ export class AgentManagerService {
             Logger.log(agentData);
             if (agentData && autoConnect === true) {
                 // TODO need error handling if this call fails
-                const connectionData = await this.createConnection(agentId, agentData.adminPort, adminApiKey);
+                const connectionData = await this.createConnection(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey);
                 return {
                     agentId,
                     connectionData
