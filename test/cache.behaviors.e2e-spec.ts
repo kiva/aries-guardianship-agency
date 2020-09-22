@@ -13,10 +13,10 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
  */
 describe('Create Connections using policies (e2e)', () => {
     let issuerId;
-    let issuerApiKey;
+    const issuerApiKey = 'adminApiKey';
     let issuerUrl;
     let holderId;
-    let holderApiKey;
+    const holderApiKey = 'adminApiKey';
     let holderUrl;
     let invitation;
     let issuerConnectionId;
@@ -27,8 +27,7 @@ describe('Create Connections using policies (e2e)', () => {
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
 
     beforeAll(async () => {
-        issuerApiKey = 'adminApiKey';
-        holderApiKey = 'adminApiKey';
+        jest.setTimeout(60000);
     });
 
     it('Spin up agent 1 (issuer)', async () => {
@@ -48,5 +47,5 @@ describe('Create Connections using policies (e2e)', () => {
                 issuerId = res.body.agentId;
                 issuerUrl = `http://${issuerId}:${agentAdminPort}`;
             });
-    }, 15000);
+    });
 });
