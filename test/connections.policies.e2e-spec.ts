@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { Logger } from 'protocol-common/logger';
+import { ProtocolUtility } from 'protocol-common/protocol.utility';
 
 
 /*
@@ -23,9 +24,6 @@ describe('Create Connections using policies (e2e)', () => {
     const hostUrl = 'http://localhost:3010';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
-    const delayFunc = (ms: number) => {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    };
 
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
@@ -73,7 +71,7 @@ describe('Create Connections using policies (e2e)', () => {
     it('Create connection invite to holder from issuer', async () => {
         // gonna wait here to let the system catch up since since spawning agents
         // also creates connections
-        await delayFunc(5000); // wait 15 sec
+        await ProtocolUtility.delay(5000); // wait 15 sec
         return request(issuerUrl)
             .post('/connections/create-invitation')
             .set('x-api-key', issuerApiKey)
@@ -87,7 +85,7 @@ describe('Create Connections using policies (e2e)', () => {
     }, 30000);
 
     it('Holder receives to connection invite', async () => {
-        await delayFunc(5000);
+        await ProtocolUtility.delay(5000);
         return request(holderUrl)
             .post('/connections/receive-invitation')
             .set('x-api-key', holderApiKey)
@@ -101,7 +99,7 @@ describe('Create Connections using policies (e2e)', () => {
     }, 60000);
 
     it('send basic message from issuer to holder', async () => {
-        await delayFunc(2000);
+        await ProtocolUtility.delay(2000);
         const data = {
             content: 'hello holder, are you ready to receive your credentials?'
         };
@@ -120,7 +118,7 @@ describe('Create Connections using policies (e2e)', () => {
     }, 30000);
 
     it('List Issuer connections', async () => {
-        await delayFunc(5000);
+        await ProtocolUtility.delay(5000);
         return request(issuerUrl)
             .get(`/connections`)
             .set('x-api-key', issuerApiKey)
