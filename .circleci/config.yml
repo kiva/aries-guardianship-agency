@@ -51,7 +51,7 @@ jobs:
             docker-compose -f docker-compose.yml build
             set -x
             docker-compose -f docker-compose.yml up -d
-            sleep 20
+            sleep 40
             docker-compose -f docker-compose.yml logs
       - run:
           name: Running integration tests
