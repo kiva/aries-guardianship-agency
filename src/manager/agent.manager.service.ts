@@ -48,7 +48,7 @@ export class AgentManagerService {
         // TODO: cleanup inconsistent return types.
         // 1  { agentId, connectionData }
         // 1a { agentId, empty }
-        // 2  { agentId, adminApiKey }
+        // 2  { agentId, container, adminApiKey }
 
         const agentId = alias || cryptoRandomString({length: 32, type: 'hex'});
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
@@ -194,7 +194,7 @@ export class AgentManagerService {
     private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string, autoConnect: boolean = true, ttl: number): Promise<any> {
         // TODO: cleanup inconsistent return types.
         // 1 { agentId, connectionData }
-        // 2 { agentId, adminApiKey }
+        // 2 { agentId, containerId, adminApiKey }
         if (agentId) {
             let agentData: any = await this.cache.get(agentId);
             if (agentData === undefined) {
