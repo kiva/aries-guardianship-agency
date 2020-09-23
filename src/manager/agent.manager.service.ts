@@ -52,7 +52,6 @@ export class AgentManagerService {
 
         const agentId = alias || cryptoRandomString({length: 32, type: 'hex'});
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
-        const adminPort = process.env.AGENT_ADMIN_PORT;
         const httpPort = process.env.AGENT_HTTP_PORT;
 
         // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com
@@ -69,13 +68,13 @@ export class AgentManagerService {
             // TODO Long term we should have a proper DB store for permanent agents
             // (or figure out a way to avoid having to save agent data all together)
 
-            const agentConfig = new AgentConfig(walletId, walletKey, adminApiKey, agentId, agentEndpoint, webhookUrl, adminPort, httpPort, seed);
-
+            const agentConfig = new AgentConfig(walletId, walletKey, adminApiKey, agentId, agentEndpoint, webhookUrl, adminApiPort, httpPort, seed);
             const containerId = await this.manager.startAgent(agentConfig);
 
             // @tothink move this caching to db
             // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
             Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1)}`);
+            // TODO  we dont really need containerId anymore, could remove it from cache
             await this.cache.set(agentId, {containerId, adminApiKey, ttl}, {ttl: (ttl === 0 ? ttl : ttl + 1)});
 
             // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
@@ -91,23 +90,24 @@ export class AgentManagerService {
             // when autoCorrect is not defined or null, treat it as true
             if (autoConnect === true) {
                 // TODO for right now let's delay and then initiate the connection
-                await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
-                connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
+                await this.pingConnectionWithRetry(agentId, adminApiPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
+                connectionData = await this.createConnection(agentId, adminApiPort, adminApiKey);
             }
 
             return {agentId, connectionData};
         } catch (e) {
             if (e.statusCode === 409 && e.message.includes('Conflict')) {
-                Logger.warn(`agent '${agentId}' is already running`);
-                // TODO:  agent is already running.  We have 1 of 2 possibilities
+                // agent is already running.  We have 1 of 2 possibilities
                 // 1 - agent is running and in cache
                 // 2 - agent is running and not in cache
-
-                const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey, autoConnect);
+                // call to handleAlreadyRunningContainer takes care of both
+                const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey, autoConnect, ttl);
                 if (runningData) {
-                    // handles case 1 above
                     return runningData;
                 }
+
+                // if the call to handleAlreadyRunningContainer fails,
+                // let it fall through because we have a bigger problem.
             }
             Logger.warn(`Unhandled error starting agent '${agentId}'`, e);
             throw e;
@@ -191,13 +191,21 @@ export class AgentManagerService {
      * for the existing one - we use the adminApiKey to ensure that the caller actually has permissions to query the agent
      * TODO we may want more checks here, eg to ensure the docker container is actually running, but for now we treat the cache as truth
      */
-    private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string, autoConnect: boolean = true): Promise<any> {
+    private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string, autoConnect: boolean = true, ttl: number): Promise<any> {
         // TODO: cleanup inconsistent return types.
         // 1 { agentId, connectionData }
         // 2 { agentId, adminApiKey }
         if (agentId) {
-            const agentData: any = await this.cache.get(agentId);
-            // TODO test the agent is actually running
+            let agentData: any = await this.cache.get(agentId);
+            if (agentData === undefined) {
+                Logger.warn(`agent ${agentId} not found in cache`);
+                // TODO  we dont really need containerId anymore, could remove it from cache
+                // @tothink() if we want to keep containerId, Dockerode contains a function to get containerId.  need
+                //   to research if k8s api has the same
+                const containerId = 'none';
+                await this.cache.set(agentId, { containerId, adminApiKey, ttl}, {ttl});
+                agentData = await this.cache.get(agentId);
+            }
 
             Logger.log(agentData);
             if (agentData && autoConnect === true) {

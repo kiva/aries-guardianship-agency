@@ -1,7 +1,9 @@
 import request from 'supertest';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolUtility } from 'protocol-common/protocol.utility';
-import { DockerService } from "../src/manager/docker.service";
+import { ConfigModule } from 'protocol-common/config.module';
+import { DockerService } from '../src/manager/docker.service';
+import { AgentConfig } from '../src/manager/agent.config';
 
 
 
@@ -14,14 +16,10 @@ import { DockerService } from "../src/manager/docker.service";
  */
 describe('Cache behaviors (e2e)', () => {
     let firstAgentId;
-    const issuerApiKey = 'adminApiKey';
-    let issuerUrl;
+    const adminApiKey = 'adminApiKey';
+    let firstAgentUrl;
     let secondAgentId;
-    const holderApiKey = 'adminApiKey';
-    let holderUrl;
-    let invitation;
-    let issuerConnectionId;
-    let holderConnectionId;
+    let thirdAgentId;
     const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const hostUrl = 'http://localhost:3010';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
@@ -33,12 +31,13 @@ describe('Cache behaviors (e2e)', () => {
 
 
     // Test condition: Cache shouldn't contain the agent, nor should the agent already be running
+    // Cache: down; Reality: down
     it('Start agent not already started successfully', async () => {
         const data = {
             alias: 'issuer',
             walletId: 'walletId11',
             walletKey: 'walletId11',
-            adminApiKey: issuerApiKey,
+            adminApiKey,
             seed: '000000000000000000000000Steward1',
             did: issuerDid
         };
@@ -48,17 +47,18 @@ describe('Cache behaviors (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 firstAgentId = res.body.agentId;
-                issuerUrl = `http://${firstAgentId}:${agentAdminPort}`;
+                firstAgentUrl = `http://${firstAgentId}:${agentAdminPort}`;
             });
     });
 
     // Test condition: Cache contain the agent, and the agent is running
+    // Cache: up; Reality: up
     it('Request agent previously started', async () => {
         const data = {
             alias: 'issuer',
             walletId: 'walletId11',
             walletKey: 'walletId11',
-            adminApiKey: issuerApiKey,
+            adminApiKey,
             seed: '000000000000000000000000Steward1',
             did: issuerDid
         };
@@ -68,17 +68,18 @@ describe('Cache behaviors (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 firstAgentId = res.body.agentId;
-                issuerUrl = `http://${firstAgentId}:${agentAdminPort}`;
+                firstAgentUrl = `http://${firstAgentId}:${agentAdminPort}`;
             });
     });
 
     // Test condition: Agent is not running. but agent manager cache thinks it is
+    // Cache: up; Reality: down
     it('Successfully request Agent not running but is in cache', async () => {
         const data = {
             alias: 'runningAgent',
             walletId: 'walletId11',
             walletKey: 'walletId11',
-            adminApiKey: issuerApiKey,
+            adminApiKey,
             seed: '000000000000000000000000Steward1',
             did: issuerDid
         };
@@ -93,6 +94,39 @@ describe('Cache behaviors (e2e)', () => {
         await manager.stopAgent(secondAgentId);
         // Agent is not running but cache does not reflect this state, so we can
         // now test that state
+        return request(hostUrl)
+            .post('/v1/manager')
+            .send(data)
+            .expect(201);
+    });
+
+    // Test condition: Agent is running but the cache doesn't contain a reference to Agent
+    // Cache down: Reality: up
+    it('Successfully request agent running not in cache', async () => {
+        // setup environment so we can create an agent without using agent manager
+        ConfigModule.init('../src/config/env.json');
+        process.env.AGENT_DOCKER_IMAGE = 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4';
+        process.env.AGENT_LOG_LENGTH = '0';
+        process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH = './resources/pool_transactions_genesis_local_dev';
+        process.env.INTERNAL_URL = 'http://aries-guardianship-agency:3010';
+        process.env.INDY_POOL_NAME = 'pool1';
+        process.env.NETWORK_NAME = 'agency-network';
+
+        thirdAgentId = 'thirdAgent';
+        const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${thirdAgentId}`;
+        const webhookUrl = `${process.env.INTERNAL_URL}/v1/controller/${thirdAgentId}`;
+        const agentConfig = new AgentConfig('walletId11', 'walletId11', adminApiKey, thirdAgentId,
+            agentEndpoint, webhookUrl, '5001', '5000', '000000000000000000000000Steward1');
+        const manager = new DockerService();
+        const containerId = await manager.startAgent(agentConfig);
+        const data = {
+            alias: thirdAgentId,
+            walletId: 'walletId11',
+            walletKey: 'walletId11',
+            adminApiKey,
+            seed: '000000000000000000000000Steward1',
+            did: issuerDid
+        };
         return request(hostUrl)
             .post('/v1/manager')
             .send(data)
@@ -114,6 +148,7 @@ describe('Cache behaviors (e2e)', () => {
         };
         await shutdownAgent(firstAgentId);
         await shutdownAgent(secondAgentId);
+        await shutdownAgent(thirdAgentId);
         return;
     });
 });
