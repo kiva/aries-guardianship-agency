@@ -112,13 +112,16 @@ describe('Cache behaviors (e2e)', () => {
         process.env.INDY_POOL_NAME = 'pool1';
         process.env.NETWORK_NAME = 'agency-network';
 
+        // spin up the agent not using AgentMananger so that is cache is out of sync
         thirdAgentId = 'thirdAgent';
         const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${thirdAgentId}`;
         const webhookUrl = `${process.env.INTERNAL_URL}/v1/controller/${thirdAgentId}`;
         const agentConfig = new AgentConfig('walletId11', 'walletId11', adminApiKey, thirdAgentId,
             agentEndpoint, webhookUrl, '5001', '5000', '000000000000000000000000Steward1');
         const manager = new DockerService();
-        const containerId = await manager.startAgent(agentConfig);
+        await manager.startAgent(agentConfig);
+
+        // attempt request for starting the same agent
         const data = {
             alias: thirdAgentId,
             walletId: 'walletId11',
