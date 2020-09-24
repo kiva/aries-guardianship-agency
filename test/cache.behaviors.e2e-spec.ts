@@ -144,12 +144,21 @@ describe('Cache behaviors (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey,
             seed: '000000000000000000000000Steward1',
-            did: agentDid
+            did: agentDid,
+            autoConnect: false
         };
-        return request(hostUrl)
+        await request(hostUrl)
             .post('/v1/manager')
             .send(data)
             .expect(201);
+
+        const agentUrl = `http://${firstAgentId}:${agentAdminPort}`;
+        return request(agentUrl)
+            .get('/status')
+            .set('x-api-key', adminApiKey)
+            .expect((res) => {
+                expect(res.status).toBe(200);
+            });
     });
 
     // Test condition: Agent is running but the cache doesn't contain a reference to Agent
@@ -185,12 +194,21 @@ describe('Cache behaviors (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: 'BillyBobLikesCars',
             seed: '000000000000000000000000Steward1',
-            did: agentDid
+            did: agentDid,
+            autoConnect: false
         };
-        return request(hostUrl)
+        await request(hostUrl)
             .post('/v1/manager')
             .send(data)
-            .expect(500);
+            .expect(201);
+
+        const agentUrl = `http://${firstAgentId}:${agentAdminPort}`;
+        return request(agentUrl)
+            .get('/status')
+            .set('x-api-key', 'BillyBobLikesCars')
+            .expect((res) => {
+                expect(res.status).toBe(401);
+            });
     });
 
     afterAll(async () => {

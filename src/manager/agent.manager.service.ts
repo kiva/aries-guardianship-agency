@@ -203,13 +203,15 @@ export class AgentManagerService {
         if (agentId) {
             let agentData: any = await this.cache.get(agentId);
             if (agentData === undefined) {
+                /*
+                // TODO: we would like to be able to ping agent to make sure its really available
                 try {
                     await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, 10000);
                 } catch (e) {
                     Logger.warn(`agent ${agentId} not found in cache and was not reachable`);
                     throw e;
                 }
-
+                */
                 Logger.warn(`agent ${agentId} not found in cache...adding`);
                 await this.cache.set(agentId, { adminApiKey, ttl}, {ttl});
                 agentData = await this.cache.get(agentId);
