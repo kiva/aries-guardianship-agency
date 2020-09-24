@@ -29,4 +29,12 @@ export class AgentManagerController {
     public stopAgent(@Body() body: any) {
         return this.agentManagerService.spinDownAgent(body.agentId);
     }
+
+    /**
+     * Make a separate call to connect with the agent
+     */
+    @Post('connect')
+    public connectAgent(@Body() body: any) {
+        return this.agentManagerService.connectAgent(body.agentId, body.adminApiKey);
+    }
 }

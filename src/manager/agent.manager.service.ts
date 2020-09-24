@@ -194,4 +194,14 @@ export class AgentManagerService {
         }
         return null;
     }
+
+    /**
+     * TODO make this DRY with above code
+     * TODO check with the goverance policy on whether to allow the connection
+     */
+    public async connectAgent (agentId: string, adminApiKey: string): Promise<any> {
+        await this.pingConnectionWithRetry(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
+        const connectionData = await this.createConnection(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey);
+        return { agentId, connectionData };
+    }
 }
