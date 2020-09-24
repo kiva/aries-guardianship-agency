@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { Logger } from 'protocol-common/logger';
 import { ProtocolUtility } from 'protocol-common/protocol.utility';
 import { ConfigModule } from 'protocol-common/config.module';
 import { DockerService } from '../src/manager/docker.service';
@@ -22,8 +21,8 @@ describe('Cache behaviors (e2e)', () => {
     let thirdAgentId;
     const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const hostUrl = 'http://localhost:3010';
-    const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
-    const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
+    const agentDid = 'Th7MpTaRZVRYnPiabds81Y';
+
     // make sure this test ends as clean as it started
     const shutdownAgent = async (agentId) => {
         try {
@@ -54,7 +53,7 @@ describe('Cache behaviors (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: agentDid
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -75,7 +74,7 @@ describe('Cache behaviors (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: agentDid
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -96,7 +95,7 @@ describe('Cache behaviors (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: agentDid
         };
         await request(hostUrl)
             .post('/v1/manager')
@@ -145,7 +144,7 @@ describe('Cache behaviors (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: agentDid
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -186,7 +185,7 @@ describe('Cache behaviors (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: 'BillyBobLikesCars',
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: agentDid
         };
         return request(hostUrl)
             .post('/v1/manager')
