@@ -124,7 +124,7 @@ export class AgentManagerService {
 
     public async isAgentServerUp(agentId: string, adminPort: string, adminApiKey: string): Promise<boolean> {
         try {
-            const url = `http://${agentId}:${adminPort}/`;
+            const url = `http://${agentId}:${adminPort}/status`;
             Logger.info(`agent admin url is ${url}`);
             const req: any = {
                 method: 'GET',
@@ -203,9 +203,11 @@ export class AgentManagerService {
         if (agentId) {
             let agentData: any = await this.cache.get(agentId);
             if (agentData === undefined) {
-                if (false === await this.isAgentServerUp(agentId, adminPort, adminApiKey)) {
+                try {
+                    await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, 10000);
+                } catch (e) {
                     Logger.warn(`agent ${agentId} not found in cache and was not reachable`);
-                    return null;
+                    throw e;
                 }
 
                 Logger.warn(`agent ${agentId} not found in cache...adding`);
