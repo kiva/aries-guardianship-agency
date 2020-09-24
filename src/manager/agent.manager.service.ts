@@ -8,6 +8,7 @@ import { DockerService } from './docker.service';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
+import { agent } from "supertest";
 
 /**
  * TODO validation, error cases, etc
@@ -74,8 +75,7 @@ export class AgentManagerService {
             // @tothink move this caching to db
             // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
             Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1)}`);
-            // TODO  we dont really need containerId anymore, could remove it from cache
-            await this.cache.set(agentId, {containerId, adminApiKey, ttl}, {ttl: (ttl === 0 ? ttl : ttl + 1)});
+            await this.cache.set(agentId, {adminApiKey, ttl}, {ttl: (ttl === 0 ? ttl : ttl + 1)});
 
             // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
             if (ttl > 0) {
@@ -96,19 +96,18 @@ export class AgentManagerService {
 
             return {agentId, connectionData};
         } catch (e) {
-            if (e.statusCode === 409 && e.message.includes('Conflict')) {
-                // agent is already running.  We have 1 of 2 possibilities
-                // 1 - agent is running and in cache
-                // 2 - agent is running and not in cache
-                // call to handleAlreadyRunningContainer takes care of both
-                const runningData = await this.handleAlreadyRunningContainer(alias, adminApiKey, autoConnect, ttl);
-                if (runningData) {
-                    return runningData;
-                }
-
-                // if the call to handleAlreadyRunningContainer fails,
-                // let it fall through because we have a bigger problem.
+            // one possible cause of the exception is
+            // agent is already running.  We have 1 of 2 possibilities
+            // 1 - agent is running and in cache
+            // 2 - agent is running and not in cache
+            // call to handleAlreadyRunningContainer takes care of both
+            const runningData = await this.handleAlreadyRunningContainer(alias, adminApiPort, adminApiKey, autoConnect, ttl);
+            if (runningData) {
+                return runningData;
             }
+
+            // if the call to handleAlreadyRunningContainer fails,
+            // let it fall through because we have a bigger problem.
             Logger.warn(`Unhandled error starting agent '${agentId}'`, e);
             throw e;
         }
@@ -124,7 +123,24 @@ export class AgentManagerService {
         await this.manager.stopAgent(agentId);
     }
 
-    public async isAgentServerUp(agentId: string): Promise<boolean> {
+    public async isAgentServerUp(agentId: string, adminPort: string, adminApiKey: string): Promise<boolean> {
+        try {
+            const url = `http://${agentId}:${adminPort}/`;
+            Logger.info(`agent admin url is ${url}`);
+            const req: any = {
+                method: 'GET',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                    accept: 'application/json'
+                },
+            };
+            const res = await this.httpService.request(req).toPromise();
+            Logger.warn(`ping result is ${res.status}`);
+            if (res.status === 200) {
+                return true;
+            }
+        } catch (e) {}
         return false;
     }
 
@@ -152,17 +168,6 @@ export class AgentManagerService {
     private async pingConnectionWithRetry(agentId: string, adminPort: string, adminApiKey: string, durationMS: number) : Promise<any> {
         Logger.info(`pingConnectionWithRetry`);
 
-        const url = `http://${agentId}:${adminPort}/status`;
-        Logger.info(`agent admin url is ${url}`);
-        const req: any = {
-            method: 'GET',
-            url,
-            headers: {
-                'x-api-key': adminApiKey,
-                accept: 'application/json'
-            },
-        };
-
         const startOf = new Date();
         while (durationMS > ProtocolUtility.timeDelta(new Date(), startOf)) {
             // no point in rushing this
@@ -172,8 +177,7 @@ export class AgentManagerService {
             // attempt a status check, if successful call it good and return
             // otherwise retry until duration is exceeded
             try {
-                const res = await this.httpService.request(req).toPromise();
-                if (res.status === 200) {
+                if (true === await this.isAgentServerUp(agentId, adminPort, adminApiKey)) {
                     Logger.info(`agent ${agentId} is up and responding`);
                     return;
                 }
@@ -191,23 +195,26 @@ export class AgentManagerService {
      * for the existing one - we use the adminApiKey to ensure that the caller actually has permissions to query the agent
      * TODO we may want more checks here, eg to ensure the docker container is actually running, but for now we treat the cache as truth
      */
-    private async handleAlreadyRunningContainer(agentId: string, adminApiKey: string, autoConnect: boolean = true, ttl: number): Promise<any> {
+    private async handleAlreadyRunningContainer(agentId: string, adminPort: string,
+                                                adminApiKey: string, autoConnect: boolean = true, ttl: number): Promise<any> {
         // TODO: cleanup inconsistent return types.
         // 1 { agentId, connectionData }
         // 2 { agentId, containerId, adminApiKey }
+        // 3 null
         if (agentId) {
             let agentData: any = await this.cache.get(agentId);
             if (agentData === undefined) {
-                Logger.warn(`agent ${agentId} not found in cache`);
-                // TODO  we dont really need containerId anymore, could remove it from cache
-                // @tothink() if we want to keep containerId, Dockerode contains a function to get containerId.  need
-                //   to research if k8s api has the same
-                const containerId = 'none';
-                await this.cache.set(agentId, { containerId, adminApiKey, ttl}, {ttl});
+                if (false === await this.isAgentServerUp(agentId, adminPort, adminApiKey)) {
+                    Logger.warn(`agent ${agentId} not found in cache and was not reachable`);
+                    return null;
+                }
+
+                Logger.warn(`agent ${agentId} not found in cache...adding`);
+                await this.cache.set(agentId, { adminApiKey, ttl}, {ttl});
                 agentData = await this.cache.get(agentId);
             }
 
-            Logger.log(agentData);
+            Logger.log(`agent ${agentId} exists and is in cache:`, agentData);
             if (agentData && autoConnect === true) {
                 // TODO need error handling if this call fails
                 const connectionData = await this.createConnection(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey);

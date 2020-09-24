@@ -24,6 +24,21 @@ describe('Cache behaviors (e2e)', () => {
     const hostUrl = 'http://localhost:3010';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
+    // make sure this test ends as clean as it started
+    const shutdownAgent = async (agentId) => {
+        try {
+            if (agentId === undefined) {
+                return;
+            }
+            const data = {
+                agentId
+            };
+            await request(hostUrl)
+                .delete('/v1/manager')
+                .send(data)
+                .expect(200);
+        } catch(e) { }
+    };
 
     beforeAll(async () => {
         jest.setTimeout(60000);
@@ -121,6 +136,8 @@ describe('Cache behaviors (e2e)', () => {
         const manager = new DockerService();
         await manager.startAgent(agentConfig);
 
+        await ProtocolUtility.delay(5000);
+
         // attempt request for starting the same agent
         const data = {
             alias: thirdAgentId,
@@ -136,19 +153,48 @@ describe('Cache behaviors (e2e)', () => {
             .expect(201);
     });
 
-    afterAll(async () => {
-        // make sure this test ends as clean as it started
-        const shutdownAgent = async (agentId) => {
-            try {
-                const data = {
-                    agentId
-                };
-                await request(hostUrl)
-                    .delete('/v1/manager')
-                    .send(data)
-                    .expect(200);
-            } catch(e) { }
+    // Test condition: Agent is running but the cache doesn't contain a reference to Agent
+    // Cache down: Reality: up
+    it('Cannot start agent already running using invalid adminApiKey', async () => {
+        await shutdownAgent(thirdAgentId);
+        await ProtocolUtility.delay(5000);
+
+        // setup environment so we can create an agent without using agent manager
+        ConfigModule.init('../src/config/env.json');
+        process.env.AGENT_DOCKER_IMAGE = 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4';
+        process.env.AGENT_LOG_LENGTH = '0';
+        process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH = './resources/pool_transactions_genesis_local_dev';
+        process.env.INTERNAL_URL = 'http://aries-guardianship-agency:3010';
+        process.env.INDY_POOL_NAME = 'pool1';
+        process.env.NETWORK_NAME = 'agency-network';
+
+        // spin up the agent not using AgentMananger so that is cache is out of sync
+        thirdAgentId = 'thirdAgent';
+        const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${thirdAgentId}`;
+        const webhookUrl = `${process.env.INTERNAL_URL}/v1/controller/${thirdAgentId}`;
+        const agentConfig = new AgentConfig('walletId11', 'walletId11', adminApiKey, thirdAgentId,
+            agentEndpoint, webhookUrl, '5001', '5000', '000000000000000000000000Steward1');
+        const manager = new DockerService();
+        await manager.startAgent(agentConfig);
+
+        await ProtocolUtility.delay(5000);
+
+        // attempt request for starting the same agent
+        const data = {
+            alias: thirdAgentId,
+            walletId: 'walletId11',
+            walletKey: 'walletId11',
+            adminApiKey: 'BillyBobLikesCars',
+            seed: '000000000000000000000000Steward1',
+            did: issuerDid
         };
+        return request(hostUrl)
+            .post('/v1/manager')
+            .send(data)
+            .expect(500);
+    });
+
+    afterAll(async () => {
         await shutdownAgent(firstAgentId);
         await shutdownAgent(secondAgentId);
         await shutdownAgent(thirdAgentId);
