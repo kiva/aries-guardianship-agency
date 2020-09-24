@@ -3,6 +3,7 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
 import { ConfigModule } from 'protocol-common/config.module';
 import { DockerService } from '../src/manager/docker.service';
 import { AgentConfig } from '../src/manager/agent.config';
+import { Logger } from 'protocol-common/logger';
 
 
 
@@ -95,7 +96,8 @@ describe('Cache behaviors (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey,
             seed: '000000000000000000000000Steward1',
-            did: agentDid
+            did: agentDid,
+            autoConnect: false
         };
         await request(hostUrl)
             .post('/v1/manager')
@@ -108,10 +110,20 @@ describe('Cache behaviors (e2e)', () => {
         await manager.stopAgent(secondAgentId);
         // Agent is not running but cache does not reflect this state, so we can
         // now test that state
-        return request(hostUrl)
+        await request(hostUrl)
             .post('/v1/manager')
             .send(data)
             .expect(201);
+
+        await ProtocolUtility.delay(15000);
+        const agentUrl = `http://${secondAgentId}:${agentAdminPort}`;
+        Logger.warn(`agentURL ${agentUrl}`);
+        return request(agentUrl)
+            .get('/status')
+            .set('x-api-key', adminApiKey)
+            .expect((res) => {
+                expect(res.status).toBe(200);
+            });
     });
 
     // Test condition: Agent is running but the cache doesn't contain a reference to Agent
@@ -152,7 +164,7 @@ describe('Cache behaviors (e2e)', () => {
             .send(data)
             .expect(201);
 
-        const agentUrl = `http://${firstAgentId}:${agentAdminPort}`;
+        const agentUrl = `http://${thirdAgentId}:${agentAdminPort}`;
         return request(agentUrl)
             .get('/status')
             .set('x-api-key', adminApiKey)
@@ -202,7 +214,7 @@ describe('Cache behaviors (e2e)', () => {
             .send(data)
             .expect(201);
 
-        const agentUrl = `http://${firstAgentId}:${agentAdminPort}`;
+        const agentUrl = `http://${thirdAgentId}:${agentAdminPort}`;
         return request(agentUrl)
             .get('/status')
             .set('x-api-key', 'BillyBobLikesCars')
