@@ -117,7 +117,7 @@ export class K8sService implements IAgentManager {
                 // Only launch the agents on the dedicated agent node pool if it exists:
                 tolerations: [{
                     key: 'agent',
-                    operator: 'equal',
+                    operator: 'Equal',
                     value: 'true',
                     effect: 'NoSchedule'
                 }],
