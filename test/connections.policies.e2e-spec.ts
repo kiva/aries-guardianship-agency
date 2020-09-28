@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { Logger } from 'protocol-common/logger';
+import { ProtocolUtility } from 'protocol-common/protocol.utility';
 
 
 /*
@@ -23,13 +24,11 @@ describe('Create Connections using policies (e2e)', () => {
     const hostUrl = 'http://localhost:3010';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
-    const delayFunc = (ms: number) => {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    };
 
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
         holderApiKey = 'adminApiKey';
+        jest.setTimeout(60000);
     });
 
     it('Spin up agent 1 (issuer)', async () => {
@@ -49,7 +48,7 @@ describe('Create Connections using policies (e2e)', () => {
                 issuerId = res.body.agentId;
                 issuerUrl = `http://${issuerId}:${agentAdminPort}`;
             });
-    }, 15000);
+    });
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
@@ -68,12 +67,12 @@ describe('Create Connections using policies (e2e)', () => {
                 holderId = res.body.agentId;
                 holderUrl = `http://${holderId}:${agentAdminPort}`;
             });
-    }, 15000);
+    });
 
     it('Create connection invite to holder from issuer', async () => {
         // gonna wait here to let the system catch up since since spawning agents
         // also creates connections
-        await delayFunc(5000); // wait 15 sec
+        await ProtocolUtility.delay(5000); // wait 15 sec
         return request(issuerUrl)
             .post('/connections/create-invitation')
             .set('x-api-key', issuerApiKey)
@@ -84,10 +83,10 @@ describe('Create Connections using policies (e2e)', () => {
                 issuerConnectionId = res.body.connection_id;
                 Logger.warn(`issuer created connection_id ${issuerConnectionId}`);
             });
-    }, 30000);
+    });
 
     it('Holder receives to connection invite', async () => {
-        await delayFunc(5000);
+        await ProtocolUtility.delay(5000);
         return request(holderUrl)
             .post('/connections/receive-invitation')
             .set('x-api-key', holderApiKey)
@@ -98,10 +97,10 @@ describe('Create Connections using policies (e2e)', () => {
                 holderConnectionId = res.body.connection_id;
                 Logger.warn(`holder created connection_id ${holderConnectionId}`);
             });
-    }, 60000);
+    });
 
     it('send basic message from issuer to holder', async () => {
-        await delayFunc(2000);
+        await ProtocolUtility.delay(2000);
         const data = {
             content: 'hello holder, are you ready to receive your credentials?'
         };
@@ -117,10 +116,10 @@ describe('Create Connections using policies (e2e)', () => {
                     throw e;
                 }
             });
-    }, 30000);
+    });
 
     it('List Issuer connections', async () => {
-        await delayFunc(5000);
+        await ProtocolUtility.delay(5000);
         return request(issuerUrl)
             .get(`/connections`)
             .set('x-api-key', issuerApiKey)
@@ -137,7 +136,7 @@ describe('Create Connections using policies (e2e)', () => {
 
                 expect(found).toBe(true);
             });
-    }, 30000);
+    });
 
     it('List Holder connections', async () => {
         return request(holderUrl)

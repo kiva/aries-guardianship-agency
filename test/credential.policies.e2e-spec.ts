@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { Logger } from 'protocol-common/logger';
+import { ProtocolUtility } from 'protocol-common/protocol.utility';
 
 
 /*
@@ -30,9 +31,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     const schemaVersion = '1.0';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
-    const delayFunc = (ms: number) => {
-        return new Promise( resolve => setTimeout(resolve, ms) );
-    };
 
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
@@ -79,7 +77,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('Create connection invite to holder from issuer', async () => {
-        await delayFunc(15000); // wait 15 sec
+        await ProtocolUtility.delay(15000); // wait 15 sec
         return request(issuerUrl)
             .post('/connections/create-invitation')
             .set('x-api-key', issuerApiKey)
@@ -92,7 +90,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('Holder responds to connection invite', async () => {
-        await delayFunc(1000);
+        await ProtocolUtility.delay(1000);
         return request(holderUrl)
             .post('/connections/receive-invitation')
             .set('x-api-key', holderApiKey)
@@ -105,7 +103,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('make issuer did public', async() => {
-        await delayFunc(1000);
+        await ProtocolUtility.delay(1000);
         return request(issuerUrl)
             .post(`/wallet/did/public?did=${issuerDid}`)
             .set('x-api-key', issuerApiKey)
@@ -136,7 +134,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it ('issuer creates credential definition', async () => {
-        await delayFunc(1000);
+        await ProtocolUtility.delay(1000);
         const data = {
             schema_id: schemaId,
             support_revocation: false,
@@ -153,7 +151,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('issuer creates credential', async () => {
-        await delayFunc(5000);
+        await ProtocolUtility.delay(5000);
         const data = {
             cred_def_id: credentialDefinitionId,
             credential_proposal: {
@@ -193,7 +191,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('Affirm Issuer credential status', async () => {
-        await delayFunc(5000);
+        await ProtocolUtility.delay(5000);
         return request(issuerUrl)
             .get('/issue-credential/records')
             .set('x-api-key', holderApiKey)
@@ -243,7 +241,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('verify proof is proved', async () => {
-        await delayFunc(6000);
+        await ProtocolUtility.delay(6000);
         return request(issuerUrl)
             .get(`/present-proof/records/${presentationExchangeId}`)
             .set('x-api-key', issuerApiKey)
