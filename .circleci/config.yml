@@ -4,7 +4,7 @@ jobs:
   build-and-test:
     executor:
       name: node/default
-      tag: '8.12'
+      tag: '12.18'
     steps:
       - checkout
       - run:
@@ -36,9 +36,9 @@ jobs:
           command: |
               npm install nodemon --save-dev
               npm install
-              nvm install v8.17.0
+              nvm install lts/erbium
               node -v
-              nvm alias default v8.17.0
+              nvm alias default lts/erbium
       - run:
           name: setup docker environments
           command: |
