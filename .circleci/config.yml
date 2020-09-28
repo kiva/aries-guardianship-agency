@@ -110,7 +110,7 @@ workflows:
            - build-and-test
       - docker/publish:
           requires:
-            - build-and-test
+            - integration-test
           filters: # only run for semver tagged versions
             tags:
               only: /^([0-9]+)\.([0-9]+)\.([0-9]+)/
