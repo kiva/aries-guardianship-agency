@@ -32,11 +32,20 @@ jobs:
             cp dummy.env .env
             echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
       - run:
-          name: node npm setup
+          name: node npm setup (1)
           command: |
               npm install nodemon --save-dev
+      - run:
+          name: node npm setup (2)
+          command: |
               npm install
+      - run:
+          name: node npm setup (3)
+          command: |
               nvm install lts/erbium
+      - run:
+          name: node npm setup (4)
+          command: |
               node -v
               nvm alias default lts/erbium
       - run:
