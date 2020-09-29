@@ -4,7 +4,7 @@ jobs:
   build-and-test:
     executor:
       name: node/default
-      tag: '12.18'
+      tag: '8.12'
     steps:
       - checkout
       - run:
@@ -36,9 +36,9 @@ jobs:
           command: |
               npm install nodemon --save-dev
               npm install
-              nvm install v12.18.4
+              nvm install v8.17.0
               node -v
-              nvm alias default v12.18.4
+              nvm alias default v8.17.0
       - run:
           name: setup docker environments
           command: |
