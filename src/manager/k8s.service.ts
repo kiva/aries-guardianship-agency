@@ -40,16 +40,16 @@ export class K8sService implements IAgentManager {
             apiVersion: 'v1',
             kind: 'Pod',
             metadata: {
-                name: config.label,
+                name: config.containerId,
                 labels: {
-                    'app.kubernetes.io/instance': config.label,
-                    'app.kubernetes.io/name': config.label,
+                    'app.kubernetes.io/instance': config.containerId,
+                    'app.kubernetes.io/name': config.containerId,
                     'agent': 'true'
                 }
             },
             spec: {
                 containers: [{
-                    name: config.label,
+                    name: config.containerId,
                     image: process.env.AGENT_DOCKER_IMAGE,
                     ports: [
                         {
@@ -149,7 +149,7 @@ export class K8sService implements IAgentManager {
         apiVersion: 'v1',
         kind: 'Service',
         metadata: {
-          name: config.label,
+          name: config.containerId,
           labels: {
             'agent': 'true'
           }
@@ -164,8 +164,8 @@ export class K8sService implements IAgentManager {
             port: parseInt(config.adminPort, 10)
           }],
           selector: {
-            'app.kubernetes.io/instance': config.label,
-            'app.kubernetes.io/name': config.label,
+            'app.kubernetes.io/instance': config.containerId,
+            'app.kubernetes.io/name': config.containerId,
           }
         }
       });
@@ -212,7 +212,7 @@ export class K8sService implements IAgentManager {
         await this.createPod(config);
         await this.createService(config);
         // TODO: wait for pods to be ready and time out
-        return config.label;
+        return config.containerId;
     }
 
     /**

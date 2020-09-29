@@ -18,7 +18,7 @@ export class AgentManagerController {
     @Post()
     public createAgent(@Body() body: any) {
         return this.agentManagerService.spinUpAgent(body.walletId, body.walletKey, body.adminApiKey, body.ttl,
-                    body.seed, body.controllerUrl, body.alias, body.autoConnect,
+                    body.seed, body.controllerUrl, body.agentId, body.label, body.autoConnect,
                     body.adminApiPort);
     }
 

@@ -49,7 +49,7 @@ describe('Cache behaviors (e2e)', () => {
     // Cache: down; Reality: down
     it('Start agent not already started successfully', async () => {
         const data = {
-            alias: 'issuer',
+            agentId: 'issuer',
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey,
@@ -70,7 +70,7 @@ describe('Cache behaviors (e2e)', () => {
     // Cache: up; Reality: up
     it('Request agent previously started', async () => {
         const data = {
-            alias: 'issuer',
+            agentId: 'issuer',
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey,
@@ -91,7 +91,7 @@ describe('Cache behaviors (e2e)', () => {
     // Cache: up; Reality: down
     it('Successfully request Agent not running but is in cache', async () => {
         const data = {
-            alias: 'runningAgent',
+            agentId: 'runningAgent',
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey,
@@ -154,7 +154,7 @@ describe('Cache behaviors (e2e)', () => {
 
         // attempt request for starting the same agent
         const data = {
-            alias: thirdAgentId,
+            agentId: thirdAgentId,
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey,
@@ -207,7 +207,7 @@ describe('Cache behaviors (e2e)', () => {
 
         // attempt request for starting the same agent
         const data = {
-            alias: thirdAgentId,
+            agentId: thirdAgentId,
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey: 'BillyBobLikesCars',
