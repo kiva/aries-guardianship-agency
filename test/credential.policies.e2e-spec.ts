@@ -40,7 +40,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Spin up agent 1 (issuer)', async () => {
         const data = {
-            alias: 'issuer',
+            agentId: 'issuer',
             walletId: 'walletId11',
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
@@ -59,7 +59,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
-            alias: 'holder',
+            agentId: 'holder',
             walletId: 'walletId22',
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,

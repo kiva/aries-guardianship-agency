@@ -47,7 +47,7 @@ POST http://localhost:3010/v1/manager
 	"adminApiKey": "someAdminKey",
 	"ttl": -1,
 	"seed": "000000000000000000000000ABCDEFG1",
-	"alias": "testAgent2"
+	"agentId": "testAgent2"
 }
 ```
 To spin down the agent, use the returned agentId from above and do:

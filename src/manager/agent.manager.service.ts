@@ -43,14 +43,15 @@ export class AgentManagerService {
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
     public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number,
-                             seed?: string, controllerUrl?: string, alias?: string, autoConnect: boolean = true,
+                             seed?: string, controllerUrl?: string, agentId?: string, label?: string, autoConnect: boolean = true,
                              adminApiPort: string = process.env.AGENT_ADMIN_PORT) {
         // TODO: cleanup inconsistent return types.
         // 1  { agentId, connectionData }
         // 1a { agentId, empty }
         // 2  { agentId, container, adminApiKey }
 
-        const agentId = alias || cryptoRandomString({length: 32, type: 'hex'});
+        agentId = agentId || cryptoRandomString({length: 32, type: 'hex'});
+        label = label || agentId;
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const httpPort = process.env.AGENT_HTTP_PORT;
 
@@ -68,8 +69,9 @@ export class AgentManagerService {
             // TODO Long term we should have a proper DB store for permanent agents
             // (or figure out a way to avoid having to save agent data all together)
 
-            const agentConfig = new AgentConfig(walletId, walletKey, adminApiKey, agentId, agentEndpoint, webhookUrl, adminApiPort, httpPort, seed);
-            const containerId = await this.manager.startAgent(agentConfig);
+            const agentConfig = new AgentConfig(
+                walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, seed);
+            await this.manager.startAgent(agentConfig);
 
             // @tothink move this caching to db
             // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
@@ -100,7 +102,7 @@ export class AgentManagerService {
             // 1 - agent is running and in cache
             // 2 - agent is running and not in cache
             // call to handleAlreadyRunningContainer takes care of both
-            const runningData = await this.handleAlreadyRunningContainer(alias, adminApiPort, adminApiKey, autoConnect, ttl);
+            const runningData = await this.handleAlreadyRunningContainer(agentId, adminApiPort, adminApiKey, autoConnect, ttl);
             if (runningData) {
                 return runningData;
             }
@@ -114,11 +116,11 @@ export class AgentManagerService {
 
     /**
      * TODO we should probably respond with something
+     * TODO handle case were agent not there
      */
     public async spinDownAgent(agentId: string) {
         Logger.log('Spinning down agent', agentId);
         await this.cache.del(agentId);
-        // TODO handle case were agent not there
         await this.manager.stopAgent(agentId);
     }
 

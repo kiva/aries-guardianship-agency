@@ -29,7 +29,7 @@ export class DockerService implements IAgentManager {
         const containerOptions = {
             Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
-            name: config.label,
+            name: config.agentId,
             HostConfig: {
                 AutoRemove: true,
                 NetworkMode: process.env.NETWORK_NAME,

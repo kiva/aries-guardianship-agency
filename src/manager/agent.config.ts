@@ -28,11 +28,13 @@ export class AgentConfig {
 
     readonly admin: string; // Admin url
 
-    readonly adminApiKey :string;
+    readonly adminApiKey: string;
 
-    readonly label :string; // Agent name
+    readonly label: string; // Agent name
 
-    readonly webhookUrl :string; // Controller endpoint
+    readonly agentId: string; // Agent id used for remote interactions
+
+    readonly webhookUrl: string; // Controller endpoint
 
     readonly endpoint: string; // Agent endpoint
 
@@ -49,7 +51,8 @@ export class AgentConfig {
         walletId: string,
         walletKey: string,
         adminApiKey: string,
-        agentName: string,
+        agentId: string,
+        label: string,
         agentEndpoint: string,
         webhookUrl: string,
         adminPort: string,
@@ -68,7 +71,8 @@ export class AgentConfig {
         this.walletStorageCreds = JSON.stringify(this.getWalletStorageCreds());
         this.admin = `0.0.0.0 ${adminPort}`;
         this.adminApiKey = adminApiKey;
-        this.label = agentName;
+        this.label = label;
+        this.agentId = agentId;
         this.webhookUrl = webhookUrl;
         this.endpoint = agentEndpoint;
         this.httpPort = httpPort;
