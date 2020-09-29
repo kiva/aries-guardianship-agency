@@ -34,8 +34,6 @@ export class AgentConfig {
 
     readonly agentId: string; // Agent id used for remote interactions
 
-    readonly containerId: string; // Container id used for docker/k8s
-
     readonly webhookUrl: string; // Controller endpoint
 
     readonly endpoint: string; // Agent endpoint
@@ -75,7 +73,6 @@ export class AgentConfig {
         this.adminApiKey = adminApiKey;
         this.label = label;
         this.agentId = agentId;
-        this.containerId = `agent-${agentId}`; // Append agent- to make more readable
         this.webhookUrl = webhookUrl;
         this.endpoint = agentEndpoint;
         this.httpPort = httpPort;
