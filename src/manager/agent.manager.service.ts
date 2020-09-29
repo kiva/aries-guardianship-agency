@@ -50,7 +50,7 @@ export class AgentManagerService {
         // 1a { agentId, empty }
         // 2  { agentId, container, adminApiKey }
 
-        const agentId = alias || cryptoRandomString({length: 32, type: 'hex'});
+        const agentId = alias || `agent-${cryptoRandomString({length: 22, type: 'hex'})}`;
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const httpPort = process.env.AGENT_HTTP_PORT;
 
