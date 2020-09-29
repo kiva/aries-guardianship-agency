@@ -108,7 +108,7 @@ workflows:
           requires:
             - build-and-test
       - production-dockerfile-test:
-          requires
+          requires:
             - integration-test
       - docker/publish:
           requires:
