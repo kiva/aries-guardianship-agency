@@ -87,6 +87,16 @@ export class K8sService implements IAgentManager {
                         '--auto-respond-presentation-request',
                         '--wallet-local-did', // TODO this could be an arg on the config
                     ],
+                    env: [
+                        {
+                            name: 'DD_ENV',
+                            value: process.env.DD_ENV,
+                        },
+                        {
+                            name: 'DD_TAGS',
+                            value: process.env.DD_TAGS,
+                        }
+                    ],
                     // TODO: get the following from src/config/env.json? or other declarative source
                     resources: {
                         limits: {
