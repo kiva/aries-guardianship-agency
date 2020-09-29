@@ -1,9 +1,9 @@
-FROM node:erbium-alpine as node_modules
+FROM node:carbon-alpine as node_modules
 WORKDIR /tmp/
 COPY package.json package-lock.json ./
 RUN npm install --production
 
-FROM node:erbium-alpine as dist
+FROM node:carbon-alpine as dist
 WORKDIR /tmp/
 COPY package.json package-lock.json tsconfig.json ./
 RUN npm install
@@ -11,7 +11,7 @@ COPY src/ src/
 COPY resources/ resources/
 RUN npm run build
 
-FROM node:erbium-alpine
+FROM node:carbon-alpine
 WORKDIR /www
 COPY --from=node_modules /tmp/node_modules ./node_modules
 COPY --from=dist /tmp/dist ./dist
