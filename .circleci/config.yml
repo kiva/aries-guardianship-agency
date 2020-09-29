@@ -59,7 +59,7 @@ jobs:
             sleep 5
             docker exec -ti aries-guardianship-agency sh -c "npm run test"
 
-  docker-publish:
+  production-dockerfile-test:
     machine:
       docker_layer_caching: true
       image: ubuntu-1604:201903-01
@@ -73,18 +73,18 @@ jobs:
       - run:
           name: node npm setup
           command: |
-            npm install nodemon --save-dev
-            npm install
-            nvm install v8.17.0
-            node -v
-            nvm alias default v8.17.0
+              npm install nodemon --save-dev
+              npm install
+              nvm install v8.17.0
+              node -v
+              nvm alias default v8.17.0
       - run:
           name: setup docker environments
           command: |
-            # note: this docker pull is also in integration-test
+            # note: this docker pull is also in docker-publish
             docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4
       - run:
-          name: Start production docker compose and wait for readiness
+          name: Start docker compose and wait for readiness
           command: |
             docker network ls
             docker-compose -f docker-compose.ci.yml build
@@ -93,10 +93,9 @@ jobs:
             sleep 20
             docker-compose -f docker-compose.ci.yml logs
       - run:
-          name: Running sanity tests
+          name: Is Agency Reachable?
           command: |
-            sleep 5
-            node -r dotenv/config node_modules/.bin/jest --runInBand --forceExit --t "Prod integration test"
+            ./scripts/healthcheck.sh http://localhost:3010/healthz
 
 workflows:
   build-and-test:
@@ -106,11 +105,14 @@ workflows:
             tags:
               only: /.*/
       - integration-test:
-         requires:
-           - build-and-test
-      - docker/publish:
+          requires:
+            - build-and-test
+      - production-dockerfile-test:
           requires:
             - integration-test
+      - docker/publish:
+          requires:
+            - production-dockerfile-test 
           filters: # only run for semver tagged versions
             tags:
               only: /^([0-9]+)\.([0-9]+)\.([0-9]+)/
