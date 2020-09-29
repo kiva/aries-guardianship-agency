@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
-import { KubeConfig, CoreV1Api, V1PodCondition } from '@kubernetes/client-node';
+import { KubeConfig, CoreV1Api, V1PodCondition, V1Pod } from '@kubernetes/client-node';
 import { readFileSync } from 'fs';
 
 /**
@@ -36,7 +36,7 @@ export class K8sService implements IAgentManager {
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
         const healthCheckPort : any = parseInt(config.httpPort, 10);
-        const podOptions = {
+        const podOptions : V1Pod = {
             apiVersion: 'v1',
             kind: 'Pod',
             metadata: {
@@ -86,6 +86,16 @@ export class K8sService implements IAgentManager {
                         // request_sent
                         '--auto-respond-presentation-request',
                         '--wallet-local-did', // TODO this could be an arg on the config
+                    ],
+                    env: [
+                        {
+                            name: 'DD_ENV',
+                            value: process.env.DD_ENV,
+                        },
+                        {
+                            name: 'DD_TAGS',
+                            value: process.env.DD_TAGS,
+                        }
                     ],
                     // TODO: get the following from src/config/env.json? or other declarative source
                     resources: {
