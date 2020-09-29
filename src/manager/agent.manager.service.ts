@@ -82,7 +82,7 @@ export class AgentManagerService {
             if (ttl > 0) {
                 setTimeout(
                     async () => {
-                        await this.spinDownAgent(agentConfig.containerId);
+                        await this.spinDownAgent(agentId, agentConfig.containerId);
                     }, ttl * 1000);
             }
 
@@ -116,11 +116,12 @@ export class AgentManagerService {
 
     /**
      * TODO we should probably respond with something
+     * TODO handle case were agent not there
      */
-    public async spinDownAgent(agentId: string, containerId: string) {
+    public async spinDownAgent(agentId: string, containerId?: string) {
         Logger.log('Spinning down agent', agentId);
         await this.cache.del(agentId);
-        // TODO handle case were agent not there
+        containerId = containerId || `agent-${agentId}`;
         await this.manager.stopAgent(containerId);
     }
 
