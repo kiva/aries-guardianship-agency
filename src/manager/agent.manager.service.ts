@@ -137,7 +137,7 @@ export class AgentManagerService {
                 },
             };
             const res = await this.httpService.request(req).toPromise();
-            Logger.warn(`ping result is ${res.status}`);
+            Logger.info(`ping result is ${res.status}`);
             if (res.status === 200) {
                 return true;
             }
