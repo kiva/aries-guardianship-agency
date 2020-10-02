@@ -137,7 +137,6 @@ export class AgentManagerService {
                 },
             };
             const res = await this.httpService.request(req).toPromise();
-            Logger.warn(`ping result is ${res.status}`);
             if (res.status === 200) {
                 return true;
             }
@@ -167,7 +166,6 @@ export class AgentManagerService {
      * TODO move to it's own class and pass in the http object
      */
     private async pingConnectionWithRetry(agentId: string, adminPort: string, adminApiKey: string, durationMS: number) : Promise<any> {
-        Logger.info(`pingConnectionWithRetry`);
 
         const startOf = new Date();
         while (durationMS > ProtocolUtility.timeDelta(new Date(), startOf)) {
@@ -185,7 +183,6 @@ export class AgentManagerService {
             } catch (e) {
                 // Do nothing and try again
             }
-            Logger.info(`pingConnectionWithRetry is retrying`);
         }
 
         throw new ProtocolException('Agent', `Never got a good status code from agent ${agentId}`);

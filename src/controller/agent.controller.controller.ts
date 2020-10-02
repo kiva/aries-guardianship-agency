@@ -22,10 +22,8 @@ export class AgentControllerController {
         @Param('subroute') subroute: string,
         @Body() body: any
     ): Promise<any> {
-        Logger.log('----- GET WEB HOOK START -----');
-        Logger.log(`${agentId}/${route}/${subroute}`, body);
+        Logger.log(`GET ${agentId}/${route}/${subroute}`);
         const value = await this.agentControllerService.handleRequest(agentId, route, subroute, body);
-        Logger.log('----- GET WEB HOOK END -----');
         return value;
     }
 
@@ -36,12 +34,10 @@ export class AgentControllerController {
         @Param('subroute') subroute: string,
         @Body() body: any
     ): Promise<any> {
-        Logger.log('----- POST WEB HOOK START -----');
         // note letting handler log body as needed
         // toThink() maybe get rid of this log message all together since it can be handled else where
-        Logger.log(`${agentId}/${route}/${subroute}`);
+        Logger.log(`POST ${agentId}/${route}/${subroute}`);
         const value = await this.agentControllerService.handleRequest(agentId, route, subroute, body);
-        Logger.log('----- POST WEB HOOK END -----');
         return value;
     }
 

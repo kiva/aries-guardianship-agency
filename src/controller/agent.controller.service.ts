@@ -21,7 +21,7 @@ export class AgentControllerService {
     }
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
-        Logger.info(`AgentControllerService.handleRequest(${agentId}, ${route}, ${topic})`, body);
+        Logger.info(`AgentControllerService.handleRequest(${agentId}, ${route}, ${topic})`);
         const agent: any = await this.cache.get(agentId);
         // @tothink http/https?  should this be from the env?
         const agentUrl = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}`;
