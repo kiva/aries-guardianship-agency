@@ -21,7 +21,9 @@ If you have access to other protocol repos, you can get the values from those re
   
 Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache  
 
-# Check `src/config/env.json` for the most up to date version:
+(not sure what this is about: Check `src/config/env.json` for the most up to date version)
+
+## Running tests
 ```
  docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4
 ```
@@ -34,7 +36,7 @@ To run tests:
 ```
 npm run test
 ```
-
+## Additional info
 To spin up an agent use a REST client like insomnia and do some like:
 ```
 POST http://localhost:3010/v1/manager
