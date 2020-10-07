@@ -40,7 +40,7 @@ services:
   wallets-db:
     image: postgres:11
     container_name: wallets-db
-    command: postgres
+    command: postgres -c listen_addresses='*'
     env_file:
       - .env
     volumes:

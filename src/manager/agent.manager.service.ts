@@ -97,6 +97,7 @@ export class AgentManagerService {
 
             return {agentId, connectionData};
         } catch (e) {
+            Logger.warn(`exception on startAgent() for agent '${agentId}'`, e);
             // one possible cause of the exception is
             // agent is already running.  We have 1 of 2 possibilities
             // 1 - agent is running and in cache
@@ -109,7 +110,7 @@ export class AgentManagerService {
 
             // if the call to handleAlreadyRunningContainer fails,
             // let it fall through because we have a bigger problem.
-            Logger.warn(`Unhandled error starting agent '${agentId}'`, e);
+            Logger.warn(`Unhandled error starting agent '${agentId}'...see previous messages for details`);
             throw e;
         }
     }
@@ -214,9 +215,10 @@ export class AgentManagerService {
                 Logger.warn(`agent ${agentId} not found in cache...adding`);
                 await this.cache.set(agentId, { adminApiKey, ttl}, {ttl});
                 agentData = await this.cache.get(agentId);
+            } else {
+                Logger.log(`agent ${agentId} exists and is in cache:`, agentData);
             }
 
-            Logger.log(`agent ${agentId} exists and is in cache:`, agentData);
             if (agentData && autoConnect === true) {
                 // TODO need error handling if this call fails
                 const connectionData = await this.createConnection(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey);

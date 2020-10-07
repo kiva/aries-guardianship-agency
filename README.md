@@ -1,30 +1,23 @@
 # Aries Guardianship Agency
 
 ### Setup
-You will need to following variables in the .env file.  Values are not literal, this just an example:
-```
-# ENV FILE FOR AGENCY
-NODE_ENV=LOCAL
+You will setup the `.env` file.  The easiest way to start is by copying
+`dummy.env` to `.env`. Other than `NODE_ENV`, the values are not literal and you may need to adjust
+those for your environment.
 
-# For Wallet DB
-WALLET_DB_HOST=hostname
-WALLET_DB_PORT=5432
-WALLET_DB_USER=username
-WALLET_DB_PASS=password
-WALLET_DB_ADMIN_USER=adminusername
-WALLET_DB_ADMIN_PASS=password
-POSTGRES_PASSWORD=password
-```
 If you have access to other protocol repos, you can get the values from those repos.
-
-(TODO figure out a good way to pass those .env vars in)  
   
-Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache  
-
-# Check `src/config/env.json` for the most up to date version:
+Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache.  
 ```
  docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4
 ```
+
+
+## Additional environment settings.
+Check `src/config/env.json`.  While it is not common, there are additional environment variable settings in this file and may need to be
+adjusted for your environment. 
+
+## Running tests
 The main docker-compose will spin up the agency, a local indy ledger, and a postgres wallets db to connect to:
 ```
 npm install
@@ -34,7 +27,7 @@ To run tests:
 ```
 npm run test
 ```
-
+## Additional info
 To spin up an agent use a REST client like insomnia and do some like:
 ```
 POST http://localhost:3010/v1/manager
