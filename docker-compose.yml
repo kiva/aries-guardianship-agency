@@ -67,9 +67,10 @@ services:
       - "3010"
     volumes:
       - ./:/www
-      - //var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - agency-network
     depends_on:
       - indy-pool
     tty: true
+    privileged: true # Need privileged to access docker.sock in latest Mac Docker
