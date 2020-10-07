@@ -21,7 +21,9 @@ If you have access to other protocol repos, you can get the values from those re
   
 Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache  
 
-(not sure what this is about: Check `src/config/env.json` for the most up to date version)
+## Additional environment settings.
+Check `src/config/env.json`.  While it is not common, there are additional environment variable settings in this file and may need to be
+adjusted for your environment. 
 
 ## Running tests
 ```
