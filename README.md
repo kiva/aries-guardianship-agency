@@ -1,7 +1,7 @@
 # Aries Guardianship Agency
 
 ### Setup
-You will setup the `.env` file.  The easiest way to start is by copying
+You will need to setup the `.env` file.  The easiest way to start is by copying
 `dummy.env` to `.env`. Other than `NODE_ENV`, the values are not literal and you may need to adjust
 those for your environment.
 
@@ -61,6 +61,6 @@ npm install
 docker-compose -f docker-compose.kiva-network.yml
 ```
 
-If you run into conflicts with docker images from another file clean things up with: docker rm -f $(docker ps -aq)
+If you run into conflicts with docker images from another file clean things up with: `docker rm -f $(docker ps -aq)`.
 
 
