@@ -65,9 +65,10 @@ services:
     expose: 
       - "3010"
     volumes:
-      - //var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - agency-network
     depends_on:
       - indy-pool
     tty: true
+    privileged: true
