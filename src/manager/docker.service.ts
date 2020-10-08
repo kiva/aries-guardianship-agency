@@ -3,6 +3,7 @@ import Dockerode from 'dockerode';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { Logger } from 'protocol-common/logger';
+import { Constants } from 'protocol-common/constants';
 
 /**
  *
@@ -26,10 +27,11 @@ export class DockerService implements IAgentManager {
     public async startAgent(config: AgentConfig): Promise<string> {
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
-        const containerOptions = {
+        let containerOptions = {
             Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
             name: config.agentId,
+            ExposedPorts : {},
             HostConfig: {
                 AutoRemove: true,
                 NetworkMode: process.env.NETWORK_NAME,
@@ -65,6 +67,16 @@ export class DockerService implements IAgentManager {
                 '--wallet-local-did', // TODO this could be an arg on the config
             ],
         };
+
+        // allow for exposing admin ports when set as this might be needed during development.
+        // to make the ports available to localhost, they need to be set to values other than
+        // the defaults
+        if (config.adminPort !== process.env.AGENT_ADMIN_PORT && Constants.LOCAL === process.env.NODE_ENV) {
+            containerOptions.ExposedPorts = {
+                [`${config.adminPort}/tcp`]: {}
+            };
+        }
+
         if (config.seed) {
             containerOptions.Cmd.push('--seed', config.seed);
         }
