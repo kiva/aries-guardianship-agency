@@ -27,7 +27,7 @@ export class DockerService implements IAgentManager {
     public async startAgent(config: AgentConfig): Promise<string> {
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
-        let containerOptions = {
+        const containerOptions = {
             Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
             name: config.agentId,
