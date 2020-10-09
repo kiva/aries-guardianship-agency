@@ -8,6 +8,7 @@ import { DockerService } from './docker.service';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
+import { agent } from 'supertest';
 
 /**
  * TODO validation, error cases, etc
@@ -50,6 +51,7 @@ export class AgentManagerService {
         // 1a { agentId, empty }
         // 2  { agentId, container, adminApiKey }
 
+        Logger.warn(`inputs are ${agentId} ${adminApiPort}`);
         agentId = agentId || cryptoRandomString({length: 32, type: 'hex'});
         label = label || agentId;
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
@@ -71,6 +73,7 @@ export class AgentManagerService {
 
             const agentConfig = new AgentConfig(
                 walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, seed);
+            Logger.warn(`calling start agent`);
             await this.manager.startAgent(agentConfig);
 
             // @tothink move this caching to db
