@@ -8,7 +8,6 @@ import { DockerService } from './docker.service';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
-import { agent } from 'supertest';
 
 /**
  * TODO validation, error cases, etc
