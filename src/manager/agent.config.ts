@@ -75,8 +75,8 @@ export class AgentConfig {
         this.agentId = agentId;
         this.webhookUrl = webhookUrl;
         this.endpoint = agentEndpoint;
-        this.httpPort = httpPort;
-        this.adminPort = adminPort;
+        this.httpPort = `${httpPort}`;
+        this.adminPort = `${adminPort}`;
         this.seed = seed;
     }
 

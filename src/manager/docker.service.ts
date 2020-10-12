@@ -25,29 +25,13 @@ export class DockerService implements IAgentManager {
      * TODO I don't think this handles errors properly if the agent fails to spin up
      */
     public async startAgent(config: AgentConfig): Promise<string> {
-        Logger.warn(`docker start agent`);
-        /*
-        const getExposedPorts = () => {
-            if (config.adminPort !== process.env.AGENT_ADMIN_PORT && Constants.LOCAL === process.env.NODE_ENV) {
-                Logger.warn(`setting up admin ports to be exposed`);
-                return {
-                    [`${config.adminPort}/tcp`]: {},
-                    [`${config.httpPort}/tcp`]: {}
-                };
-            }
-            return undefined;
-        };
-        */
+
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
         const containerOptions: ContainerCreateOptions = {
             Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
             name: config.agentId,
-            /*ExposedPorts: {
-                [`${config.adminPort}/tcp`]: {},
-                [`${config.httpPort}/tcp`]: {}
-            },*/
             HostConfig: {
                 AutoRemove: true,
                 NetworkMode: process.env.NETWORK_NAME,
@@ -98,9 +82,7 @@ export class DockerService implements IAgentManager {
         if (config.seed) {
             containerOptions.Cmd.push('--seed', config.seed);
         }
-        Logger.warn(`creating container`, containerOptions);
         const container = await this.dockerode.createContainer(containerOptions);
-        Logger.warn(`starting container`);
         await container.start();
 
         // Log the first few lines so we can see if there's an issue with the agent
