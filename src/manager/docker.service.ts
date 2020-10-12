@@ -26,6 +26,18 @@ export class DockerService implements IAgentManager {
      */
     public async startAgent(config: AgentConfig): Promise<string> {
         Logger.warn(`docker start agent`);
+        /*
+        const getExposedPorts = () => {
+            if (config.adminPort !== process.env.AGENT_ADMIN_PORT && Constants.LOCAL === process.env.NODE_ENV) {
+                Logger.warn(`setting up admin ports to be exposed`);
+                return {
+                    [`${config.adminPort}/tcp`]: {},
+                    [`${config.httpPort}/tcp`]: {}
+                };
+            }
+            return undefined;
+        };
+        */
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
         const containerOptions: ContainerCreateOptions = {
