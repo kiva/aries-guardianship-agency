@@ -76,7 +76,7 @@ export class AgentManagerService {
             // @tothink move this caching to db
             // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
             Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1)}`);
-            await this.cache.set(agentId, {adminApiKey, ttl}, {ttl: (ttl === 0 ? ttl : ttl + 1)});
+            await this.cache.set(agentId, {adminApiKey, adminApiPort, ttl}, {ttl: (ttl === 0 ? ttl : ttl + 1)});
 
             // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
             if (ttl > 0) {
@@ -221,7 +221,7 @@ export class AgentManagerService {
 
             if (agentData && autoConnect === true) {
                 // TODO need error handling if this call fails
-                const connectionData = await this.createConnection(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey);
+                const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
                 return {
                     agentId,
                     connectionData
@@ -240,8 +240,10 @@ export class AgentManagerService {
      * TODO check with the goverance policy on whether to allow the connection
      */
     public async connectAgent (agentId: string, adminApiKey: string): Promise<any> {
-        await this.pingConnectionWithRetry(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
-        const connectionData = await this.createConnection(agentId, process.env.AGENT_ADMIN_PORT, adminApiKey);
+        const agentCache: any = await this.cache.get(agentId);
+        const adminPort = (agentCache ? agentCache.adminApiPort : process.env.AGENT_ADMIN_PORT);
+        await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
+        const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
         return { agentId, connectionData };
     }
 }

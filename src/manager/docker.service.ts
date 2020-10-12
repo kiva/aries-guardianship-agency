@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import Dockerode from 'dockerode';
+import Dockerode, { ContainerCreateOptions } from 'dockerode';
+import { Logger } from 'protocol-common/logger';
+import { Constants } from 'protocol-common/constants';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
-import { Logger } from 'protocol-common/logger';
 
 /**
  *
@@ -24,9 +25,10 @@ export class DockerService implements IAgentManager {
      * TODO I don't think this handles errors properly if the agent fails to spin up
      */
     public async startAgent(config: AgentConfig): Promise<string> {
+
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
-        const containerOptions = {
+        const containerOptions: ContainerCreateOptions = {
             Image: process.env.AGENT_DOCKER_IMAGE,
             Tty: true,
             name: config.agentId,
@@ -65,6 +67,18 @@ export class DockerService implements IAgentManager {
                 '--wallet-local-did', // TODO this could be an arg on the config
             ],
         };
+
+        // allow for exposing admin ports when set as this might be needed during development.
+        // to make the ports available to localhost, they need to be set to values other than
+        // the defaults
+        if (config.adminPort !== process.env.AGENT_ADMIN_PORT && Constants.LOCAL === process.env.NODE_ENV) {
+            Logger.info(`setting up ports to be exposed`);
+            containerOptions.ExposedPorts = {
+                [`${config.adminPort}/tcp`]: {},
+                [`${config.httpPort}/tcp`]: {}
+            };
+        }
+
         if (config.seed) {
             containerOptions.Cmd.push('--seed', config.seed);
         }
@@ -74,6 +88,7 @@ export class DockerService implements IAgentManager {
         // Log the first few lines so we can see if there's an issue with the agent
         let logCount = 0;
         const agentLogLength = process.env.AGENT_LOG_LENGTH || 100;
+
         container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
             Logger.log('Starting agent:');
             stream.on('data', (chunk: Buffer) => {

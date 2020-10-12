@@ -1,6 +1,7 @@
 import { Controller, Body, Post, Delete } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AgentManagerService } from './agent.manager.service';
+import { Logger } from 'protocol-common/logger';
 
 /**
  *
