@@ -242,8 +242,9 @@ export class AgentManagerService {
      */
     public async connectAgent (agentId: string, adminApiKey: string): Promise<any> {
         const agentCache: any = await this.cache.get(agentId);
-        await this.pingConnectionWithRetry(agentId, agentCache.adminApiPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
-        const connectionData = await this.createConnection(agentId, agentCache.adminApiPort, adminApiKey);
+        const adminPort = (agentCache ? agentCache.adminApiPort : process.env.AGENT_ADMIN_PORT);
+        await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
+        const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
         return { agentId, connectionData };
     }
 }

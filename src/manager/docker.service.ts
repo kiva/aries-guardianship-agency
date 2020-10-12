@@ -72,7 +72,7 @@ export class DockerService implements IAgentManager {
         // to make the ports available to localhost, they need to be set to values other than
         // the defaults
         if (config.adminPort !== process.env.AGENT_ADMIN_PORT && Constants.LOCAL === process.env.NODE_ENV) {
-            Logger.warn(`setting up admin ports to be exposed`);
+            Logger.info(`setting up ports to be exposed`);
             containerOptions.ExposedPorts = {
                 [`${config.adminPort}/tcp`]: {},
                 [`${config.httpPort}/tcp`]: {}
@@ -88,7 +88,7 @@ export class DockerService implements IAgentManager {
         // Log the first few lines so we can see if there's an issue with the agent
         let logCount = 0;
         const agentLogLength = process.env.AGENT_LOG_LENGTH || 100;
-        Logger.warn(`attaching to container`);
+
         container.attach({stream: true, stdout: true, stderr: true}, (err, stream) => {
             Logger.log('Starting agent:');
             stream.on('data', (chunk: Buffer) => {

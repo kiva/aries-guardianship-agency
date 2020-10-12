@@ -18,7 +18,6 @@ export class AgentManagerController {
      */
     @Post()
     public createAgent(@Body() body: any) {
-        Logger.warn(`createAgent inputs are ${body.agentId} ${body.adminApiPort}`);
         return this.agentManagerService.spinUpAgent(body.walletId, body.walletKey, body.adminApiKey, body.ttl,
                     body.seed, body.controllerUrl, body.agentId, body.label, body.autoConnect,
                     body.adminApiPort);
