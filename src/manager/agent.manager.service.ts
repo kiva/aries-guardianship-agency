@@ -76,7 +76,7 @@ export class AgentManagerService {
             // @tothink move this caching to db
             // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
             Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1)}`);
-            await this.cache.set(agentId, {adminApiKey, adminApiPort, ttl}, {ttl: (ttl === 0 ? ttl : ttl + 1)});
+            await this.setAgentCache(agentId, adminApiKey, adminApiPort, ttl);
 
             // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
             if (ttl > 0) {
@@ -194,7 +194,7 @@ export class AgentManagerService {
      * for the existing one - we use the adminApiKey to ensure that the caller actually has permissions to query the agent
      * TODO we may want more checks here, eg to ensure the docker container is actually running, but for now we treat the cache as truth
      */
-    private async handleAlreadyRunningContainer(agentId: string, adminPort: string,
+    private async handleAlreadyRunningContainer(agentId: string, adminApiPort: string,
                                                 adminApiKey: string, autoConnect: boolean = true, ttl: number): Promise<any> {
         // TODO: cleanup inconsistent return types.
         // 1 { agentId, connectionData }
@@ -206,14 +206,14 @@ export class AgentManagerService {
                 /*
                 // TODO: we would like to be able to ping agent to make sure its really available
                 try {
-                    await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, 10000);
+                    await this.pingConnectionWithRetry(agentId, adminApiPort, adminApiKey, 10000);
                 } catch (e) {
                     Logger.warn(`agent ${agentId} not found in cache and was not reachable`);
                     throw e;
                 }
                 */
                 Logger.warn(`agent ${agentId} not found in cache...adding`);
-                await this.cache.set(agentId, { adminApiKey, ttl}, {ttl});
+                await this.setAgentCache(agentId, adminApiKey, adminApiPort, ttl);
                 agentData = await this.cache.get(agentId);
             } else {
                 Logger.log(`agent ${agentId} exists and is in cache:`, agentData);
@@ -221,7 +221,7 @@ export class AgentManagerService {
 
             if (agentData && autoConnect === true) {
                 // TODO need error handling if this call fails
-                const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
+                const connectionData = await this.createConnection(agentId, adminApiPort, adminApiKey);
                 return {
                     agentId,
                     connectionData
@@ -245,5 +245,12 @@ export class AgentManagerService {
         await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
         const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
         return { agentId, connectionData };
+    }
+
+    /**
+     * This gets called in multiple places so ensuring logic stays the same
+     */
+    private async setAgentCache(agentId: string, adminApiKey: string, adminApiPort: string, ttl: number): Promise<void> {
+        await this.cache.set(agentId, {adminApiKey, adminApiPort, ttl}, {ttl: (ttl === 0 ? ttl : ttl + 1)});
     }
 }
