@@ -5,18 +5,31 @@ import { readFileSync } from 'fs';
  * TODO some of these things may need to be moved to env.json or .env files
  */
 export class AgentConfig {
+    readonly admin: string; // Admin url
 
-    readonly inboundTransport: string;
+    readonly adminApiKey: string;
 
-    readonly outboundTransport: string;
+    readonly adminPort: string;
 
-    readonly ledgerPoolName: string;
+    readonly agentId: string; // Agent id used for remote interactions
+
+    readonly endpoint: string; // Agent endpoint
 
     readonly genesisTransactions: string;
 
-    readonly walletType: string;
+    readonly httpPort: string;
 
-    readonly walletStorageType: string;
+    readonly label: string; // Agent name
+
+    readonly ledgerPoolName: string;
+
+    readonly inboundTransport: string;
+
+    readonly networkName: string;
+
+    readonly outboundTransport: string;
+
+    readonly seed: string;
 
     readonly walletName: string;
 
@@ -26,23 +39,11 @@ export class AgentConfig {
 
     readonly walletStorageCreds: string;
 
-    readonly admin: string; // Admin url
+    readonly walletStorageType: string;
 
-    readonly adminApiKey: string;
-
-    readonly label: string; // Agent name
-
-    readonly agentId: string; // Agent id used for remote interactions
+    readonly walletType: string;
 
     readonly webhookUrl: string; // Controller endpoint
-
-    readonly endpoint: string; // Agent endpoint
-
-    readonly httpPort: string;
-
-    readonly adminPort: string;
-
-    readonly seed: string;
 
     /**
      * Sets up the agent config
@@ -62,6 +63,7 @@ export class AgentConfig {
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
         this.outboundTransport = 'http';
         this.ledgerPoolName = process.env.INDY_POOL_NAME;
+        this.networkName = process.env.NETWORK_NAME;
         this.genesisTransactions = AgentConfig.getGenesisFile();
         this.walletType = 'indy';
         this.walletStorageType = 'postgres_storage';
