@@ -31,6 +31,6 @@ export class HandlersFactory {
                 Logger.warn(`unhandled topic ${topic}`);
                 break;
         }
-        throw new ProtocolException('Agency', `No suitable handler found for topic ${topic})`);
+        throw new ProtocolException('Agency', `No suitable handler found for topic ${topic}`);
     }
 }
