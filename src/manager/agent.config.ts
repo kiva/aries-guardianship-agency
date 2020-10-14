@@ -129,8 +129,8 @@ export class AgentConfig {
             '--admin-api-key', this.adminApiKey,
             '--label', this.label,
             '--webhook-url', this.webhookUrl,
-            // TODO For now we auto respond, eventually we will want more refined responses
             '--log-level', this.logLevel,
+            // TODO For now we auto respond, eventually we will want more refined responses
             '--auto-respond-messages',
             // status offer_sent
             '--auto-respond-credential-offer',
