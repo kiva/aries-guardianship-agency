@@ -50,7 +50,7 @@ export class K8sService implements IAgentManager {
             spec: {
                 containers: [{
                     name: config.agentId,
-                    image: process.env.AGENT_DOCKER_IMAGE,
+                    image: config.dockerImage,
                     ports: [
                         {
                             name: 'http',
@@ -79,7 +79,7 @@ export class K8sService implements IAgentManager {
                         '--label', config.label,
                         '--webhook-url', config.webhookUrl,
                         // TODO For now we auto respond, eventually we will want more refined responses
-                        '--log-level', 'debug',
+                        '--log-level', config.logLevel,
                         '--auto-respond-messages',
                         // status offer_sent
                         '--auto-respond-credential-offer',

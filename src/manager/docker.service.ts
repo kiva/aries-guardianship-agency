@@ -29,12 +29,12 @@ export class DockerService implements IAgentManager {
         const inboundTransportSplit = config.inboundTransport.split(' ');
         const adminSplit = config.admin.split(' ');
         const containerOptions: ContainerCreateOptions = {
-            Image: process.env.AGENT_DOCKER_IMAGE,
+            Image: config.dockerImage,
             Tty: true,
             name: config.agentId,
             HostConfig: {
                 AutoRemove: true,
-                NetworkMode: process.env.NETWORK_NAME,
+                NetworkMode: config.networkName,
                 PortBindings: {
                     [`${config.adminPort}/tcp`]: [{ 'HostPort': config.adminPort}],
                     [`${config.httpPort}/tcp`]: [{ 'HostPort': config.httpPort}]
@@ -58,7 +58,7 @@ export class DockerService implements IAgentManager {
                 '--label', config.label,
                 '--webhook-url', config.webhookUrl,
                 // TODO For now we auto respond, eventually we will want more refined responses
-                '--log-level', 'debug',
+                '--log-level', config.logLevel,
                 '--auto-respond-messages',
                 // status offer_sent
                 '--auto-respond-credential-offer',

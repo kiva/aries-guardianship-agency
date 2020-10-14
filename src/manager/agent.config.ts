@@ -14,6 +14,8 @@ export class AgentConfig {
 
     readonly agentId: string; // Agent id used for remote interactions
 
+    readonly dockerImage: string;
+
     readonly endpoint: string; // Agent endpoint
 
     readonly genesisTransactions: string;
@@ -65,6 +67,7 @@ export class AgentConfig {
     ) {
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
         this.outboundTransport = 'http';
+        this.dockerImage = process.env.AGENT_DOCKER_IMAGE;
         this.ledgerPoolName = process.env.INDY_POOL_NAME;
         this.networkName = process.env.NETWORK_NAME;
         this.logLevel = process.env.AGENT_LOG_LEVEL;
