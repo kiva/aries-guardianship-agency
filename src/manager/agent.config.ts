@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import { ProtocolException } from 'protocol-common/protocol.exception';
 
 /**
  * Centralizes the config setup for an agent so it can be used in docker or k8s
