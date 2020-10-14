@@ -109,7 +109,39 @@ export class AgentConfig {
         return readFileSync(process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH).toString();
     }
 
-    public getStartArgs(): any {
-        throw new ProtocolException('TODO', 'TODO');
+    public getStartArgs(): any[] {
+        const inboundTransportSplit = this.inboundTransport.split(' ');
+        const adminSplit = this.admin.split(' ');
+
+        const args = [ 'start',
+            '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
+            '--outbound-transport', this.outboundTransport,
+            '--ledger-pool-name', this.ledgerPoolName,
+            '--genesis-transactions', this.genesisTransactions,
+            '--wallet-type', this.walletType,
+            '--wallet-storage-type', this.walletStorageType,
+            '--endpoint', this.endpoint,
+            '--wallet-name', this.walletName,
+            '--wallet-key', this.walletKey,
+            '--wallet-storage-config', this.walletStorageConfig,
+            '--wallet-storage-creds', this.walletStorageCreds,
+            '--admin', adminSplit[0], adminSplit[1],
+            '--admin-api-key', this.adminApiKey,
+            '--label', this.label,
+            '--webhook-url', this.webhookUrl,
+            // TODO For now we auto respond, eventually we will want more refined responses
+            '--log-level', this.logLevel,
+            '--auto-respond-messages',
+            // status offer_sent
+            '--auto-respond-credential-offer',
+            // request_sent
+            '--auto-respond-presentation-request',
+            '--wallet-local-did', // TODO this could be an arg on the config
+        ];
+
+        if (this.seed) {
+            args.push('--seed', this.seed);
+        }
+        return args;
     }
 }
