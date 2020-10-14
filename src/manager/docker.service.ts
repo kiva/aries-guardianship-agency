@@ -40,32 +40,7 @@ export class DockerService implements IAgentManager {
                     [`${config.httpPort}/tcp`]: [{ 'HostPort': config.httpPort}]
                 }
             },
-            Cmd: [
-                'start',
-                '--inbound-transport', inboundTransportSplit[0],  inboundTransportSplit[1], inboundTransportSplit[2],
-                '--outbound-transport', config.outboundTransport,
-                '--ledger-pool-name', config.ledgerPoolName,
-                '--genesis-transactions', config.genesisTransactions,
-                '--wallet-type', config.walletType,
-                '--wallet-storage-type', config.walletStorageType,
-                '--endpoint', config.endpoint,
-                '--wallet-name', config.walletName,
-                '--wallet-key', config.walletKey,
-                '--wallet-storage-config', config.walletStorageConfig,
-                '--wallet-storage-creds', config.walletStorageCreds,
-                '--admin', adminSplit[0], adminSplit[1],
-                '--admin-api-key', config.adminApiKey,
-                '--label', config.label,
-                '--webhook-url', config.webhookUrl,
-                // TODO For now we auto respond, eventually we will want more refined responses
-                '--log-level', config.logLevel,
-                '--auto-respond-messages',
-                // status offer_sent
-                '--auto-respond-credential-offer',
-                // request_sent
-                '--auto-respond-presentation-request',
-                '--wallet-local-did', // TODO this could be an arg on the config
-            ],
+            Cmd: config.getStartArgs(),
         };
 
         // allow for exposing admin ports when set as this might be needed during development.
@@ -79,9 +54,6 @@ export class DockerService implements IAgentManager {
             };
         }
 
-        if (config.seed) {
-            containerOptions.Cmd.push('--seed', config.seed);
-        }
         const container = await this.dockerode.createContainer(containerOptions);
         await container.start();
 
