@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { ProtocolException } from 'protocol-common/protocol.exception';
 
 /**
  * Centralizes the config setup for an agent so it can be used in docker or k8s
@@ -22,6 +23,8 @@ export class AgentConfig {
     readonly label: string; // Agent name
 
     readonly ledgerPoolName: string;
+
+    readonly logLevel: string;
 
     readonly inboundTransport: string;
 
@@ -64,6 +67,7 @@ export class AgentConfig {
         this.outboundTransport = 'http';
         this.ledgerPoolName = process.env.INDY_POOL_NAME;
         this.networkName = process.env.NETWORK_NAME;
+        this.logLevel = process.env.AGENT_LOG_LEVEL;
         this.genesisTransactions = AgentConfig.getGenesisFile();
         this.walletType = 'indy';
         this.walletStorageType = 'postgres_storage';
@@ -100,5 +104,9 @@ export class AgentConfig {
 
     public static getGenesisFile(): string {
         return readFileSync(process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH).toString();
+    }
+
+    public getStartArgs(): any {
+        throw new ProtocolException('TODO', 'TODO');
     }
 }
