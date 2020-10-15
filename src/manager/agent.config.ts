@@ -5,18 +5,37 @@ import { readFileSync } from 'fs';
  * TODO some of these things may need to be moved to env.json or .env files
  */
 export class AgentConfig {
+    readonly admin: string; // Admin url
 
-    readonly inboundTransport: string;
+    readonly adminApiKey: string;
 
-    readonly outboundTransport: string;
+    readonly agentLogLength: number;
 
-    readonly ledgerPoolName: string;
+    readonly adminPort: string;
+
+    readonly agentId: string; // Agent id used for remote interactions
+
+    readonly dockerImage: string;
+
+    readonly endpoint: string; // Agent endpoint
 
     readonly genesisTransactions: string;
 
-    readonly walletType: string;
+    readonly httpPort: string;
 
-    readonly walletStorageType: string;
+    readonly label: string; // Agent name
+
+    readonly ledgerPoolName: string;
+
+    readonly logLevel: string;
+
+    readonly inboundTransport: string;
+
+    readonly networkName: string;
+
+    readonly outboundTransport: string;
+
+    readonly seed: string;
 
     readonly walletName: string;
 
@@ -26,23 +45,11 @@ export class AgentConfig {
 
     readonly walletStorageCreds: string;
 
-    readonly admin: string; // Admin url
+    readonly walletStorageType: string;
 
-    readonly adminApiKey: string;
-
-    readonly label: string; // Agent name
-
-    readonly agentId: string; // Agent id used for remote interactions
+    readonly walletType: string;
 
     readonly webhookUrl: string; // Controller endpoint
-
-    readonly endpoint: string; // Agent endpoint
-
-    readonly httpPort: string;
-
-    readonly adminPort: string;
-
-    readonly seed: string;
 
     /**
      * Sets up the agent config
@@ -61,7 +68,11 @@ export class AgentConfig {
     ) {
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
         this.outboundTransport = 'http';
+        this.dockerImage = process.env.AGENT_DOCKER_IMAGE;
         this.ledgerPoolName = process.env.INDY_POOL_NAME;
+        this.networkName = process.env.NETWORK_NAME;
+        this.logLevel = process.env.AGENT_LOG_LEVEL;
+        this.agentLogLength = parseInt(process.env.AGENT_LOG_LENGTH || `100`, 10);
         this.genesisTransactions = AgentConfig.getGenesisFile();
         this.walletType = 'indy';
         this.walletStorageType = 'postgres_storage';
@@ -98,5 +109,41 @@ export class AgentConfig {
 
     public static getGenesisFile(): string {
         return readFileSync(process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH).toString();
+    }
+
+    public getStartArgs(): any[] {
+        const inboundTransportSplit = this.inboundTransport.split(' ');
+        const adminSplit = this.admin.split(' ');
+
+        const args = [ 'start',
+            '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
+            '--outbound-transport', this.outboundTransport,
+            '--ledger-pool-name', this.ledgerPoolName,
+            '--genesis-transactions', this.genesisTransactions,
+            '--wallet-type', this.walletType,
+            '--wallet-storage-type', this.walletStorageType,
+            '--endpoint', this.endpoint,
+            '--wallet-name', this.walletName,
+            '--wallet-key', this.walletKey,
+            '--wallet-storage-config', this.walletStorageConfig,
+            '--wallet-storage-creds', this.walletStorageCreds,
+            '--admin', adminSplit[0], adminSplit[1],
+            '--admin-api-key', this.adminApiKey,
+            '--label', this.label,
+            '--webhook-url', this.webhookUrl,
+            '--log-level', this.logLevel,
+            // TODO For now we auto respond, eventually we will want more refined responses
+            '--auto-respond-messages',
+            // status offer_sent
+            '--auto-respond-credential-offer',
+            // request_sent
+            '--auto-respond-presentation-request',
+            '--wallet-local-did', // TODO this could be an arg on the config
+        ];
+
+        if (this.seed) {
+            args.push('--seed', this.seed);
+        }
+        return args;
     }
 }

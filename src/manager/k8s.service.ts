@@ -33,8 +33,6 @@ export class K8sService implements IAgentManager {
     }
 
     private async createPod(config: AgentConfig): Promise<any> {
-        const inboundTransportSplit = config.inboundTransport.split(' ');
-        const adminSplit = config.admin.split(' ');
         const healthCheckPort : any = parseInt(config.httpPort, 10);
         const podOptions : V1Pod = {
             apiVersion: 'v1',
@@ -50,7 +48,7 @@ export class K8sService implements IAgentManager {
             spec: {
                 containers: [{
                     name: config.agentId,
-                    image: process.env.AGENT_DOCKER_IMAGE,
+                    image: config.dockerImage,
                     ports: [
                         {
                             name: 'http',
@@ -61,32 +59,7 @@ export class K8sService implements IAgentManager {
                             containerPort: parseInt(config.adminPort, 10)
                         }
                     ],
-                    args: [
-                        'start',
-                        '--inbound-transport', inboundTransportSplit[0],  inboundTransportSplit[1], inboundTransportSplit[2],
-                        '--outbound-transport', config.outboundTransport,
-                        '--ledger-pool-name', config.ledgerPoolName,
-                        '--genesis-transactions', config.genesisTransactions,
-                        '--wallet-type', config.walletType,
-                        '--wallet-storage-type', config.walletStorageType,
-                        '--endpoint', config.endpoint,
-                        '--wallet-name', config.walletName,
-                        '--wallet-key', config.walletKey,
-                        '--wallet-storage-config', config.walletStorageConfig,
-                        '--wallet-storage-creds', config.walletStorageCreds,
-                        '--admin', adminSplit[0], adminSplit[1],
-                        '--admin-api-key', config.adminApiKey,
-                        '--label', config.label,
-                        '--webhook-url', config.webhookUrl,
-                        // TODO For now we auto respond, eventually we will want more refined responses
-                        '--log-level', 'debug',
-                        '--auto-respond-messages',
-                        // status offer_sent
-                        '--auto-respond-credential-offer',
-                        // request_sent
-                        '--auto-respond-presentation-request',
-                        '--wallet-local-did', // TODO this could be an arg on the config
-                    ],
+                    args: config.getStartArgs(),
                     env: [
                         {
                             name: 'DD_ENV',
@@ -147,9 +120,6 @@ export class K8sService implements IAgentManager {
                 }
             }
         };
-        if (config.seed) {
-            podOptions.spec.containers[0].args.push('--seed', config.seed);
-        }
         const res = await this.kapi.createNamespacedPod(this.namespace, podOptions);
         return res.body;
     }
