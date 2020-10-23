@@ -89,6 +89,8 @@ export class Proofs implements IAgentResponseHandler {
         }
 
         if (body.role === 'verifier' && body.state === 'request_sent') {
+            // NOTE: this is not the expected place to handle the next step in governance
+            // it is here just to get a look at verifier data
             let url: string = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/credentials`;
             let req: AxiosRequestConfig = {
                 method: 'GET',
@@ -116,6 +118,7 @@ export class Proofs implements IAgentResponseHandler {
             const res = await this.http.requestWithRetry(req);
             Logger.warn(`TEMP: prover got this back from getting presentation credential: ${res.status} ${res.body}`);
             // post /present-proof/records/{pres_ex_id}/send-presentation
+            // finish implementation following pattern in previous handler
         }
 
         Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`, body);
