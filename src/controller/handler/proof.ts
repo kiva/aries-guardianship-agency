@@ -61,7 +61,7 @@ export class Proofs implements IAgentResponseHandler {
     public async handlePost(agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
 
         if (route !== 'topic' || topic !== 'present_proof') {
-            throw new ProtocolException('present_proof',`${route}/${topic} is not valid.`);
+            throw new ProtocolException('present_proof', `${route}/${topic} is not valid.`);
         }
 
         const readPermission = async (governanceKey: string, cacheKey: string) => {
@@ -88,7 +88,37 @@ export class Proofs implements IAgentResponseHandler {
             return res.data;
         }
 
-        Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`);
+        if (body.role === 'verifier' && body.state === 'request_sent') {
+            let url: string = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/credentials`;
+            let req: AxiosRequestConfig = {
+                method: 'GET',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                }
+            };
+            Logger.info(`getting presentation credential ${req.url}`);
+            const res = await this.http.requestWithRetry(req);
+            Logger.warn(`TEMP: verifier got this back from getting presentation credential: ${res.status} ${res.body}`);
+        }
+
+        if (body.role === 'prover' && body.state === 'request_received') {
+            // get credential
+            let url: string = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/credentials`;
+            let req: AxiosRequestConfig = {
+                method: 'GET',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                }
+            };
+            Logger.info(`getting presentation credential ${req.url}`);
+            const res = await this.http.requestWithRetry(req);
+            Logger.warn(`TEMP: prover got this back from getting presentation credential: ${res.status} ${res.body}`);
+            // post /present-proof/records/{pres_ex_id}/send-presentation
+        }
+
+        Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`, body);
         return;
     }
 }
