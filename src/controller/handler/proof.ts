@@ -88,22 +88,6 @@ export class Proofs implements IAgentResponseHandler {
             return res.data;
         }
 
-        if (body.role === 'verifier' && body.state === 'request_sent') {
-            // NOTE: this is not the expected place to handle the next step in governance
-            // it is here just to get a look at verifier data
-            let url: string = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/credentials`;
-            let req: AxiosRequestConfig = {
-                method: 'GET',
-                url,
-                headers: {
-                    'x-api-key': adminApiKey,
-                }
-            };
-            Logger.info(`getting presentation credential ${req.url}`);
-            const res = await this.http.requestWithRetry(req);
-            Logger.warn(`TEMP: verifier got this back from getting presentation credential: ${res.status} ${res.body}`);
-        }
-
         if (body.role === 'prover' && body.state === 'request_received') {
             // get credential
             let url: string = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/credentials`;
@@ -115,10 +99,74 @@ export class Proofs implements IAgentResponseHandler {
                 }
             };
             Logger.info(`getting presentation credential ${req.url}`);
-            const res = await this.http.requestWithRetry(req);
-            Logger.warn(`TEMP: prover got this back from getting presentation credential: ${res.status} ${res.body}`);
+            let res = await this.http.requestWithRetry(req);
+            Logger.warn(`TEMP: prover got this back from getting presentation credential: ${res.status} `, res.data);
+            // TODO: add governance checks
+            // TODO: remove extra logging
             // post /present-proof/records/{pres_ex_id}/send-presentation
             // finish implementation following pattern in previous handler
+            /*
+                { cred_info:
+                  { referent: 'd7ff6b53-c59e-4c43-8a2d-e411b1c7683c',
+                    attrs: { score: 750},
+                    schema_id: 'Th7MpTaRZVRYnPiabds81Y:2:sample_schema:1.0',
+                    cred_def_id: 'Th7MpTaRZVRYnPiabds81Y:3:CL:12:issued_1',
+                    rev_reg_id: null,
+                    cred_rev_id: null
+                  },
+                  interval: null,
+                  presentation_referents: [ 'score' ]
+                }
+                {
+                  "trace": false,
+                  "requested_predicates": {
+                    "additionalProp1": {
+                      "cred_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                      "timestamp": 1603736702
+                    }
+                  },
+                  "requested_attributes": {
+                    "additionalProp1": {
+                      "cred_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                      "timestamp": 1603736702,
+                      "revealed": true
+                    }
+                  },
+                  "self_attested_attributes": {
+                    "additionalProp1": "self_attested_value"
+                  }
+                }
+            */
+            const requested_predicates = {};
+            const requested_attributes = {};
+            const self_attested_attributes = {};
+            const cred_id = res.data[0].cred_info.referent;
+
+            for (const attribute of res.data[0].presentation_referents) {
+                const item = res.data[0].cred_info.attrs[attribute];
+                const timestamp = Math.floor(Date.now() / 1000);
+                Logger.warn(`dealing with ${attribute} / ${item}`);
+
+                self_attested_attributes[attribute] = item;
+                requested_predicates[attribute] = { cred_id, timestamp };
+                requested_attributes[attribute] = { cred_id, timestamp, revealed: true };
+            }
+
+            const reply = { trace: true, requested_attributes, requested_predicates, self_attested_attributes};
+            Logger.warn(`this is what we will return`, reply);
+            url = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/send-presentation`;
+            req = {
+                method: 'POST',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                },
+                data: reply
+            };
+            Logger.info(`requesting prover to send-presentation ${req.url}`);
+            res = await this.http.requestWithRetry(req);
+            Logger.warn(`send-presentation results are ${res.status}`, res.data);
+            return res.data;
         }
 
         Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`, body);
