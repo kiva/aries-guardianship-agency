@@ -136,8 +136,6 @@ export class AgentConfig {
             '--auto-respond-messages',
             // status offer_sent
             '--auto-respond-credential-offer',
-            // request_sent
-            '--auto-respond-presentation-request',
             '--wallet-local-did', // TODO this could be an arg on the config
         ];
 

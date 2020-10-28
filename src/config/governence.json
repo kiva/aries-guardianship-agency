@@ -13,7 +13,8 @@
       "store": "always"
     },
     "present-proof": {
-      "verify-presentation": "always"
+      "verify-presentation": "always",
+      "send-presentation": "always"
     }
   },
   "SingleConnection": {
@@ -25,7 +26,8 @@
       "store": "once"
     },
     "present-proof": {
-      "verify-presentation": "once"
+      "verify-presentation": "once",
+      "send-presentation": "once"
     }
   }
 }

@@ -26,6 +26,61 @@ export class Proofs implements IAgentResponseHandler {
     }
 
     /*
+        we will get an array like this:
+        [
+        { cred_info:
+          { referent: 'd7ff6b53-c59e-4c43-8a2d-e411b1c7683c',
+            attrs: { score: 750},
+            schema_id: 'Th7MpTaRZVRYnPiabds81Y:2:sample_schema:1.0',
+            cred_def_id: 'Th7MpTaRZVRYnPiabds81Y:3:CL:12:issued_1',
+            rev_reg_id: null,
+            cred_rev_id: null
+          },
+          interval: null,
+          presentation_referents: [ 'score' ]
+        }
+        ]
+        and create this:
+         { score:
+           { cred_info:
+              { referent: '40ea2f38-593d-46b6-839f-540232f60c5b',
+                attrs: [Object],
+                schema_id: 'Th7MpTaRZVRYnPiabds81Y:2:sample_schema:1.0',
+                cred_def_id: 'Th7MpTaRZVRYnPiabds81Y:3:CL:12:issued_1',
+                rev_reg_id: null,
+                cred_rev_id: null },
+             interval: null,
+             presentation_referents: [ 'score' ]
+           }
+         }
+    */
+    private async getCredentialsByReferentId(url: string, adminApiKey: string): Promise<any> {
+        const req: AxiosRequestConfig = {
+            method: 'GET',
+            url,
+            headers: {
+                'x-api-key': adminApiKey,
+            }
+        };
+        const res = await this.http.requestWithRetry(req);
+
+        const sorted = res.data.sort((a, b) => a.cred_info.referent.localeCompare(b.cred_info.referent));
+        const credentials: any = {};
+
+        if (sorted) {
+            for (const item of sorted) {
+                for (const referent of item.presentation_referents) {
+                    if (!credentials[referent]) {
+                        credentials[referent] = item;
+                    }
+                }
+            }
+        }
+
+        return credentials;
+    }
+
+    /*
        body is expected to be like this
         {
            "thread_id":"ce43593c-f901-4901-85ac-e3626f1f105b",
@@ -61,7 +116,7 @@ export class Proofs implements IAgentResponseHandler {
     public async handlePost(agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
 
         if (route !== 'topic' || topic !== 'present_proof') {
-            throw new ProtocolException('present_proof',`${route}/${topic} is not valid.`);
+            throw new ProtocolException('present_proof', `${route}/${topic} is not valid.`);
         }
 
         const readPermission = async (governanceKey: string, cacheKey: string) => {
@@ -88,7 +143,54 @@ export class Proofs implements IAgentResponseHandler {
             return res.data;
         }
 
-        Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`);
+        if (body.role === 'prover' && body.state === 'request_received') {
+            const presentationExchangeId: string = body.presentation_exchange_id;
+            const action: string = 'send-presentation';
+            const templatedCacheKey = `${agentId}-${body.role}-${presentationExchangeId}`;
+            await this.checkPolicyForAction(action, templatedCacheKey);
+            await readPermission(action, templatedCacheKey);
+
+            // get credential
+            let url: string = agentUrl + `/present-proof/records/${presentationExchangeId}/credentials`;
+            const credentials: any = await this.getCredentialsByReferentId(url, adminApiKey);
+            const presentationRequest = body.presentation_request;
+            const requested_attributes: any = {};
+            const requested_predicates: any = {};
+            const self_attested_attributes: any = {};       // note: we are not building any as we do not use self_attested attribs
+                                                            // if proofs fail, look at this missing functionality
+
+            for (const attributeKey in presentationRequest.requested_attributes) {
+                if (credentials[attributeKey]) {
+                    requested_attributes[attributeKey] = {
+                        cred_id: credentials[attributeKey].cred_info.referent,
+                        revealed: true
+                    };
+                }
+            }
+
+            for (const predicateKey in presentationRequest.requested_predicates) {
+                if (credentials[predicateKey]) {
+                    requested_predicates[predicateKey] = {
+                        cred_id: credentials[predicateKey].cred_info.referent
+                    };
+                }
+            }
+
+            const reply = { trace: false, requested_predicates, requested_attributes, self_attested_attributes };
+            url = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/${action}`;
+            const req: AxiosRequestConfig = {
+                method: 'POST',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                },
+                data: reply
+            };
+            const res = await this.http.requestWithRetry(req);
+            return res.data;
+        }
+
+        Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`, body);
         return;
     }
 }
