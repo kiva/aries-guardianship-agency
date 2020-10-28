@@ -25,6 +25,33 @@ export class Proofs implements IAgentResponseHandler {
         }
     }
 
+    private async getCredentialsByReferentId(url: string, adminApiKey: string): Promise<any> {
+        // get credential
+        const req: AxiosRequestConfig = {
+            method: 'GET',
+            url,
+            headers: {
+                'x-api-key': adminApiKey,
+            }
+        };
+        const res = await this.http.requestWithRetry(req);
+
+        const sorted = res.data.sort((a, b) => a.cred_info.referent.localeCompare(b.cred_info.referent));
+        const credentials: any = {};
+
+        if (sorted) {
+            for (const item of sorted) {
+                for (const referent of item.presentation_referents) {
+                    if (!credentials[referent]) {
+                        credentials[referent] = item;
+                    }
+                }
+            }
+        }
+
+        return credentials;
+    }
+
     /*
        body is expected to be like this
         {
@@ -97,53 +124,33 @@ export class Proofs implements IAgentResponseHandler {
 
             // get credential
             let url: string = agentUrl + `/present-proof/records/${presentationExchangeId}/credentials`;
-            let req: AxiosRequestConfig = {
-                method: 'GET',
-                url,
-                headers: {
-                    'x-api-key': adminApiKey,
-                }
-            };
-            let res = await this.http.requestWithRetry(req);
-
-            const credentials = res.data.sort((a, b) => a.cred_info.referent.localeCompare(b.cred_info.referent));
+            const credentials: any = await this.getCredentialsByReferentId(url, adminApiKey);
             const presentationRequest = body.presentation_request;
-            const timestamp = Math.floor(Date.now() / 1000);
-            const credentialsByReft: any = {};
             const requested_attributes: any = {};
             const requested_predicates: any = {};
-            const self_attested_attributes: any = {};
+            const self_attested_attributes: any = {};       // note: we are not building any as we do not use self_attested attribs
+                                                            // if proofs fail, look at this missing functionality
 
-            if (credentials) {
-                for (const item of credentials) {
-                    for (const referent of item.presentation_referents) {
-                        if (!credentialsByReft[referent]) {
-                            credentialsByReft[referent] = item;
-                        }
-                    }
-                }
-            }
-
-            for (const referent in presentationRequest.requested_attributes) {
-                if (credentialsByReft[referent]) {
-                    requested_attributes[referent] = {
-                        cred_id: credentialsByReft[referent].cred_info.referent,
+            for (const attributeKey in presentationRequest.requested_attributes) {
+                if (credentials[attributeKey]) {
+                    requested_attributes[attributeKey] = {
+                        cred_id: credentials[attributeKey].cred_info.referent,
                         revealed: true
                     };
                 }
             }
 
-            for (const referent in presentationRequest.requested_predicates) {
-                if (credentialsByReft[referent]) {
-                    requested_predicates[referent] = {
-                        cred_id: credentialsByReft[referent].cred_info.referent
+            for (const predicateKey in presentationRequest.requested_predicates) {
+                if (credentials[predicateKey]) {
+                    requested_predicates[predicateKey] = {
+                        cred_id: credentials[predicateKey].cred_info.referent
                     };
                 }
             }
 
             const reply = { trace: false, requested_predicates, requested_attributes, self_attested_attributes };
             url = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/${action}`;
-            req = {
+            const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,
                 headers: {
@@ -151,7 +158,7 @@ export class Proofs implements IAgentResponseHandler {
                 },
                 data: reply
             };
-            res = await this.http.requestWithRetry(req);
+            const res = await this.http.requestWithRetry(req);
             return res.data;
         }
 
