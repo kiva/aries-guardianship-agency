@@ -120,9 +120,13 @@ export class AgentManagerService {
      * TODO handle case were agent not there
      */
     public async spinDownAgent(agentId: string) {
-        Logger.log('Spinning down agent', agentId);
-        await this.cache.del(agentId);
-        await this.manager.stopAgent(agentId);
+        try {
+            Logger.log('Spinning down agent', agentId);
+            await this.cache.del(agentId);
+            await this.manager.stopAgent(agentId);
+        } catch (e) {
+            Logger.warn(`error shutting down agent: '${e.message}'`, e);
+        }
     }
 
     public async isAgentServerUp(agentId: string, adminPort: string, adminApiKey: string): Promise<boolean> {
