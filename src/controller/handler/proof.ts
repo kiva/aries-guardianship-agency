@@ -26,6 +26,53 @@ export class Proofs implements IAgentResponseHandler {
     }
 
     /*
+        The api call will return us an array of:
+        [
+           {
+              "cred_info":{
+                 "referent":"95092747-76ab-411b-91b6-355b3109cbd1",
+                 "attrs":[
+                    "Object"
+                 ],
+                 "schema_id":"Th7MpTaRZVRYnPiabds81Y:2:sample_schema:1.0",
+                 "cred_def_id":"Th7MpTaRZVRYnPiabds81Y:3:CL:12:issued_1",
+                 "rev_reg_id":null,
+                 "cred_rev_id":null
+              },
+              "interval":null,
+              "presentation_referents":[
+                 "score"
+              ]
+           }
+        ]
+
+        we will in turn create a sorted array like this:
+        [
+          referent_value : [object]
+        ]
+    */
+    private async getCredentials(url: string, adminApiKey: string): Promise<any[]> {
+        const req: AxiosRequestConfig = {
+            method: 'GET',
+            url,
+            headers: {
+                'x-api-key': adminApiKey,
+            }
+        };
+        Logger.info(`getting presentation credential ${req.url}`);
+        const res = await this.http.requestWithRetry(req);
+        Logger.warn(`TEMP: prover got this back from getting presentation credential: ${res.status} `, res.data);
+        res.sort((a, b) => a.cred_info.referent.localeCompare(b.cred_info.referent));
+        const list = [];
+
+        for(const credential of res) {
+            list[credential.cred_info.referent] = credential;
+        }
+
+        return list;
+    }
+
+    /*
        body is expected to be like this
         {
            "thread_id":"ce43593c-f901-4901-85ac-e3626f1f105b",
@@ -89,34 +136,20 @@ export class Proofs implements IAgentResponseHandler {
         }
 
         if (body.role === 'prover' && body.state === 'request_received') {
+            Logger.warn(`Have presentation request to handle`, body);
+
+            const presentationExchangeId: string = body.presentation_exchange_id;
+            const presentationRequest = body.presentation_request;
+
             // get credential
-            let url: string = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/credentials`;
-            let req: AxiosRequestConfig = {
-                method: 'GET',
-                url,
-                headers: {
-                    'x-api-key': adminApiKey,
-                }
-            };
-            Logger.info(`getting presentation credential ${req.url}`);
-            let res = await this.http.requestWithRetry(req);
-            Logger.warn(`TEMP: prover got this back from getting presentation credential: ${res.status} `, res.data);
+            let url: string = agentUrl + `/present-proof/records/${presentationExchangeId}/credentials`;
+            const credentials = await this.getCredentials(url, adminApiKey);
+            Logger.warn(`TEMP: sorted credentials`, credentials);
             // TODO: add governance checks
             // TODO: remove extra logging
             // post /present-proof/records/{pres_ex_id}/send-presentation
             // finish implementation following pattern in previous handler
             /*
-                { cred_info:
-                  { referent: 'd7ff6b53-c59e-4c43-8a2d-e411b1c7683c',
-                    attrs: { score: 750},
-                    schema_id: 'Th7MpTaRZVRYnPiabds81Y:2:sample_schema:1.0',
-                    cred_def_id: 'Th7MpTaRZVRYnPiabds81Y:3:CL:12:issued_1',
-                    rev_reg_id: null,
-                    cred_rev_id: null
-                  },
-                  interval: null,
-                  presentation_referents: [ 'score' ]
-                }
                 {
                   "trace": false,
                   "requested_predicates": {
@@ -140,8 +173,10 @@ export class Proofs implements IAgentResponseHandler {
             const requested_predicates = {};
             const requested_attributes = {};
             const self_attested_attributes = {};
-            const cred_id = res.data[0].cred_info.referent;
+            const cred_id = '???'; // res.data[0].cred_info.referent;
+            const timestamp = Math.floor(Date.now() / 1000);
 
+            /*
             for (const attribute of res.data[0].presentation_referents) {
                 const item = res.data[0].cred_info.attrs[attribute];
                 const timestamp = Math.floor(Date.now() / 1000);
@@ -151,11 +186,18 @@ export class Proofs implements IAgentResponseHandler {
                 requested_predicates[attribute] = { cred_id, timestamp };
                 requested_attributes[attribute] = { cred_id, timestamp, revealed: true };
             }
+            */
 
-            const reply = { trace: true, requested_attributes, requested_predicates, self_attested_attributes};
+            for(const attribute of presentationRequest.requested_attributes) {
+                requested_attributes[attribute] = { cred_id, timestamp, revealed: true };
+            }
+            for(const predicate of presentationRequest.requested_attributes) {
+                requested_predicates[predicate] = { cred_id, timestamp };
+            }
+            const reply = { trace: true, requested_attributes, requested_predicates, self_attested_attributes };
             Logger.warn(`this is what we will return`, reply);
             url = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/send-presentation`;
-            req = {
+            const req: AxiosRequestConfig = {
                 method: 'POST',
                 url,
                 headers: {
@@ -164,7 +206,7 @@ export class Proofs implements IAgentResponseHandler {
                 data: reply
             };
             Logger.info(`requesting prover to send-presentation ${req.url}`);
-            res = await this.http.requestWithRetry(req);
+            const res = await this.http.requestWithRetry(req);
             Logger.warn(`send-presentation results are ${res.status}`, res.data);
             return res.data;
         }
