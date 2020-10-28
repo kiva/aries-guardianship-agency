@@ -61,7 +61,7 @@ export class Proofs implements IAgentResponseHandler {
     public async handlePost(agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
 
         if (route !== 'topic' || topic !== 'present_proof') {
-            throw new ProtocolException('present_proof',`${route}/${topic} is not valid.`);
+            throw new ProtocolException('present_proof', `${route}/${topic} is not valid.`);
         }
 
         const readPermission = async (governanceKey: string, cacheKey: string) => {
@@ -88,7 +88,74 @@ export class Proofs implements IAgentResponseHandler {
             return res.data;
         }
 
-        Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`);
+        if (body.role === 'prover' && body.state === 'request_received') {
+            const presentationExchangeId: string = body.presentation_exchange_id;
+            const action: string = 'send-presentation';
+            const templatedCacheKey = `${agentId}-${body.role}-${presentationExchangeId}`;
+            await this.checkPolicyForAction(action, templatedCacheKey);
+            await readPermission(action, templatedCacheKey);
+
+            // get credential
+            let url: string = agentUrl + `/present-proof/records/${presentationExchangeId}/credentials`;
+            let req: AxiosRequestConfig = {
+                method: 'GET',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                }
+            };
+            let res = await this.http.requestWithRetry(req);
+
+            const credentials = res.data.sort((a, b) => a.cred_info.referent.localeCompare(b.cred_info.referent));
+            const presentationRequest = body.presentation_request;
+            const timestamp = Math.floor(Date.now() / 1000);
+            const credentialsByReft: any = {};
+            const requested_attributes: any = {};
+            const requested_predicates: any = {};
+            const self_attested_attributes: any = {};
+
+            if (credentials) {
+                for (const item of credentials) {
+                    for (const referent of item.presentation_referents) {
+                        if (!credentialsByReft[referent]) {
+                            credentialsByReft[referent] = item;
+                        }
+                    }
+                }
+            }
+
+            for (const referent in presentationRequest.requested_attributes) {
+                if (credentialsByReft[referent]) {
+                    requested_attributes[referent] = {
+                        cred_id: credentialsByReft[referent].cred_info.referent,
+                        revealed: true
+                    };
+                }
+            }
+
+            for (const referent in presentationRequest.requested_predicates) {
+                if (credentialsByReft[referent]) {
+                    requested_predicates[referent] = {
+                        cred_id: credentialsByReft[referent].cred_info.referent
+                    };
+                }
+            }
+
+            const reply = { trace: false, requested_predicates, requested_attributes, self_attested_attributes };
+            url = agentUrl + `/present-proof/records/${body.presentation_exchange_id}/${action}`;
+            req = {
+                method: 'POST',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                },
+                data: reply
+            };
+            res = await this.http.requestWithRetry(req);
+            return res.data;
+        }
+
+        Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`, body);
         return;
     }
 }
