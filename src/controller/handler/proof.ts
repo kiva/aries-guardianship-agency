@@ -25,8 +25,36 @@ export class Proofs implements IAgentResponseHandler {
         }
     }
 
+    /*
+        we will get an array like this:
+        [
+        { cred_info:
+          { referent: 'd7ff6b53-c59e-4c43-8a2d-e411b1c7683c',
+            attrs: { score: 750},
+            schema_id: 'Th7MpTaRZVRYnPiabds81Y:2:sample_schema:1.0',
+            cred_def_id: 'Th7MpTaRZVRYnPiabds81Y:3:CL:12:issued_1',
+            rev_reg_id: null,
+            cred_rev_id: null
+          },
+          interval: null,
+          presentation_referents: [ 'score' ]
+        }
+        ]
+        and create this:
+         { score:
+           { cred_info:
+              { referent: '40ea2f38-593d-46b6-839f-540232f60c5b',
+                attrs: [Object],
+                schema_id: 'Th7MpTaRZVRYnPiabds81Y:2:sample_schema:1.0',
+                cred_def_id: 'Th7MpTaRZVRYnPiabds81Y:3:CL:12:issued_1',
+                rev_reg_id: null,
+                cred_rev_id: null },
+             interval: null,
+             presentation_referents: [ 'score' ]
+           }
+         }
+    */
     private async getCredentialsByReferentId(url: string, adminApiKey: string): Promise<any> {
-        // get credential
         const req: AxiosRequestConfig = {
             method: 'GET',
             url,
