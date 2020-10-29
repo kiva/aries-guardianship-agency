@@ -105,7 +105,7 @@ export class Connections implements IAgentResponseHandler {
         }
 
 
-        Logger.info(`nothing to do for route/topic: ${route}/${topic}`);
+        Logger.info(`nothing to do for doing nothing for ${agentId}: route ${route}: topic ${topic}  role: ${body.role} state: ${body.state}`);
         return;
     }
 }

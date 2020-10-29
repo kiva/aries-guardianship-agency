@@ -66,9 +66,10 @@ export class IssueCredential implements IAgentResponseHandler {
         };
 
         if (body.role === 'holder' && body.state === 'offer_received') {
-
-            // /issue-credential/records/{cred_ex_id}/send-request
             const action = 'send-request';
+            const templatedCacheKey = `${agentId}-${body.role}-${body.credential_exchange_id}`;
+            await this.checkPolicyForAction(action, templatedCacheKey);
+            await readPermission(action, templatedCacheKey);
             const url: string = agentUrl + `/${IssueCredential.ISSUE_CREDENTIALS_URL}/records/${body.credential_exchange_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
@@ -104,9 +105,9 @@ export class IssueCredential implements IAgentResponseHandler {
 
         if (body.role === 'issuer' && body.state === 'offer_sent') {
             const action = 'issue';
-            /*const templatedCacheKey = `${agentId}-${body.role}-${body.credential_exchange_id}`;
+            const templatedCacheKey = `${agentId}-${body.role}-${body.credential_exchange_id}`;
             await this.checkPolicyForAction(action, templatedCacheKey);
-            await readPermission(action, templatedCacheKey);*/
+            await readPermission(action, templatedCacheKey);
 
             const url: string = agentUrl + `/${IssueCredential.ISSUE_CREDENTIALS_URL}/records/${body.credential_exchange_id}/${action}`;
             const data = {
@@ -125,7 +126,7 @@ export class IssueCredential implements IAgentResponseHandler {
             return res.data;
         }
 
-        Logger.warn(`doing nothing for ${agentId}: route ${route}: topic ${topic} role: ${body.role} state: ${body.state}`, body);
+        Logger.warn(`doing nothing for ${agentId}: route ${route}: topic ${topic} role: ${body.role} state: ${body.state}`);
         return;
     }
 }
