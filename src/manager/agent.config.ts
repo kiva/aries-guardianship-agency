@@ -135,7 +135,7 @@ export class AgentConfig {
             // TODO For now we auto respond, eventually we will want more refined responses
             '--auto-respond-messages',
             // status offer_sent
-            '--auto-respond-credential-offer',
+            // '--auto-respond-credential-offer',
             '--wallet-local-did', // TODO this could be an arg on the config
         ];
 

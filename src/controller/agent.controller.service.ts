@@ -1,6 +1,5 @@
 import { Injectable, HttpService, Inject, CACHE_MANAGER, CacheStore } from '@nestjs/common';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { Logger } from 'protocol-common/logger';
 import { AgentGovernance } from './agent.governance';
 import { HandlersFactory } from './handler/handlers.factory';
 
@@ -21,7 +20,6 @@ export class AgentControllerService {
     }
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
-        Logger.info(`AgentControllerService.handleRequest(${agentId}, ${route}, ${topic})`);
         const agent: any = await this.cache.get(agentId);
         const adminPort = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);
         // @tothink http/https?  should this be from the env?
