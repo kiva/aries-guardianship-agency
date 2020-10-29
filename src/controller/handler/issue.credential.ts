@@ -66,6 +66,23 @@ export class IssueCredential implements IAgentResponseHandler {
         };
 
         if (body.role === 'holder' && body.state === 'offer_received') {
+
+            // /issue-credential/records/{cred_ex_id}/send-request
+            const action = 'send-request';
+            const url: string = agentUrl + `/${IssueCredential.ISSUE_CREDENTIALS_URL}/records/${body.credential_exchange_id}/${action}`;
+            const req: AxiosRequestConfig = {
+                method: 'POST',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                }
+            };
+            Logger.info(`requesting holder to send-request ${req.url}`);
+            const res = await this.http.requestWithRetry(req);
+            return res.data;
+        }
+
+        if (body.role === 'holder' && body.state === 'request_sent') {
             const action = 'store';
             const templatedCacheKey = `${agentId}-${body.role}-${body.credential_exchange_id}`;
             await this.checkPolicyForAction(action, templatedCacheKey);
@@ -85,7 +102,30 @@ export class IssueCredential implements IAgentResponseHandler {
             return res.data;
         }
 
-        Logger.info(`doing nothing for ${agentId}: route ${route}: topic ${topic}`);
+        if (body.role === 'issuer' && body.state === 'offer_sent') {
+            const action = 'issue';
+            /*const templatedCacheKey = `${agentId}-${body.role}-${body.credential_exchange_id}`;
+            await this.checkPolicyForAction(action, templatedCacheKey);
+            await readPermission(action, templatedCacheKey);*/
+
+            const url: string = agentUrl + `/${IssueCredential.ISSUE_CREDENTIALS_URL}/records/${body.credential_exchange_id}/${action}`;
+            const data = {
+                'comment': 'no comment'
+            };
+            const req: AxiosRequestConfig = {
+                method: 'POST',
+                url,
+                headers: {
+                    'x-api-key': adminApiKey,
+                },
+                data
+            };
+            Logger.info(`requesting issuer to issue credential ${req.url}`);
+            const res = await this.http.requestWithRetry(req);
+            return res.data;
+        }
+
+        Logger.warn(`doing nothing for ${agentId}: route ${route}: topic ${topic} role: ${body.role} state: ${body.state}`, body);
         return;
     }
 }
