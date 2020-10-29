@@ -126,7 +126,7 @@ export class IssueCredential implements IAgentResponseHandler {
             return res.data;
         }
 
-        Logger.warn(`doing nothing for ${agentId}: route ${route}: topic ${topic} role: ${body.role} state: ${body.state}`);
+        Logger.warn(`doing nothing for '${agentId}': route '${route}': topic '${topic}': role '${body.role}': state '${body.state}'`);
         return;
     }
 }
