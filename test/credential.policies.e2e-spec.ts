@@ -150,11 +150,15 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    it('issuer creates credential', async () => {
+    it('issuer sends credential offer', async () => {
         await ProtocolUtility.delay(5000);
         const data = {
+            auto_issue: true,
+            auto_remove: false,
+            comment: 'pleading the 5th',
+            connection_id: issuerConnectionId,
             cred_def_id: credentialDefinitionId,
-            credential_proposal: {
+            credential_preview: {
             '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
                 attributes: [
                     {
@@ -163,19 +167,12 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     }
                 ]
             },
-            schema_name: schemaName,
-            schema_version: schemaVersion,
-            schema_id: schemaId,
-            auto_remove: false,
-            issuer_did: issuerDid,
-            schema_issuer_did: issuerDid,
-            comment: 'pleading the 5th',
-            connection_id: issuerConnectionId
+            trace: false
         };
 
-        Logger.warn(`For issuer ${issuerId} issue-credential/send body request '${issuerUrl}' -> `, data);
+        Logger.warn(`For issuer ${issuerId} issue-credential/send-offer body request '${issuerUrl}' -> `, data);
         return request(issuerUrl)
-            .post('/issue-credential/send')
+            .post('/issue-credential/send-offer')
             .send(data)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {

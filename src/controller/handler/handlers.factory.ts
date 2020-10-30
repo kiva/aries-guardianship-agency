@@ -17,7 +17,6 @@ export class HandlersFactory {
 
      */
     public static getHandler(agentGovernance: AgentGovernance, topic: string, http: ProtocolHttpService, cache: CacheStore): IAgentResponseHandler {
-        Logger.info(`looking for handler topic ${topic}`);
         switch (topic) {
             case 'connections':
                 return new Connections(agentGovernance, http, cache);

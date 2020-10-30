@@ -10,7 +10,9 @@
       "accept-request": "always"
     },
     "issue-credential": {
-      "store": "always"
+      "store": "always",
+      "send-request": "always",
+      "issue": "always"
     },
     "present-proof": {
       "verify-presentation": "always",
@@ -23,7 +25,9 @@
       "accept-request": "once"
     },
     "issue-credential": {
-      "store": "once"
+      "store": "once",
+      "send-request": "once",
+      "issue": "once"
     },
     "present-proof": {
       "verify-presentation": "once",

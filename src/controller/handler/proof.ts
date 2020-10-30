@@ -190,7 +190,7 @@ export class Proofs implements IAgentResponseHandler {
             return res.data;
         }
 
-        Logger.info(`Proofs!: doing nothing for ${agentId}: route ${route}: topic ${topic}`);
+        Logger.info(`doing nothing for '${agentId}': route '${route}': topic '${topic}': role '${body.role}': state '${body.state}'`);
         return;
     }
 }
