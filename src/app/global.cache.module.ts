@@ -19,14 +19,15 @@ import * as redisStore from 'cache-manager-redis-store';
                     ttl: parseInt(process.env.DEFAULT_CACHE_TTL, 10),
                     max: 1000
                 };
+            } else {
+                Logger.log('Using file system cache');
+                return {
+                    store: fsStore,
+                    path:'/tmp/diskcache',
+                    ttl: parseInt(process.env.DEFAULT_CACHE_TTL, 10),
+                    max: 1000
+                };
             }
-            Logger.log('Using file system cache');
-            return {
-                store: fsStore,
-                path:'/tmp/diskcache',
-                ttl: parseInt(process.env.DEFAULT_CACHE_TTL, 10),
-                max: 1000
-            };
         }
     })],
     exports: [CacheModule]
