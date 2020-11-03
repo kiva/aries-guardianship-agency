@@ -99,6 +99,44 @@ describe('Create Connections using policies (e2e)', () => {
             });
     });
 
+    it('Confirm Issuer connections is ready', async () => {
+        await ProtocolUtility.delay(5000);
+        return request(issuerUrl)
+            .get(`/connections`)
+            .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                expect(res.status).toBe(200);
+
+                let found: boolean = false;
+                res.body.results.forEach(conn => {
+                    if (conn.connection_id === issuerConnectionId) {
+                        found = true;
+                        expect(conn.state).toBe('response');
+                    }
+                });
+
+                expect(found).toBe(true);
+            });
+    });
+
+    it('Confirm Holder connection is ready', async () => {
+        return request(holderUrl)
+            .get(`/connections`)
+            .set('x-api-key', holderApiKey)
+            .expect((res) => {
+                expect(res.status).toBe(200);
+                let found: boolean = false;
+                res.body.results.forEach(conn => {
+                    if (conn.connection_id === holderConnectionId) {
+                        found = true;
+                        expect(conn.state).toBe('response');
+                    }
+                });
+
+                expect(found).toBe(true);
+            });
+    });
+
     it('send basic message from issuer to holder', async () => {
         await ProtocolUtility.delay(2000);
         const data = {
@@ -108,6 +146,25 @@ describe('Create Connections using policies (e2e)', () => {
             .post(`/connections/${issuerConnectionId}/send-message`)
             .send(data)
             .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                try {
+                    expect(res.status).toBe(200);
+                } catch (e) {
+                    Logger.warn(`connections/send-message errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
+            });
+    });
+
+    it('send basic message from holder to issuer', async () => {
+        await ProtocolUtility.delay(2000);
+        const data = {
+            content: 'hello issuer, are you ready to receive your credentials?'
+        };
+        return request(holderUrl)
+            .post(`/connections/${holderConnectionId}/send-message`)
+            .send(data)
+            .set('x-api-key', holderApiKey)
             .expect((res) => {
                 try {
                     expect(res.status).toBe(200);

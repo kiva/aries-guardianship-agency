@@ -132,8 +132,6 @@ export class AgentConfig {
             '--label', this.label,
             '--webhook-url', this.webhookUrl,
             '--log-level', this.logLevel,
-            // TODO For now we auto respond, eventually we will want more refined responses
-            '--auto-respond-messages',
             '--wallet-local-did', // TODO this could be an arg on the config
         ];
 
