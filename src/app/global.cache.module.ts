@@ -16,8 +16,7 @@ import * as redisStore from 'cache-manager-redis-store';
                     host: process.env.REDIS_HOST,
                     auth_pass: process.env.REDIS_PASS,
                     port: 6379,
-                    ttl: parseInt(process.env.DEFAULT_CACHE_TTL, 10),
-                    max: 1000
+                    ttl: 0
                 };
             } else {
                 Logger.log('Using file system cache');
