@@ -74,3 +74,12 @@ services:
       - indy-pool
     tty: true
     privileged: true # Need privileged to access docker.sock in latest Mac Docker
+
+  # Adding redis here for testing, not needed on docker-compose.ci.yml
+  redis:
+    image: redis
+    container_name: redis
+    networks:
+      - agency-network
+    depends_on:
+      - indy-pool
