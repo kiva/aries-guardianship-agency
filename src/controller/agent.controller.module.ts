@@ -1,8 +1,8 @@
 import { Module, HttpModule } from '@nestjs/common';
+import { AgentGovernanceFactory } from 'aries-controller/controller/agent.governance.factory';
 import { AgentControllerService } from './agent.controller.service';
 import { AgentControllerController } from './agent.controller.controller';
 import { GlobalCacheModule } from '../app/global.cache.module';
-import { AgentGovernanceFactory } from './agent.governance.factory';
 
 /**
  * The controller module for our agency, handles all the callbacks and webhooks from our agents

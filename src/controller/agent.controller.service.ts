@@ -1,7 +1,7 @@
 import { Injectable, HttpService, Inject, CACHE_MANAGER, CacheStore } from '@nestjs/common';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { AgentGovernance } from './agent.governance';
-import { HandlersFactory } from './handler/handlers.factory';
+import { AgentGovernance } from 'aries-controller/controller/agent.governance';
+import { HandlersFactory } from 'aries-controller/controller/handler/handlers.factory';
 
 /**
  * Agent acting on the behalf of a "citizen" or credential holder

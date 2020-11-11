@@ -15,10 +15,6 @@ jobs:
           name: run linter
           command: |
             npm run lint
-      - run:
-          name: run smoke test
-          command: |
-            npm run smoke-test
 
   integration-test:
     machine:
