@@ -54,6 +54,19 @@ export class IssueCredential implements IAgentResponseHandler {
         for this handler, this will always be true:
         Route will be "topic"
         topic will be "issue_credential"
+
+        State transitions:
+        issuer offer_sent
+        holder offer_received
+          action -> send-request
+        holder request_sent
+        issuer request_received
+          action -> issue
+        issuer credential_issued
+        holder credential_received
+          action -> store
+        holder credential_acked
+        issuer credential_acked
     */
     public async handlePost(agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any): Promise<any> {
         if (route !== 'topic' || topic !== 'issue_credential') {
@@ -83,13 +96,40 @@ export class IssueCredential implements IAgentResponseHandler {
             return res.data;
         }
 
-        if (body.role === 'holder' && body.state === 'request_sent') {
+        // Not sure why, but sometimes the role for issuer comes back as undefined
+        if ((body.role === 'issuer' || body.role === undefined) && body.state === 'request_received') {
+            if (body.auto_issue === true) {
+                Logger.info(`Not requesting issuer to issue credential, because auto_issue is true`);
+                return;
+            }
+            const action = 'issue';
+            const templatedCacheKey = `${agentId}-${body.role}-${body.credential_exchange_id}`;
+            await this.checkPolicyForAction(action, templatedCacheKey);
+            await readPermission(action, templatedCacheKey);
+
+            const url: string = agentUrl + `/${IssueCredential.ISSUE_CREDENTIALS_URL}/records/${body.credential_exchange_id}/${action}`;
+            const data = {
+                credential_preview: body.credential_offer_dict.credential_preview
+            };
+            const req: AxiosRequestConfig = {
+                method: 'POST',
+                url,
+                data,
+                headers: {
+                    'x-api-key': adminApiKey,
+                }
+            };
+            Logger.info(`requesting issuer to issue credential ${req.url}`);
+            const res = await this.http.requestWithRetry(req);
+            return res.data;
+        }
+
+        if (body.role === 'holder' && body.state === 'credential_received') {
             const action = 'store';
             const templatedCacheKey = `${agentId}-${body.role}-${body.credential_exchange_id}`;
             await this.checkPolicyForAction(action, templatedCacheKey);
             await readPermission(action, templatedCacheKey);
 
-            await ProtocolUtility.delay(2000);
             const url: string = agentUrl + `/${IssueCredential.ISSUE_CREDENTIALS_URL}/records/${body.credential_exchange_id}/${action}`;
             const req: AxiosRequestConfig = {
                 method: 'POST',
@@ -99,25 +139,6 @@ export class IssueCredential implements IAgentResponseHandler {
                 }
             };
             Logger.info(`requesting holder to save credential ${req.url}`);
-            const res = await this.http.requestWithRetry(req);
-            return res.data;
-        }
-
-        if (body.role === 'issuer' && body.state === 'offer_sent') {
-            const action = 'issue';
-            const templatedCacheKey = `${agentId}-${body.role}-${body.credential_exchange_id}`;
-            await this.checkPolicyForAction(action, templatedCacheKey);
-            await readPermission(action, templatedCacheKey);
-
-            const url: string = agentUrl + `/${IssueCredential.ISSUE_CREDENTIALS_URL}/records/${body.credential_exchange_id}/${action}`;
-            const req: AxiosRequestConfig = {
-                method: 'POST',
-                url,
-                headers: {
-                    'x-api-key': adminApiKey,
-                }
-            };
-            Logger.info(`requesting issuer to issue credential ${req.url}`);
             const res = await this.http.requestWithRetry(req);
             return res.data;
         }

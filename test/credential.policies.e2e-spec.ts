@@ -150,15 +150,18 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    it('issuer sends credential offer', async () => {
+    it('issuer sends credential', async () => {
         await ProtocolUtility.delay(5000);
         const data = {
-            auto_issue: true,
             auto_remove: false,
             comment: 'pleading the 5th',
             connection_id: issuerConnectionId,
             cred_def_id: credentialDefinitionId,
-            credential_preview: {
+            schema_name: schemaName,
+            schema_version: schemaVersion,
+            schema_id: schemaId,
+            issuer_did: issuerDid,
+            credential_proposal: {
             '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
                 attributes: [
                     {
@@ -167,12 +170,11 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     }
                 ]
             },
-            trace: false
         };
 
-        Logger.warn(`For issuer ${issuerId} issue-credential/send-offer body request '${issuerUrl}' -> `, data);
+        Logger.warn(`For issuer ${issuerId} issue-credential/send body request '${issuerUrl}' -> `, data);
         return request(issuerUrl)
-            .post('/issue-credential/send-offer')
+            .post('/issue-credential/send')
             .send(data)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
@@ -186,6 +188,48 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 }
             });
     });
+
+    // @tothink ideally I want to test 3 different scenarios but not sure the best way to do it without duplicate a bunch of the test setup
+    //  1. /send
+    //  2. /send-offer with auto_issue true
+    //  3. /send-offer with auto_issue false
+
+    // it('issuer sends credential offer', async () => {
+    //     await ProtocolUtility.delay(5000);
+    //     const data = {
+    //         auto_issue: true, // Can switch this between true and false and it will still work
+    //         auto_remove: false,
+    //         comment: 'pleading the 5th',
+    //         connection_id: issuerConnectionId,
+    //         cred_def_id: credentialDefinitionId,
+    //         credential_preview: {
+    //         '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
+    //             attributes: [
+    //                 {
+    //                     name: 'score',
+    //                     value: '750'
+    //                 }
+    //             ]
+    //         },
+    //         trace: false
+    //     };
+
+    //     Logger.warn(`For issuer ${issuerId} issue-credential/send-offer body request '${issuerUrl}' -> `, data);
+    //     return request(issuerUrl)
+    //         .post('/issue-credential/send-offer')
+    //         .send(data)
+    //         .set('x-api-key', issuerApiKey)
+    //         .expect((res) => {
+    //             try {
+    //                 Logger.warn(`issue-credential/send-offer result -> ${res.status}`, res.body);
+    //                 expect(res.status).toBe(200);
+    //                 credentialExchangeId = res.body.credential_exchange_id;
+    //             } catch (e) {
+    //                 Logger.warn(`issue-credential/send errored result -> ${res.status}`, res.body);
+    //                 throw e;
+    //             }
+    //         });
+    // });
 
     it('Affirm Issuer credential status', async () => {
         await ProtocolUtility.delay(5000);
