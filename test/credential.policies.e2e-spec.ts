@@ -215,7 +215,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 attributes: [
                     {
                         name: 'score',
-                        value: '751'
+                        value: '750'
                     }
                 ]
             },
