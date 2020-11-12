@@ -150,6 +150,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
+    // First let's issue a credential using /send
     it('issuer sends credential', async () => {
         await ProtocolUtility.delay(5000);
         const data = {
@@ -189,48 +190,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    // @tothink ideally I want to test 3 different scenarios but not sure the best way to do it without duplicate a bunch of the test setup
-    //  1. /send
-    //  2. /send-offer with auto_issue true
-    //  3. /send-offer with auto_issue false
-
-    // it('issuer sends credential offer', async () => {
-    //     await ProtocolUtility.delay(5000);
-    //     const data = {
-    //         auto_issue: true, // Can switch this between true and false and it will still work
-    //         auto_remove: false,
-    //         comment: 'pleading the 5th',
-    //         connection_id: issuerConnectionId,
-    //         cred_def_id: credentialDefinitionId,
-    //         credential_preview: {
-    //         '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
-    //             attributes: [
-    //                 {
-    //                     name: 'score',
-    //                     value: '750'
-    //                 }
-    //             ]
-    //         },
-    //         trace: false
-    //     };
-
-    //     Logger.warn(`For issuer ${issuerId} issue-credential/send-offer body request '${issuerUrl}' -> `, data);
-    //     return request(issuerUrl)
-    //         .post('/issue-credential/send-offer')
-    //         .send(data)
-    //         .set('x-api-key', issuerApiKey)
-    //         .expect((res) => {
-    //             try {
-    //                 Logger.warn(`issue-credential/send-offer result -> ${res.status}`, res.body);
-    //                 expect(res.status).toBe(200);
-    //                 credentialExchangeId = res.body.credential_exchange_id;
-    //             } catch (e) {
-    //                 Logger.warn(`issue-credential/send errored result -> ${res.status}`, res.body);
-    //                 throw e;
-    //             }
-    //         });
-    // });
-
     it('Affirm Issuer credential status', async () => {
         await ProtocolUtility.delay(5000);
         return request(issuerUrl)
@@ -241,6 +200,56 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 expect(res.status).toBe(200);
                 expect(res.body.results.length).toBe(1);
                 expect(res.body.results[0].state).toBe('credential_acked');
+            });
+    });
+
+    it('issuer sends second credential using offer', async () => {
+        await ProtocolUtility.delay(5000);
+        const data = {
+            auto_issue: false, // set to false so we can check our governance policy issuer
+            auto_remove: false,
+            comment: 'pleading the 5th',
+            connection_id: issuerConnectionId,
+            cred_def_id: credentialDefinitionId,
+            credential_preview: {
+            '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
+                attributes: [
+                    {
+                        name: 'score',
+                        value: '751'
+                    }
+                ]
+            },
+            trace: false
+        };
+
+        Logger.warn(`For issuer ${issuerId} issue-credential/send-offer body request '${issuerUrl}' -> `, data);
+        return request(issuerUrl)
+            .post('/issue-credential/send-offer')
+            .send(data)
+            .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                try {
+                    Logger.warn(`issue-credential/send-offer result -> ${res.status}`, res.body);
+                    expect(res.status).toBe(200);
+                    credentialExchangeId = res.body.credential_exchange_id;
+                } catch (e) {
+                    Logger.warn(`issue-credential/send errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
+            });
+    });
+
+    it('Affirm Issuer credential status', async () => {
+        await ProtocolUtility.delay(5000);
+        return request(issuerUrl)
+            .get('/issue-credential/records')
+            .set('x-api-key', holderApiKey)
+            .send(invitation)
+            .expect((res) => {
+                expect(res.status).toBe(200);
+                expect(res.body.results.length).toBe(2);
+                expect(res.body.results[1].state).toBe('credential_acked');
             });
     });
 
