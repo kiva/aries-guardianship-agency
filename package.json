@@ -27,7 +27,7 @@
     "@nestjs/platform-express": "^7.4.2",
     "@nestjs/swagger": "^4.6.0",
     "@types/dockerode": "^2.5.34",
-    "aries-controller": "^1.0.3",
+    "aries-controller": "^1.0.4",
     "cache-manager": "^3.3.0",
     "cache-manager-fs-hash": "^0.0.9",
     "cache-manager-redis-store": "^2.0.0",
