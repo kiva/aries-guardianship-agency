@@ -83,21 +83,13 @@ services:
     networks:
       - tails-server
     env_file:
-      - ./resources/tails-local.env
-    environment:
-     - NODE_ENV=production
-     - MSYS_NO_PATHCONV=1
-     - DOCKERHOST=${APPLICATION_URL-$(docker run --rm --net=host eclipse/che-ip)}
-     - GENESIS_URL=${GENESIS_URL:-http://$DOCKERHOST:9000/genesis}
-     - STORAGE_PATH=tmp/tails-files
-     - LOG_LEVEL=${LOG_LEVEL:-INFO}
-     - TAILS_SERVER_URL=${TAILS_SERVER_URL:-http://$DOCKERHOST:6543}
+      - ./.env
     command: >
       tails-server
         --host 0.0.0.0
         --port 6543
         --storage-path ${STORAGE_PATH}
-        --log-level ${LOG_LEVEL}
+        --log-level INFO
 
 
   # Adding redis here for testing, not needed on docker-compose.ci.yml
