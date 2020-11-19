@@ -78,7 +78,8 @@ services:
     ports:
       - 6543:6543
     networks:
-      - tails-server
+      agency-network:
+        ipv4_address: 10.0.0.3
     env_file:
       - ./.env
     command: >

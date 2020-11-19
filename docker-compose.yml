@@ -12,7 +12,6 @@ networks:
         config:
           -
             subnet: 10.0.0.0/24
-    tails-server:
 
 services:
       # indy pool needs a static ip configured in the pool_transactions_genesis so need to start it first
@@ -81,7 +80,8 @@ services:
     ports:
       - 6543:6543
     networks:
-      - tails-server
+      agency-network:
+        ipv4_address: 10.0.0.3
     env_file:
       - ./.env
     command: >
