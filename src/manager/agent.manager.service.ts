@@ -82,7 +82,6 @@ export class AgentManagerService {
                 await this.manager.startAgent(agentConfig);
             }
 
-
             // @tothink move this caching to db
             // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
             Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1)}`);
