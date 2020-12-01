@@ -44,7 +44,7 @@ export class AgentManagerService {
      */
     public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number,
                              seed?: string, controllerUrl?: string, agentId?: string, label?: string, autoConnect: boolean = true,
-                             adminApiPort: string = process.env.AGENT_ADMIN_PORT, tailsServer: boolean) {
+                             adminApiPort: string = process.env.AGENT_ADMIN_PORT, useTailsServer: boolean = false) {
         // TODO: cleanup inconsistent return types.
         // 1  { agentId, connectionData }
         // 1a { agentId, empty }
@@ -70,16 +70,10 @@ export class AgentManagerService {
             // Short term you can pass in -1 and it will cache for max int (ie a very long time)
             // TODO Long term we should have a proper DB store for permanent agents
             // (or figure out a way to avoid having to save agent data all together)
-            if (tailsServer) {
-                const tailsUrl = process.env.TAILS_URL;
-                const agentConfig = new AgentConfig(
-                    walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, seed, tailsUrl);
-                await this.manager.startAgent(agentConfig);
-            } else {
-                const agentConfig = new AgentConfig(
-                    walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, seed);
-                await this.manager.startAgent(agentConfig);
-            }
+            
+            const agentConfig = new AgentConfig(
+                walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, useTailsServer, seed);
+            await this.manager.startAgent(agentConfig);
 
             // @tothink move this caching to db
             // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record

@@ -51,7 +51,7 @@ export class AgentConfig {
 
     readonly webhookUrl: string; // Controller endpoint
 
-    readonly tailsUrl: string;
+    readonly useTailsServer: boolean;
 
     /**
      * Sets up the agent config
@@ -66,8 +66,8 @@ export class AgentConfig {
         webhookUrl: string,
         adminPort: string,
         httpPort: string,
+        useTailsServer: boolean,
         seed?: string,
-        tailsUrl?: string,
     ) {
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
         this.outboundTransport = 'http';
@@ -92,7 +92,7 @@ export class AgentConfig {
         this.httpPort = `${httpPort}`;
         this.adminPort = `${adminPort}`;
         this.seed = seed;
-        this.tailsUrl = tailsUrl;
+        this.useTailsServer = useTailsServer;
     }
 
     private getWalletStorageConfig() {
@@ -118,8 +118,9 @@ export class AgentConfig {
     public getStartArgs(): any[] {
         const inboundTransportSplit = this.inboundTransport.split(' ');
         const adminSplit = this.admin.split(' ');
-
-        const args = [ 'start',
+        const args = [];
+        if (this.useTailsServer) {
+            args.push( 'start',
             '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
             '--outbound-transport', this.outboundTransport,
             '--ledger-pool-name', this.ledgerPoolName,
@@ -137,8 +138,29 @@ export class AgentConfig {
             '--webhook-url', this.webhookUrl,
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
-            '--tails-server-base-url', this.tailsUrl,
-        ];
+            '--tails-server-base-url', process.env.TAILS_URL,
+            );   
+        } else {
+            args.push( 'start',
+            '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
+            '--outbound-transport', this.outboundTransport,
+            '--ledger-pool-name', this.ledgerPoolName,
+            '--genesis-transactions', this.genesisTransactions,
+            '--wallet-type', this.walletType,
+            '--wallet-storage-type', this.walletStorageType,
+            '--endpoint', this.endpoint,
+            '--wallet-name', this.walletName,
+            '--wallet-key', this.walletKey,
+            '--wallet-storage-config', this.walletStorageConfig,
+            '--wallet-storage-creds', this.walletStorageCreds,
+            '--admin', adminSplit[0], adminSplit[1],
+            '--admin-api-key', this.adminApiKey,
+            '--label', this.label,
+            '--webhook-url', this.webhookUrl,
+            '--log-level', this.logLevel,
+            '--wallet-local-did', // TODO this could be an arg on the config
+            );   
+        }
 
         if (this.seed) {
             args.push('--seed', this.seed);
