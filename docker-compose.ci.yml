@@ -78,8 +78,7 @@ services:
     ports:
       - 6543:6543
     networks:
-      agency-network:
-        ipv4_address: 10.0.0.3
+      - agency-network
     env_file:
       - ./.env
     command: >
