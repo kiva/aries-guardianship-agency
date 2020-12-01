@@ -146,7 +146,7 @@ describe('Cache behaviors (e2e)', () => {
         const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${thirdAgentId}`;
         const webhookUrl = `${process.env.INTERNAL_URL}/v1/controller/${thirdAgentId}`;
         const agentConfig = new AgentConfig('walletId11', 'walletId11', adminApiKey, thirdAgentId, thirdAgentId,
-            agentEndpoint, webhookUrl, '5001', '5000', '000000000000000000000000Steward1');
+            agentEndpoint, webhookUrl, '5001', '5000', false,'000000000000000000000000Steward1');
         const manager = new DockerService();
         await manager.startAgent(agentConfig);
 
@@ -199,7 +199,7 @@ describe('Cache behaviors (e2e)', () => {
         const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${thirdAgentId}`;
         const webhookUrl = `${process.env.INTERNAL_URL}/v1/controller/${thirdAgentId}`;
         const agentConfig = new AgentConfig('walletId11', 'walletId11', adminApiKey, thirdAgentId, thirdAgentId,
-            agentEndpoint, webhookUrl, '5001', '5000', '000000000000000000000000Steward1');
+            agentEndpoint, webhookUrl, '5001', '5000', false, '000000000000000000000000Steward1');
         const manager = new DockerService();
         await manager.startAgent(agentConfig);
 
