@@ -79,6 +79,8 @@ services:
       - 6543:6543
     networks:
       - agency-network
+    depends_on:
+      - indy-pool
     env_file:
       - ./.env
     command: >
