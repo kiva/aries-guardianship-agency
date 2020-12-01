@@ -119,6 +119,7 @@ export class AgentConfig {
         const inboundTransportSplit = this.inboundTransport.split(' ');
         const adminSplit = this.admin.split(' ');
         const args = [];
+        
         if (this.useTailsServer) {
             args.push( 'start',
             '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
