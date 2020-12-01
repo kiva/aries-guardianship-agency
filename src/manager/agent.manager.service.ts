@@ -70,7 +70,6 @@ export class AgentManagerService {
             // Short term you can pass in -1 and it will cache for max int (ie a very long time)
             // TODO Long term we should have a proper DB store for permanent agents
             // (or figure out a way to avoid having to save agent data all together)
-            
             const agentConfig = new AgentConfig(
                 walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, useTailsServer, seed);
             await this.manager.startAgent(agentConfig);

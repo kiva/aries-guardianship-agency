@@ -119,7 +119,7 @@ export class AgentConfig {
         const inboundTransportSplit = this.inboundTransport.split(' ');
         const adminSplit = this.admin.split(' ');
         const args = [];
-        
+
         if (this.useTailsServer) {
             args.push( 'start',
             '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
@@ -140,7 +140,7 @@ export class AgentConfig {
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
             '--tails-server-base-url', process.env.TAILS_URL,
-            );   
+            );
         } else {
             args.push( 'start',
             '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
@@ -160,7 +160,7 @@ export class AgentConfig {
             '--webhook-url', this.webhookUrl,
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
-            );   
+            );
         }
 
         if (this.seed) {
