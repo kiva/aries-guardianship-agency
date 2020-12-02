@@ -137,11 +137,11 @@ export class AgentConfig {
             '--webhook-url', this.webhookUrl,
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
-            
+
         ];
 
         if(this.useTailsServer) {
-            args.push('--tails-server-base-url', process.env.TAILS_URL)
+            args.push('--tails-server-base-url', process.env.TAILS_URL);
         }
 
         if (this.seed) {
