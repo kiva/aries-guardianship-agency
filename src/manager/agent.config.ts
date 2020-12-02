@@ -118,10 +118,8 @@ export class AgentConfig {
     public getStartArgs(): any[] {
         const inboundTransportSplit = this.inboundTransport.split(' ');
         const adminSplit = this.admin.split(' ');
-        const args = [];
 
-        if (this.useTailsServer) {
-            args.push( 'start',
+        const args = [ 'start',
             '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
             '--outbound-transport', this.outboundTransport,
             '--ledger-pool-name', this.ledgerPoolName,
@@ -139,28 +137,11 @@ export class AgentConfig {
             '--webhook-url', this.webhookUrl,
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
-            '--tails-server-base-url', process.env.TAILS_URL,
-            );
-        } else {
-            args.push( 'start',
-            '--inbound-transport', inboundTransportSplit[0], inboundTransportSplit[1], inboundTransportSplit[2],
-            '--outbound-transport', this.outboundTransport,
-            '--ledger-pool-name', this.ledgerPoolName,
-            '--genesis-transactions', this.genesisTransactions,
-            '--wallet-type', this.walletType,
-            '--wallet-storage-type', this.walletStorageType,
-            '--endpoint', this.endpoint,
-            '--wallet-name', this.walletName,
-            '--wallet-key', this.walletKey,
-            '--wallet-storage-config', this.walletStorageConfig,
-            '--wallet-storage-creds', this.walletStorageCreds,
-            '--admin', adminSplit[0], adminSplit[1],
-            '--admin-api-key', this.adminApiKey,
-            '--label', this.label,
-            '--webhook-url', this.webhookUrl,
-            '--log-level', this.logLevel,
-            '--wallet-local-did', // TODO this could be an arg on the config
-            );
+            
+        ];
+
+        if(this.useTailsServer) {
+            args.push('--tails-server-base-url', process.env.TAILS_URL)
         }
 
         if (this.seed) {
