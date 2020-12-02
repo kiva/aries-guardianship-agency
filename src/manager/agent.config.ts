@@ -51,6 +51,8 @@ export class AgentConfig {
 
     readonly webhookUrl: string; // Controller endpoint
 
+    readonly useTailsServer: boolean;
+
     /**
      * Sets up the agent config
      */
@@ -64,6 +66,7 @@ export class AgentConfig {
         webhookUrl: string,
         adminPort: string,
         httpPort: string,
+        useTailsServer: boolean,
         seed?: string,
     ) {
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
@@ -89,6 +92,7 @@ export class AgentConfig {
         this.httpPort = `${httpPort}`;
         this.adminPort = `${adminPort}`;
         this.seed = seed;
+        this.useTailsServer = useTailsServer;
     }
 
     private getWalletStorageConfig() {
@@ -133,7 +137,12 @@ export class AgentConfig {
             '--webhook-url', this.webhookUrl,
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
+
         ];
+
+        if(this.useTailsServer) {
+            args.push('--tails-server-base-url', process.env.TAILS_URL);
+        }
 
         if (this.seed) {
             args.push('--seed', this.seed);

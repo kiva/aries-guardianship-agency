@@ -44,7 +44,7 @@ export class AgentManagerService {
      */
     public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number,
                              seed?: string, controllerUrl?: string, agentId?: string, label?: string, autoConnect: boolean = true,
-                             adminApiPort: string = process.env.AGENT_ADMIN_PORT) {
+                             adminApiPort: string = process.env.AGENT_ADMIN_PORT, useTailsServer: boolean = false) {
         // TODO: cleanup inconsistent return types.
         // 1  { agentId, connectionData }
         // 1a { agentId, empty }
@@ -54,6 +54,8 @@ export class AgentManagerService {
         label = label || agentId;
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const httpPort = process.env.AGENT_HTTP_PORT;
+
+
 
         // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com
         // Locally we don't have that public url so we need to reference the docker container for the agency
@@ -68,9 +70,8 @@ export class AgentManagerService {
             // Short term you can pass in -1 and it will cache for max int (ie a very long time)
             // TODO Long term we should have a proper DB store for permanent agents
             // (or figure out a way to avoid having to save agent data all together)
-
             const agentConfig = new AgentConfig(
-                walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, seed);
+                walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, useTailsServer, seed);
             await this.manager.startAgent(agentConfig);
 
             // @tothink move this caching to db

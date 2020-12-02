@@ -20,7 +20,7 @@ export class AgentManagerController {
     public createAgent(@Body() body: any) {
         return this.agentManagerService.spinUpAgent(body.walletId, body.walletKey, body.adminApiKey, body.ttl,
                     body.seed, body.controllerUrl, body.agentId, body.label, body.autoConnect,
-                    body.adminApiPort);
+                    body.adminApiPort, body.useTailsServer);
     }
 
     /**
