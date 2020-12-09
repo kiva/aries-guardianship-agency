@@ -1,9 +1,9 @@
 {
   "name": "agency",
   "version": "1.0.0",
-  "private": true,
   "description": "agency for Kiva Protocol",
-  "license": "none",
+  "license": "Apache-2.0",
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kiva/protocol.git"
