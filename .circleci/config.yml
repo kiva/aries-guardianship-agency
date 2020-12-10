@@ -4,17 +4,12 @@ jobs:
   build-and-test:
     executor:
       name: node/default
-      tag: '8.12'
+      tag: '14.15.1'
     steps:
       - checkout
-      - run:
-          name: npm install
-          command: |
-            npm install
-      - run:
-          name: run linter
-          command: |
-            npm run lint
+      - run: npm install
+      - run: npm run build
+      - run: npm run lint
 
   integration-test:
     machine:
@@ -32,9 +27,9 @@ jobs:
           command: |
               npm install nodemon --save-dev
               npm install
-              nvm install v8.17.0
+              nvm install v14.15.1
               node -v
-              nvm alias default v8.17.0
+              nvm alias default v14.15.1
       - run:
           name: setup docker environments
           command: |
@@ -70,9 +65,9 @@ jobs:
           command: |
               npm install nodemon --save-dev
               npm install
-              nvm install v8.17.0
+              nvm install v14.15.1
               node -v
-              nvm alias default v8.17.0
+              nvm alias default v14.15.1
       - run:
           name: setup docker environments
           command: |
@@ -106,12 +101,13 @@ workflows:
               only: /.*/
       - production-dockerfile-test:
           requires:
-            - integration-test
+            - build-and-test
           filters: # run for all branches AND tags
             tags:
               only: /.*/
       - docker/publish:
           requires:
+            - integration-test
             - production-dockerfile-test 
           filters: # only run for semver tagged versions
             tags:
