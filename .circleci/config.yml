@@ -101,12 +101,13 @@ workflows:
               only: /.*/
       - production-dockerfile-test:
           requires:
-            - integration-test
+            - build-and-test
           filters: # run for all branches AND tags
             tags:
               only: /.*/
       - docker/publish:
           requires:
+            - integration-test
             - production-dockerfile-test 
           filters: # only run for semver tagged versions
             tags:
