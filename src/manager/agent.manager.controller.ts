@@ -5,7 +5,7 @@ import { ProtocolValidationPipe } from 'protocol-common/protocol.validation.pipe
 import { AgentCreateDto } from './dtos/agent.create.dto';
 
 /**
- *
+ * Endpoints to spin up and down agents
  */
 @Controller('v1/manager')
 @ApiTags('manager')
@@ -14,7 +14,7 @@ export class AgentManagerController {
     constructor(private readonly agentManagerService: AgentManagerService) {}
 
     /**
-     * TODO ignoring the linting errors for now, need to fix eventually - perhaps by passing the full DTO object
+     * Spin up an agent with the passed in params
      */
     @Post()
     public createAgent(@Body(new ProtocolValidationPipe()) body: AgentCreateDto) {
