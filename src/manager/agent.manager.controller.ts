@@ -18,8 +18,7 @@ export class AgentManagerController {
      */
     @Post()
     public createAgent(@Body(new ProtocolValidationPipe()) body: AgentCreateDto) {
-        return this.agentManagerService.spinUpAgent(body.walletId, body.walletKey, body.adminApiKey, body.agentId,
-                body.ttl, body.seed, body.controllerUrl,  body.label, body.autoConnect, body.adminApiPort, body.useTailsServer);
+        return this.agentManagerService.spinUpAgent(body);
     }
 
     /**

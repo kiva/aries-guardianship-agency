@@ -1,10 +1,13 @@
 import { readFileSync } from 'fs';
+import { AgentCreateDto } from './dtos/agent.create.dto';
 
 /**
  * Centralizes the config setup for an agent so it can be used in docker or k8s
  * TODO some of these things may need to be moved to env.json or .env files
  */
 export class AgentConfig {
+    private readonly DEFAULT_TTL_SECONDS: number = 3600;
+
     readonly admin: string; // Admin url
 
     readonly adminApiKey: string;
@@ -53,22 +56,16 @@ export class AgentConfig {
 
     readonly useTailsServer: boolean;
 
+    readonly ttl: number;
+
+    readonly cacheTtl: number;
+
     /**
-     * Sets up the agent config
+     * Sets up the agent config, using smart defaults from the AgentCreateDto
      */
-    constructor(
-        walletId: string,
-        walletKey: string,
-        adminApiKey: string,
-        agentId: string,
-        label: string,
-        agentEndpoint: string,
-        webhookUrl: string,
-        adminPort: string,
-        httpPort: string,
-        useTailsServer: boolean,
-        seed?: string,
-    ) {
+    constructor(agentDto: AgentCreateDto) {
+        const httpPort = process.env.AGENT_HTTP_PORT;
+        const adminPort = agentDto.adminApiPort || process.env.AGENT_ADMIN_PORT;
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
         this.outboundTransport = 'http';
         this.dockerImage = process.env.AGENT_DOCKER_IMAGE;
@@ -79,20 +76,38 @@ export class AgentConfig {
         this.genesisTransactions = AgentConfig.getGenesisFile();
         this.walletType = 'indy';
         this.walletStorageType = 'postgres_storage';
-        this.walletName = walletId;
-        this.walletKey = walletKey;
+        this.walletName = agentDto.walletId;
+        this.walletKey = agentDto.walletKey;
         this.walletStorageConfig = JSON.stringify(this.getWalletStorageConfig());
         this.walletStorageCreds = JSON.stringify(this.getWalletStorageCreds());
         this.admin = `0.0.0.0 ${adminPort}`;
-        this.adminApiKey = adminApiKey;
-        this.label = label;
-        this.agentId = agentId;
-        this.webhookUrl = webhookUrl;
-        this.endpoint = agentEndpoint;
+        this.adminApiKey = agentDto.adminApiKey;
+        this.label = agentDto.label;
+        this.agentId = agentDto.agentId;
         this.httpPort = `${httpPort}`;
         this.adminPort = `${adminPort}`;
-        this.seed = seed;
-        this.useTailsServer = useTailsServer;
+        this.seed = agentDto.seed;
+        this.useTailsServer = (agentDto.useTailsServer === true); // defaults to false
+        this.ttl = agentDto.ttl || this.DEFAULT_TTL_SECONDS;
+        this.cacheTtl = this.getCacheTtl();
+        // The webhook url should be private on the network between the agent and the controller, since we don't want the admin api exposed publicly.
+        // It's either the passed in controller URL, or the internal URL of the agency for this specific agent ID.
+        this.webhookUrl = agentDto.controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${agentDto.agentId}`;
+        // The agent's endpoint is the one that is exposed publicly via the agency
+        this.endpoint = `${process.env.PUBLIC_URL}/v1/router/${agentDto.agentId}`;
+    }
+
+    /**
+     * We want the cache ttl to generally last 1 second longer than the agent's ttl so we have time to read values to shut it down
+     * However there are 2 special cases when the ttl is set to "infinite"
+     * When using the redis cache, setting ttl to 0 effectively sets it to infinite, so we don't want to add 1 in that case
+     * When using the fs cache, setting ttl to 0 causes it to clear immediately, and setting to -1 gets us to max int
+     */
+    private getCacheTtl(): number {
+        if (this.ttl > 0) {
+            return this.ttl + 1;
+        }
+        return this.ttl;
     }
 
     private getWalletStorageConfig() {
