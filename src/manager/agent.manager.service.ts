@@ -42,20 +42,16 @@ export class AgentManagerService {
      * TODO need to think through a few more cases - like how the public endpoints and ports will work
      * TODO need to handle error cases and ensure logging works in our deployed envs
      */
-    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number,
-                             seed?: string, controllerUrl?: string, agentId?: string, label?: string, autoConnect: boolean = true,
+    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, agentId: string,
+                             ttl?: number, seed?: string, controllerUrl?: string,  label?: string, autoConnect: boolean = true,
                              adminApiPort: string = process.env.AGENT_ADMIN_PORT, useTailsServer: boolean = false) {
         // TODO: cleanup inconsistent return types.
         // 1  { agentId, connectionData }
         // 1a { agentId, empty }
         // 2  { agentId, container, adminApiKey }
-
-        agentId = agentId || cryptoRandomString({length: 32, type: 'hex'});
         label = label || agentId;
         ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
         const httpPort = process.env.AGENT_HTTP_PORT;
-
-
 
         // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com
         // Locally we don't have that public url so we need to reference the docker container for the agency
