@@ -198,7 +198,6 @@ describe('Cache behaviors (e2e)', () => {
             seed: '000000000000000000000000Steward1'
         };
         const agentConfig = new AgentConfig(agentDto);
-        Logger.log(JSON.stringify(agentConfig));
         const manager = new DockerService();
         await manager.startAgent(agentConfig);
 

@@ -58,8 +58,6 @@ export class AgentConfig {
 
     readonly ttl: number;
 
-    readonly cacheTtl: number;
-
     /**
      * Sets up the agent config, using smart defaults from the AgentCreateDto
      */
@@ -89,25 +87,11 @@ export class AgentConfig {
         this.seed = agentDto.seed;
         this.useTailsServer = (agentDto.useTailsServer === true); // defaults to false
         this.ttl = agentDto.ttl || this.DEFAULT_TTL_SECONDS;
-        this.cacheTtl = this.getCacheTtl();
         // The webhook url should be private on the network between the agent and the controller, since we don't want the admin api exposed publicly.
         // It's either the passed in controller URL, or the internal URL of the agency for this specific agent ID.
         this.webhookUrl = agentDto.controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${agentDto.agentId}`;
         // The agent's endpoint is the one that is exposed publicly via the agency
         this.endpoint = `${process.env.PUBLIC_URL}/v1/router/${agentDto.agentId}`;
-    }
-
-    /**
-     * We want the cache ttl to generally last 1 second longer than the agent's ttl so we have time to read values to shut it down
-     * However there are 2 special cases when the ttl is set to "infinite"
-     * When using the redis cache, setting ttl to 0 effectively sets it to infinite, so we don't want to add 1 in that case
-     * When using the fs cache, setting ttl to 0 causes it to clear immediately, and setting to -1 gets us to max int
-     */
-    private getCacheTtl(): number {
-        if (this.ttl > 0) {
-            return this.ttl + 1;
-        }
-        return this.ttl;
     }
 
     private getWalletStorageConfig() {
