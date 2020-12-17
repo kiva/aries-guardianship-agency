@@ -1,5 +1,4 @@
 import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nestjs/common';
-import cryptoRandomString from 'crypto-random-string';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
@@ -8,6 +7,7 @@ import { DockerService } from './docker.service';
 import { IAgentManager } from './agent.manager.interface';
 import { AgentConfig } from './agent.config';
 import { K8sService } from './k8s.service';
+import { AgentCreateDto } from './dtos/agent.create.dto';
 
 /**
  * TODO validation, error cases, etc
@@ -15,7 +15,6 @@ import { K8sService } from './k8s.service';
 @Injectable()
 export class AgentManagerService {
 
-    private readonly DEFAULT_TTL_SECONDS: number = 3600;
     private manager: IAgentManager;
 
     // TODO expose a non-retry call to ProtocolHttpService so we don't need to keep both
@@ -39,81 +38,29 @@ export class AgentManagerService {
 
     /**
      * Contains the general logic to spin up an agent regardless of environment
-     * TODO need to think through a few more cases - like how the public endpoints and ports will work
-     * TODO need to handle error cases and ensure logging works in our deployed envs
      */
-    public async spinUpAgent(walletId: string, walletKey: string, adminApiKey: string, ttl?: number,
-                             seed?: string, controllerUrl?: string, agentId?: string, label?: string, autoConnect: boolean = true,
-                             adminApiPort: string = process.env.AGENT_ADMIN_PORT, useTailsServer: boolean = false) {
-        // TODO: cleanup inconsistent return types.
-        // 1  { agentId, connectionData }
-        // 1a { agentId, empty }
-        // 2  { agentId, container, adminApiKey }
-
-        agentId = agentId || cryptoRandomString({length: 32, type: 'hex'});
-        label = label || agentId;
-        ttl = (ttl === undefined ? this.DEFAULT_TTL_SECONDS : ttl);
-        const httpPort = process.env.AGENT_HTTP_PORT;
-
-
-
-        // TODO the agent's endpoint needs to be the public one exposed to the user, eg http://our-agency.com
-        // Locally we don't have that public url so we need to reference the docker container for the agency
-        const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${agentId}`;
-
-        // TODO the webhook url should be a private one just on the network between the agent and the controller
-        // since we don't want to expose the admin api publicly. Both locally and remotely this will be the docker container for the agency
-        const webhookUrl = controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${agentId}`;
-
+    public async spinUpAgent(agentDto: AgentCreateDto) {
+        const agentConfig = new AgentConfig(agentDto);
         try {
-            // Note: according to the docs a 0 value means caching for infinity, however this does not work in practice - it doesn't cache at all
-            // Short term you can pass in -1 and it will cache for max int (ie a very long time)
-            // TODO Long term we should have a proper DB store for permanent agents
-            // (or figure out a way to avoid having to save agent data all together)
-            const agentConfig = new AgentConfig(
-                walletId, walletKey, adminApiKey, agentId, label, agentEndpoint, webhookUrl, adminApiPort, httpPort, useTailsServer, seed);
             await this.manager.startAgent(agentConfig);
-
-            // @tothink move this caching to db
-            // adding one second to cache record timeout so that spinDownAgent has time to process before cache deletes the record
-            Logger.info(`record cache limit set to: ${(ttl === 0 ? ttl : ttl + 1)}`);
-            await this.setAgentCache(agentId, adminApiKey, adminApiPort, ttl);
-
-            // ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
-            if (ttl > 0) {
-                setTimeout(
-                    async () => {
-                        await this.spinDownAgent(agentId);
-                    }, ttl * 1000);
-            }
-
-            let connectionData = {};
-            // when autoConnect is true, then call the createConnection method
-            // when autoCorrect is not defined or null, treat it as true
-            if (autoConnect === true) {
-                // TODO for right now let's delay and then initiate the connection
-                await this.pingConnectionWithRetry(agentId, adminApiPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
-                connectionData = await this.createConnection(agentId, adminApiPort, adminApiKey);
-            }
-
-            return {agentId, connectionData};
         } catch (e) {
-            Logger.warn(`exception on startAgent() for agent '${agentId}'`, e);
-            // one possible cause of the exception is
-            // agent is already running.  We have 1 of 2 possibilities
-            // 1 - agent is running and in cache
-            // 2 - agent is running and not in cache
-            // call to handleAlreadyRunningContainer takes care of both
-            const runningData = await this.handleAlreadyRunningContainer(agentId, adminApiPort, adminApiKey, autoConnect, ttl);
-            if (runningData) {
-                return runningData;
-            }
-
-            // if the call to handleAlreadyRunningContainer fails,
-            // let it fall through because we have a bigger problem.
-            Logger.warn(`Unhandled error starting agent '${agentId}'...see previous messages for details`);
-            throw e;
+            Logger.warn(`exception on startAgent() for agent '${agentDto.agentId}'`, e);
+            await this.handleAlreadyRunningContainer(agentConfig, agentDto.autoConnect, e);
         }
+
+        await this.setAgentCache(agentConfig);
+        this.setSpinDownJob(agentConfig);
+
+        let connectionData = {};
+        // when autoConnect is true, then call the createConnection method, when autoCorrect is not defined or null, treat it as true
+        if (agentDto.autoConnect === true) {
+            // TODO for right now let's delay and then initiate the connection
+            const retryDuration = parseInt(process.env.AGENT_RETRY_DURATION, 10);
+            await this.pingConnectionWithRetry(agentConfig.agentId, agentConfig.adminPort, agentConfig.adminApiKey, retryDuration);
+            connectionData = await this.createConnection(agentConfig.agentId, agentConfig.adminPort, agentConfig.adminApiKey);
+        }
+
+        return { agentId: agentConfig.agentId, connectionData };
     }
 
     /**
@@ -142,6 +89,7 @@ export class AgentManagerService {
                     accept: 'application/json'
                 },
             };
+            // TODO we should either add a non-retry call to ProtocolHttpService, or make the existing requestWithRetry more configurable
             const res = await this.httpService.request(req).toPromise();
             if (res.status === 200) {
                 return true;
@@ -172,15 +120,11 @@ export class AgentManagerService {
      * TODO move to it's own class and pass in the http object
      */
     private async pingConnectionWithRetry(agentId: string, adminPort: string, adminApiKey: string, durationMS: number) : Promise<any> {
-
         const startOf = new Date();
         while (durationMS > ProtocolUtility.timeDelta(new Date(), startOf)) {
             // no point in rushing this
             await ProtocolUtility.delay(1000);
-
-            // TODO we should either add a non-retry call to ProtocolHttpService, or make the existing requestWithRetry more configurable
-            // attempt a status check, if successful call it good and return
-            // otherwise retry until duration is exceeded
+            // attempt a status check, if successful call it good and return, otherwise retry until duration is exceeded
             try {
                 if (true === await this.isAgentServerUp(agentId, adminPort, adminApiKey)) {
                     Logger.info(`agent ${agentId} is up and responding`);
@@ -195,54 +139,47 @@ export class AgentManagerService {
     }
 
     /**
-     * If we already have an agent running with the same agent id, don't try to start a new one, just return the connection data
-     * for the existing one - we use the adminApiKey to ensure that the caller actually has permissions to query the agent
-     * TODO we may want more checks here, eg to ensure the docker container is actually running, but for now we treat the cache as truth
+     * If we get an error attempting to start an agent it could be because the agent is already running
+     * If the agent is already in the cache, then attempt to connect to it, otherwise add to cache
      */
-    private async handleAlreadyRunningContainer(agentId: string, adminApiPort: string,
-                                                adminApiKey: string, autoConnect: boolean = true, ttl: number): Promise<any> {
-        // TODO: cleanup inconsistent return types.
-        // 1 { agentId, connectionData }
-        // 2 { agentId, containerId, adminApiKey }
-        // 3 null
-        if (agentId) {
-            let agentData: any = await this.cache.get(agentId);
-            if (agentData === undefined) {
-                /*
-                // TODO: we would like to be able to ping agent to make sure its really available
-                try {
-                    await this.pingConnectionWithRetry(agentId, adminApiPort, adminApiKey, 10000);
-                } catch (e) {
-                    Logger.warn(`agent ${agentId} not found in cache and was not reachable`);
-                    throw e;
-                }
-                */
-                Logger.warn(`agent ${agentId} not found in cache...adding`);
-                await this.setAgentCache(agentId, adminApiKey, adminApiPort, ttl);
-                agentData = await this.cache.get(agentId);
-            } else {
-                Logger.log(`agent ${agentId} exists and is in cache:`, agentData);
+    private async handleAlreadyRunningContainer(agentConfig: AgentConfig, autoConnect: boolean, e: any): Promise<any> {
+        let agentData: any = await this.cache.get(agentConfig.agentId);
+        if (agentData === undefined) {
+            /*
+            // TODO: we would like to be able to ping agent to make sure its really available
+            try {
+                await this.pingConnectionWithRetry(agentId, adminApiPort, adminApiKey, 10000);
+            } catch (e) {
+                Logger.warn(`agent ${agentId} not found in cache and was not reachable`);
+                throw e;
             }
-
-            if (agentData && autoConnect === true) {
-                // TODO need error handling if this call fails
-                const connectionData = await this.createConnection(agentId, adminApiPort, adminApiKey);
-                return {
-                    agentId,
-                    connectionData
-                };
-            }
-            if (agentData && autoConnect === false) {
-                return agentData;
-            }
-
+            */
+            Logger.warn(`agent ${agentConfig.agentId} not found in cache...adding`);
+            await this.setAgentCache(agentConfig);
+            agentData = await this.cache.get(agentConfig.agentId);
+        } else {
+            Logger.log(`agent ${agentConfig.agentId} exists and is in cache:`, agentData);
         }
-        return null;
+
+        let connectionData = {};
+        if (agentData) {
+            if (autoConnect === true) {
+                // TODO need error handling if this call fails
+                connectionData = await this.createConnection(agentConfig.agentId, agentConfig.adminPort, agentConfig.adminApiKey);
+            }
+            return {
+                agentId: agentConfig.agentId,
+                connectionData
+            };
+        }
+
+        // if the call to handleAlreadyRunningContainer fails, let it fall through because we have a bigger problem.
+        Logger.warn(`Unhandled error starting agent '${agentConfig.agentId}'...see previous messages for details`);
+        throw e;
     }
 
     /**
-     * TODO make this DRY with above code
-     * TODO check with the goverance policy on whether to allow the connection
+     * TODO check with the governance policy on whether to allow the connection
      */
     public async connectAgent (agentId: string, adminApiKey: string): Promise<any> {
         const agentCache: any = await this.cache.get(agentId);
@@ -255,7 +192,32 @@ export class AgentManagerService {
     /**
      * This gets called in multiple places so ensuring logic stays the same
      */
-    private async setAgentCache(agentId: string, adminApiKey: string, adminApiPort: string, ttl: number): Promise<void> {
-        await this.cache.set(agentId, {adminApiKey, adminApiPort, ttl}, {ttl: (ttl === 0 ? ttl : ttl + 1)});
+    private async setAgentCache(agentConfig: AgentConfig): Promise<void> {
+        // Generally we want the cache to last 1 second longer than the agent, except when set to an "infinite" value like 0 or -1
+        const cacheTtl = (agentConfig.ttl < 0) ? agentConfig.ttl : agentConfig.ttl + 1;
+        Logger.info(`record cache limit set to: ${cacheTtl}`);
+        await this.cache.set(
+            agentConfig.agentId,
+            {
+                adminApiKey: agentConfig.adminApiKey,
+                adminApiPort: agentConfig.adminPort,
+                ttl: agentConfig.ttl
+            },
+            {
+                ttl: cacheTtl
+            }
+        );
+    }
+
+    /**
+     * ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
+     */
+    private setSpinDownJob(agentConfig: AgentConfig): void {
+        if (agentConfig.ttl > 0) {
+            setTimeout(
+                async () => {
+                    await this.spinDownAgent(agentConfig.agentId);
+                }, agentConfig.ttl * 1000);
+        }
     }
 }

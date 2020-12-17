@@ -4,8 +4,7 @@ import { ConfigModule } from 'protocol-common/config.module';
 import { DockerService } from '../src/manager/docker.service';
 import { AgentConfig } from '../src/manager/agent.config';
 import { Logger } from 'protocol-common/logger';
-
-
+import { AgentCreateDto } from '../src/manager/dtos/agent.create.dto';
 
 /*
     Integration test to show the gammit of the exchange of messages between
@@ -41,9 +40,18 @@ describe('Cache behaviors (e2e)', () => {
     };
 
     beforeAll(async () => {
+        // setup environment so we can create an agent without using agent manager
+        ConfigModule.init('../src/config/env.json');
+        process.env.AGENT_DOCKER_IMAGE = 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4';
+        process.env.AGENT_LOG_LENGTH = '0';
+        process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH = './resources/pool_transactions_genesis_local_dev';
+        process.env.INTERNAL_URL = 'http://aries-guardianship-agency:3010';
+        process.env.INDY_POOL_NAME = 'pool1';
+        process.env.NETWORK_NAME = 'agency-network';
+        process.env.AGENT_ADMIN_PORT = '5001';
+        process.env.AGENT_HTTP_PORT = '5000';
         jest.setTimeout(60000);
     });
-
 
     // Test condition: Cache shouldn't contain the agent, nor should the agent already be running
     // Cache: down; Reality: down
@@ -132,21 +140,16 @@ describe('Cache behaviors (e2e)', () => {
     // Test condition: Agent is running but the cache doesn't contain a reference to Agent
     // Cache down: Reality: up
     it('Successfully request agent running not in cache', async () => {
-        // setup environment so we can create an agent without using agent manager
-        ConfigModule.init('../src/config/env.json');
-        process.env.AGENT_DOCKER_IMAGE = 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4';
-        process.env.AGENT_LOG_LENGTH = '0';
-        process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH = './resources/pool_transactions_genesis_local_dev';
-        process.env.INTERNAL_URL = 'http://aries-guardianship-agency:3010';
-        process.env.INDY_POOL_NAME = 'pool1';
-        process.env.NETWORK_NAME = 'agency-network';
-
         // spin up the agent not using AgentMananger so that is cache is out of sync
         thirdAgentId = 'thirdAgent';
-        const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${thirdAgentId}`;
-        const webhookUrl = `${process.env.INTERNAL_URL}/v1/controller/${thirdAgentId}`;
-        const agentConfig = new AgentConfig('walletId11', 'walletId11', adminApiKey, thirdAgentId, thirdAgentId,
-            agentEndpoint, webhookUrl, '5001', '5000', false,'000000000000000000000000Steward1');
+        const agentDto: AgentCreateDto = {
+            walletId: 'walletId11',
+            walletKey: 'walletId11',
+            adminApiKey,
+            agentId: thirdAgentId,
+            seed: '000000000000000000000000Steward1'
+        };
+        const agentConfig = new AgentConfig(agentDto);
         const manager = new DockerService();
         await manager.startAgent(agentConfig);
 
@@ -185,21 +188,16 @@ describe('Cache behaviors (e2e)', () => {
         await shutdownAgent(thirdAgentId);
         await ProtocolUtility.delay(5000);
 
-        // setup environment so we can create an agent without using agent manager
-        ConfigModule.init('../src/config/env.json');
-        process.env.AGENT_DOCKER_IMAGE = 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4';
-        process.env.AGENT_LOG_LENGTH = '0';
-        process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH = './resources/pool_transactions_genesis_local_dev';
-        process.env.INTERNAL_URL = 'http://aries-guardianship-agency:3010';
-        process.env.INDY_POOL_NAME = 'pool1';
-        process.env.NETWORK_NAME = 'agency-network';
-
-        // spin up the agent not using AgentMananger so that is cache is out of sync
+        // spin up the agent not using AgentManager so that is cache is out of sync
         thirdAgentId = 'thirdAgent';
-        const agentEndpoint = `${process.env.PUBLIC_URL}/v1/router/${thirdAgentId}`;
-        const webhookUrl = `${process.env.INTERNAL_URL}/v1/controller/${thirdAgentId}`;
-        const agentConfig = new AgentConfig('walletId11', 'walletId11', adminApiKey, thirdAgentId, thirdAgentId,
-            agentEndpoint, webhookUrl, '5001', '5000', false, '000000000000000000000000Steward1');
+        const agentDto: AgentCreateDto = {
+            walletId: 'walletId11',
+            walletKey: 'walletId11',
+            adminApiKey,
+            agentId: thirdAgentId,
+            seed: '000000000000000000000000Steward1'
+        };
+        const agentConfig = new AgentConfig(agentDto);
         const manager = new DockerService();
         await manager.startAgent(agentConfig);
 
