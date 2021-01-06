@@ -34,8 +34,8 @@ export class DockerService implements IAgentManager {
                 AutoRemove: true,
                 NetworkMode: config.networkName,
                 PortBindings: {
-                    [`${config.adminPort}/tcp`]: [{ 'HostPort': config.adminPort}],
-                    [`${config.httpPort}/tcp`]: [{ 'HostPort': config.httpPort}]
+                    [`${config.adminPort}/tcp`]: [{ 'HostPort': `${config.adminPort}`}],
+                    [`${config.httpPort}/tcp`]: [{ 'HostPort': `${config.httpPort}`}]
                 }
             },
             Cmd: config.getStartArgs(),
@@ -44,7 +44,7 @@ export class DockerService implements IAgentManager {
         // allow for exposing admin ports when set as this might be needed during development.
         // to make the ports available to localhost, they need to be set to values other than
         // the defaults
-        if (config.adminPort !== process.env.AGENT_ADMIN_PORT && Constants.LOCAL === process.env.NODE_ENV) {
+        if (config.adminPort !== parseInt(process.env.AGENT_ADMIN_PORT, 10) && Constants.LOCAL === process.env.NODE_ENV) {
             Logger.info(`setting up ports to be exposed`);
             containerOptions.ExposedPorts = {
                 [`${config.adminPort}/tcp`]: {},

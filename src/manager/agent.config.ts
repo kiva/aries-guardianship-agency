@@ -14,7 +14,7 @@ export class AgentConfig {
 
     readonly agentLogLength: number;
 
-    readonly adminPort: string;
+    readonly adminPort: number;
 
     readonly agentId: string; // Agent id used for remote interactions
 
@@ -24,7 +24,7 @@ export class AgentConfig {
 
     readonly genesisTransactions: string;
 
-    readonly httpPort: string;
+    readonly httpPort: number;
 
     readonly label: string; // Agent name
 
@@ -62,8 +62,8 @@ export class AgentConfig {
      * Sets up the agent config, using smart defaults from the AgentCreateDto
      */
     constructor(agentDto: AgentCreateDto) {
-        const httpPort = process.env.AGENT_HTTP_PORT;
-        const adminPort = agentDto.adminApiPort || process.env.AGENT_ADMIN_PORT;
+        const httpPort = parseInt(process.env.AGENT_HTTP_PORT, 10);
+        const adminPort = agentDto.adminApiPort || parseInt(process.env.AGENT_ADMIN_PORT, 10);
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
         this.outboundTransport = 'http';
         this.dockerImage = process.env.AGENT_DOCKER_IMAGE;
@@ -82,8 +82,8 @@ export class AgentConfig {
         this.adminApiKey = agentDto.adminApiKey;
         this.label = agentDto.label;
         this.agentId = agentDto.agentId;
-        this.httpPort = `${httpPort}`;
-        this.adminPort = `${adminPort}`;
+        this.httpPort = httpPort;
+        this.adminPort = adminPort;
         this.seed = agentDto.seed;
         this.useTailsServer = (agentDto.useTailsServer === true); // defaults to false
         this.ttl = agentDto.ttl || this.DEFAULT_TTL_SECONDS;
