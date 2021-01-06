@@ -77,7 +77,7 @@ export class AgentManagerService {
         }
     }
 
-    public async isAgentServerUp(agentId: string, adminPort: string, adminApiKey: string): Promise<boolean> {
+    public async isAgentServerUp(agentId: string, adminPort: number, adminApiKey: string): Promise<boolean> {
         try {
             const url = `http://${agentId}:${adminPort}/status`;
             Logger.info(`agent admin url is ${url}`);
@@ -102,7 +102,7 @@ export class AgentManagerService {
      * TODO move to it's own class and pass in the http object
      * TODO error handling
      */
-    private async createConnection(agentId: string, adminPort: string, adminApiKey: string) {
+    private async createConnection(agentId: string, adminPort: number, adminApiKey: string) {
         const url = `http://${agentId}:${adminPort}/connections/create-invitation`;
         const req: any = {
             method: 'POST',
@@ -119,7 +119,7 @@ export class AgentManagerService {
     /**
      * TODO move to it's own class and pass in the http object
      */
-    private async pingConnectionWithRetry(agentId: string, adminPort: string, adminApiKey: string, durationMS: number) : Promise<any> {
+    private async pingConnectionWithRetry(agentId: string, adminPort: number, adminApiKey: string, durationMS: number) : Promise<any> {
         const startOf = new Date();
         while (durationMS > ProtocolUtility.timeDelta(new Date(), startOf)) {
             // no point in rushing this
@@ -183,7 +183,7 @@ export class AgentManagerService {
      */
     public async connectAgent (agentId: string, adminApiKey: string): Promise<any> {
         const agentCache: any = await this.cache.get(agentId);
-        const adminPort = (agentCache ? agentCache.adminApiPort : process.env.AGENT_ADMIN_PORT);
+        const adminPort = (agentCache ? agentCache.adminApiPort : parseInt(process.env.AGENT_ADMIN_PORT, 10));
         await this.pingConnectionWithRetry(agentId, adminPort, adminApiKey, parseInt(process.env.AGENT_RETRY_DURATION, 10));
         const connectionData = await this.createConnection(agentId, adminPort, adminApiKey);
         return { agentId, connectionData };

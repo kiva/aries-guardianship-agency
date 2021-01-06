@@ -48,9 +48,9 @@ export class AgentCreateDto {
     @IsOptional() @IsBoolean() readonly autoConnect?: boolean = true;
 
     @ApiProperty({
-        description: '(Optional) Custom admin API port for agent, useful for local testing. Default: \'5001\'',
+        description: '(Optional) Custom admin API port for agent, useful for local testing. Default: 5001',
     })
-    @IsOptional() @IsNumber() readonly adminApiPort?: string;
+    @IsOptional() @IsNumber() readonly adminApiPort?: number;
 
     @ApiProperty({
         description: '(Optional) Whether the agent should use a tails server for revocation. Default: false',
