@@ -63,7 +63,7 @@ export class AgentConfig {
      */
     constructor(agentDto: AgentCreateDto) {
         const httpPort = parseInt(process.env.AGENT_HTTP_PORT, 10);
-        const adminPort = agentDto.adminApiPort || parseInt(process.env.AGENT_ADMIN_PORT);
+        const adminPort = agentDto.adminApiPort || parseInt(process.env.AGENT_ADMIN_PORT, 10);
         this.inboundTransport = `http 0.0.0.0 ${httpPort}`;
         this.outboundTransport = 'http';
         this.dockerImage = process.env.AGENT_DOCKER_IMAGE;
