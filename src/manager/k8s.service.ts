@@ -33,7 +33,7 @@ export class K8sService implements IAgentManager {
     }
 
     private async createPod(config: AgentConfig): Promise<any> {
-        const healthCheckPort : any = parseInt(config.httpPort, 10);
+        const healthCheckPort : any = config.httpPort;
         const podOptions : V1Pod = {
             apiVersion: 'v1',
             kind: 'Pod',
@@ -52,11 +52,11 @@ export class K8sService implements IAgentManager {
                     ports: [
                         {
                             name: 'http',
-                            containerPort: parseInt(config.httpPort, 10)
+                            containerPort: config.httpPort
                         },
                         {
                             name: 'admin',
-                            containerPort: parseInt(config.adminPort, 10)
+                            containerPort: config.adminPort
                         }
                     ],
                     args: config.getStartArgs(),
@@ -137,11 +137,11 @@ export class K8sService implements IAgentManager {
         spec: {
           ports: [{
             name: 'http',
-            port: parseInt(config.httpPort, 10)
+            port: config.httpPort
           },
           {
             name: 'admin',
-            port: parseInt(config.adminPort, 10)
+            port: config.adminPort
           }],
           selector: {
             'app.kubernetes.io/instance': config.agentId,

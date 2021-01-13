@@ -156,7 +156,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             auto_remove: false,
             comment: 'pleading the 5th',
             connection_id: issuerConnectionId,
-            cred_def_id: credentialDefinitionId,
             schema_name: schemaName,
             schema_version: schemaVersion,
             schema_id: schemaId,
