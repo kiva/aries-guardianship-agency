@@ -47,7 +47,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: issuerDid,
+            useTailsServer: true
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -126,7 +127,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
                 try {
-                    expect(res.status).toBe(200);
+                    expect(res.status).toBe(200)
                     schemaId = res.body.schema_id;
                 } catch (e) {
                     Logger.warn(`schema errored result -> ${res.status}`, res.body);
@@ -140,7 +141,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         const data = {
             schema_id: schemaId,
             support_revocation: true,
-            tag: 'issued_1'
+            tag: 'issued_3'
         };
         return request(issuerUrl)
             .post('/credential-definitions')
@@ -198,9 +199,12 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .set('x-api-key', holderApiKey)
             .send(invitation)
             .expect((res) => {
+                Logger.warn(`issue-credential/records result -> ${res.status}`, res.body);
                 expect(res.status).toBe(200);
                 expect(res.body.results.length).toBe(1);
                 expect(res.body.results[0].state).toBe('credential_acked');
+                revocationRegistryId = res.body.results[0].revoc_reg_id;
+                credentialRevocationId = res.body.results[0].revocation_id;
             });
     });
 
@@ -259,46 +263,9 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    it('create revocation registry on ledger', async () => {
-        const data = {
-            "max_cred_num": 100,
-            "credential_definition_id": credentialDefinitionId
-        };
-        return request(issuerUrl)
-        .post('/revocation/create-registry')
-        .send(data)
-        .set('x-api-key', issuerApiKey)
-            .expect((res) => {
-                try {
-                    Logger.warn(`/revocation/create-registry  result -> ${res.status}`, res.body);
-                    expect(res.status).toBe(200);
-                } catch (e) {
-                    Logger.warn(`/revocation/create-registry errored result -> ${res.status}`, res.body);
-                    throw e;
-                }
-            });
-    });
-
-    it('get revocation registry id', async () => {
-        return request(issuerUrl)
-        .get(`/revocation/registries/created?cred_def_id=${credentialDefinitionId}`)
-
-        .set('x-api-key', issuerApiKey)
-            .expect((res) => {
-                try {
-                    Logger.warn(`/revocation/registries/created?cred_def_id=${credentialDefinitionId} result -> ${res.status}`, res.body);
-                    expect(res.status).toBe(200);
-                    revocationRegistryId =  res.body.rev_reg_ids[0];
-                } catch (e) {
-                    Logger.warn(`/revocation/registries/created?cred_def_id=${credentialDefinitionId} errored result -> ${res.status}`, res.body);
-                    throw e;
-                }
-            });
-    });
-
     it('revoke credential', async () => {
         return request(issuerUrl)
-        .post(`/issue-credential/revoke/issue-credential/revoke?rev_reg_id=${revocationRegistryId}&cred_rev_id=${credentialRevocationId}&publish=true`)
+        .post(`/issue-credential/revoke?rev_reg_id=${revocationRegistryId}&cred_rev_id=${credentialRevocationId}&publish=true`)
         .set('x-api-key', issuerApiKey)
             .expect((res) => {
                 try {
@@ -311,24 +278,78 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    it('Spin down agent 1', () => {
+    it('prover proves holders credential that has just been revoked', async () => {
         const data = {
-            agentId: issuerId
+            connection_id: issuerConnectionId,
+            comment: 'requesting score above 50',
+            proof_request: {
+                name: 'Proof of Score',
+                version: '1.0',
+                requested_attributes: {
+                    'score': {
+                        name: 'score',
+                        restrictions: [
+                            {
+                                cred_def_id: credentialDefinitionId
+                            }
+                        ]
+                    }
+                },
+                requested_predicates: {}
+            }
         };
-        return request(hostUrl)
-            .delete('/v1/manager')
+        Logger.warn(`For issuer ${issuerId} /present-proof/send-request body request '${issuerUrl}' -> `, data);
+        return request(issuerUrl)
+            .post('/present-proof/send-request')
             .send(data)
-            .expect(200);
+            .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                try {
+                    Logger.warn(`/present-proof/send-request result -> ${res.status}`, res.body);
+                    expect(res.status).toBe(200);
+                    presentationExchangeId = res.body.presentation_exchange_id;
+                } catch (e) {
+                    Logger.warn(`/present-proof/send-request errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
+            });
     });
 
-    it('Spin down agent 2', () => {
-        const data = {
-            agentId: holderId
-        };
-        return request(hostUrl)
-            .delete('/v1/manager')
-            .send(data)
-            .expect(200);
+    it('verify proof failed', async () => {
+        await ProtocolUtility.delay(6000);
+        return request(issuerUrl)
+            .get(`/present-proof/records/${presentationExchangeId}`)
+            .set('x-api-key', issuerApiKey)
+            .expect((res) => {
+                try {
+                    Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
+                    expect(res.status).toBe(200);
+                    expect(res.body.state).toBe('failed');
+                } catch (e) {
+                    Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
+            });
     });
+
+    // it('Spin down agent 1', () => {
+    //     const data = {
+    //         agentId: issuerId
+    //     };
+    //     return request(hostUrl)
+    //         .delete('/v1/manager')
+    //         .send(data)
+    //         .expect(200);
+    // });
+
+    // it('Spin down agent 2', () => {
+    //     const data = {
+    //         agentId: holderId
+    //     };
+    //     return request(hostUrl)
+    //         .delete('/v1/manager')
+    //         .send(data)
+    //         .expect(200);
+    // });
 
 });
