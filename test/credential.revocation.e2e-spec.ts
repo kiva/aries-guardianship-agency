@@ -62,9 +62,9 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
-            agentId: 'holder2',
-            walletId: 'walletId2',
-            walletKey: 'walletId2',
+            agentId: 'holder3',
+            walletId: 'walletId3',
+            walletKey: 'walletId3',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra2',
             did: holderDid
