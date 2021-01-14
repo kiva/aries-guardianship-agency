@@ -255,6 +255,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
                     expect(res.body.state).toBe('verified');
+                    expect(res.body.verified).toBe('true');
                     expect(res.body.presentation.requested_proof.revealed_attrs.score.raw).toBe('750');
                 } catch (e) {
                     Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);
@@ -324,7 +325,9 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 try {
                     Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
-                    expect(res.body.state).toBe('failed');
+                    expect(res.body.state).toBe('verified');
+                    expect(res.body.verified).toBe('false');
+                    expect(res.body.presentation.requested_proof.revealed_attrs.score.raw).toBe('750');
                 } catch (e) {
                     Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);
                     throw e;
@@ -332,24 +335,23 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    // it('Spin down agent 1', () => {
-    //     const data = {
-    //         agentId: issuerId
-    //     };
-    //     return request(hostUrl)
-    //         .delete('/v1/manager')
-    //         .send(data)
-    //         .expect(200);
-    // });
+    it('Spin down agent 1', () => {
+        const data = {
+            agentId: issuerId
+        };
+        return request(hostUrl)
+            .delete('/v1/manager')
+            .send(data)
+            .expect(200);
+    });
 
-    // it('Spin down agent 2', () => {
-    //     const data = {
-    //         agentId: holderId
-    //     };
-    //     return request(hostUrl)
-    //         .delete('/v1/manager')
-    //         .send(data)
-    //         .expect(200);
-    // });
-
+    it('Spin down agent 2', () => {
+        const data = {
+            agentId: holderId
+        };
+        return request(hostUrl)
+            .delete('/v1/manager')
+            .send(data)
+            .expect(200);
+    });
 });
