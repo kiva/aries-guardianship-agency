@@ -148,8 +148,13 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .send(data)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
-                expect(res.status).toBe(200);
-                credentialDefinitionId = res.body.credential_definition_id;
+                try {
+                    expect(res.status).toBe(200);
+                    credentialDefinitionId = res.body.credential_definition_id;
+                } catch (e) {
+                    Logger.warn(`credential-definitions errored result -> ${res.status}`, res.body);
+                    throw e;
+                }
             });
     });
 
