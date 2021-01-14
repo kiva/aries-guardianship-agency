@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ProtocolExceptionFilter } from 'protocol-common/protocol.exception.filter';
+import { Logger as AriesControllerLogger } from 'aries-controller/node_modules/protocol-common/logger';
 import { Logger } from 'protocol-common/logger';
 import { LoggingInterceptor } from 'protocol-common/logging.interceptor';
 import { DatadogLogger } from 'protocol-common/datadog.logger';
@@ -25,8 +26,13 @@ export class AppService {
         const requestId = require('express-request-id')();
         app.use(requestId);
 
-        const logger = new Logger(DatadogLogger.getLogger());
+        const datadogInstance = DatadogLogger.getLogger();
+        const logger = new Logger(datadogInstance);
         app.useLogger(logger);
+        // The aries-controller npm package also uses the common-logger but because it's a different node_modules it's a different instance
+        // To fix this we inject the datadog instance into the aries-controller logger class
+        new AriesControllerLogger(datadogInstance);
+        
         // Increase json parse size to handle encoded images
         app.use(json({ limit: HttpConstants.JSON_LIMIT }));
         app.use(helmet());
