@@ -31,8 +31,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     const hostUrl = 'http://localhost:3010';
     const schemaName = 'sample_schema';
     const schemaVersion = '2.0';
-    const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
-    const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
+    const issuerDid = 'EbP4aYNeTHL6q385GuVpRV';
+    const holderDid = 'QKYQTgkQncYc5vZQ6H7gnu';
 
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
