@@ -46,7 +46,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletId: 'walletId2',
             walletKey: 'walletId2',
             adminApiKey: issuerApiKey,
-            seed: '000000000000000000000000Steward1',
+            seed: '000000000000000000000000Steward2',
             did: issuerDid,
             useTailsServer: true
         };
@@ -66,7 +66,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletId: 'walletId2',
             walletKey: 'walletId2',
             adminApiKey: holderApiKey,
-            seed: '000000000000000000000000000ncra1',
+            seed: '000000000000000000000000000ncra2',
             did: holderDid
         };
         return request(hostUrl)
