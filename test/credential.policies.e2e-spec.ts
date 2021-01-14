@@ -300,6 +300,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
                     expect(res.body.state).toBe('verified');
+                    expect(res.body.verified).toBe('true');
                     expect(res.body.presentation.requested_proof.revealed_attrs.score.raw).toBe('750');
                 } catch (e) {
                     Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);

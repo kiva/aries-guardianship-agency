@@ -60,9 +60,9 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
-            agentId: 'holder',
-            walletId: 'walletId22',
-            walletKey: 'walletId22',
+            agentId: 'holder2',
+            walletId: 'walletId222',
+            walletKey: 'walletId222',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
             did: holderDid,
@@ -140,7 +140,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         const data = {
             schema_id: schemaId,
             support_revocation: true,
-            tag: 'issued_2'
+            tag: 'tag2'
         };
         return request(issuerUrl)
             .post('/credential-definitions')
@@ -204,7 +204,28 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
+    it('issuer revoke credential', async () => {
+        const data = {
+            cred_ex_id: credentialExchangeId,
+            publish: true
+        };
+        return request(issuerUrl)
+        .post(`/revocation/revoke`)
+        .set('x-api-key', issuerApiKey)
+        .send(data)
+        .expect((res) => {
+            try {
+                Logger.warn(`revocation/revoke  result -> ${res.status}`, res.body);
+                expect(res.status).toBe(200);
+            } catch (e) {
+                Logger.warn(`revocation/revoke errored result -> ${res.status}`, res.body);
+                throw e;
+            }
+        });
+    });
+
     it('prover proves holders credential', async () => {
+        await ProtocolUtility.delay(1000);
         const data = {
             connection_id: issuerConnectionId,
             comment: 'requesting score above 50',
@@ -241,7 +262,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    it('verify proof is proved', async () => {
+    it('verify proof is failed because revoked', async () => {
         await ProtocolUtility.delay(6000);
         return request(issuerUrl)
             .get(`/present-proof/records/${presentationExchangeId}`)
@@ -251,6 +272,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
                     expect(res.body.state).toBe('verified');
+                    expect(res.body.verified).toBe('false');
                     expect(res.body.presentation.requested_proof.revealed_attrs.score.raw).toBe('750');
                 } catch (e) {
                     Logger.warn(`${issuerUrl}/present-proof/records/${presentationExchangeId} errored result -> ${res.status}`, res.body);
