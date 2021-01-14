@@ -45,7 +45,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: issuerDid,
+            useTailsServer: true
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -137,7 +138,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         await ProtocolUtility.delay(1000);
         const data = {
             schema_id: schemaId,
-            support_revocation: false,
+            support_revocation: true,
             tag: 'issued_1'
         };
         return request(issuerUrl)
