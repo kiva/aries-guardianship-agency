@@ -30,7 +30,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const hostUrl = 'http://localhost:3010';
     const schemaName = 'sample_schema';
-    const schemaVersion = '1.0';
+    const schemaVersion = '2.0';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
 
@@ -141,7 +141,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         const data = {
             schema_id: schemaId,
             support_revocation: true,
-            tag: 'issued_3'
+            tag: 'issued_2'
         };
         return request(issuerUrl)
             .post('/credential-definitions')
