@@ -26,12 +26,12 @@ export class AppService {
         const requestId = require('express-request-id')();
         app.use(requestId);
 
-        const datadogLogger = DatadogLogger.getLogger();
-        const logger = new Logger();
+        const datadogInstance = DatadogLogger.getLogger();
+        const logger = new Logger(datadogInstance);
         app.useLogger(logger);
         // The aries-controller npm package also uses the common-logger and because it's in a different node_modules location, it means it's a different
-        // instance than the one defined in the parent service. To fix this we inject the datadog logger into the aries-controller logger class
-        new AriesControllerLogger(datadogLogger);
+        // instance than the one defined in the parent service. To fix this we inject the datadog instance into the aries-controller logger class
+        new AriesControllerLogger(datadogInstance);
 
         // Increase json parse size to handle encoded images
         app.use(json({ limit: HttpConstants.JSON_LIMIT }));

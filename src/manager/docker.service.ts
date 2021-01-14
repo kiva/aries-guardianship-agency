@@ -47,8 +47,7 @@ export class DockerService implements IAgentManager {
         if (config.adminPort !== parseInt(process.env.AGENT_ADMIN_PORT, 10) && Constants.LOCAL === process.env.NODE_ENV) {
             Logger.info(`setting up ports to be exposed`);
             containerOptions.ExposedPorts = {
-                [`${config.adminPort}/tcp`]: {},
-                [`${config.httpPort}/tcp`]: {}
+                [`${config.adminPort}/tcp`]: {}
             };
         }
 
