@@ -30,9 +30,9 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const hostUrl = 'http://localhost:3010';
     const schemaName = 'sample_schema';
-    const schemaVersion = '2.0';
-    const issuerDid = 'EbP4aYNeTHL6q385GuVpRV';
-    const holderDid = 'QKYQTgkQncYc5vZQ6H7gnu';
+    const schemaVersion = '1.0';
+    const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
+    const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
 
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
@@ -42,11 +42,11 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Spin up agent 1 (issuer)', async () => {
         const data = {
-            agentId: 'issuer2',
-            walletId: 'walletId2',
-            walletKey: 'walletId2',
+            agentId: 'issuer',
+            walletId: 'walletId11',
+            walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
-            seed: '000000000000000000000000Steward2',
+            seed: '000000000000000000000000Steward1',
             did: issuerDid,
             useTailsServer: true
         };
@@ -62,12 +62,13 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('Spin up agent 2 (holder)', async () => {
         const data = {
-            agentId: 'holder3',
-            walletId: 'walletId3',
-            walletKey: 'walletId3',
+            agentId: 'holder',
+            walletId: 'walletId22',
+            walletKey: 'walletId22',
             adminApiKey: holderApiKey,
-            seed: '000000000000000000000000000ncra2',
-            did: holderDid
+            seed: '000000000000000000000000000ncra1',
+            did: holderDid,
+            useTailsServer: true
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -206,8 +207,9 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect((res) => {
                 Logger.warn(`issue-credential/records result -> ${res.status}`, res.body);
                 expect(res.status).toBe(200);
-                expect(res.body.results.length).toBe(1);
-                expect(res.body.results[0].state).toBe('credential_acked');
+                expect(res.body.results.length).toBeGreaterThan(0);
+                const i = res.body.results.length - 1;
+                expect(res.body.results[i].state).toBe('credential_acked');
                 revocationRegistryId = res.body.results[0].revoc_reg_id;
                 credentialRevocationId = res.body.results[0].revocation_id;
             });
