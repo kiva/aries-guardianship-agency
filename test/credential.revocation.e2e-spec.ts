@@ -45,7 +45,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletKey: 'walletId11',
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
-            did: issuerDid
+            did: issuerDid,
+            useTailsServer: true
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -64,7 +65,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletKey: 'walletId22',
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
-            did: holderDid
+            did: holderDid,
+            useTailsServer: true
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -137,8 +139,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         await ProtocolUtility.delay(1000);
         const data = {
             schema_id: schemaId,
-            support_revocation: false,
-            tag: 'issued_1'
+            support_revocation: true,
+            tag: 'issued_2'
         };
         return request(issuerUrl)
             .post('/credential-definitions')
@@ -198,58 +200,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 expect(res.status).toBe(200);
                 expect(res.body.results.length).toBeGreaterThan(0);
                 const i = res.body.results.length - 1;
-                expect(res.body.results[i].state).toBe('credential_acked');
-            });
-    });
-
-    it('issuer sends second credential using /send-offer', async () => {
-        await ProtocolUtility.delay(5000);
-        const data = {
-            auto_issue: false, // set to false so we can check our governance policy issuer
-            auto_remove: false,
-            comment: 'pleading the 5th',
-            connection_id: issuerConnectionId,
-            cred_def_id: credentialDefinitionId,
-            credential_preview: {
-            '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
-                attributes: [
-                    {
-                        name: 'score',
-                        value: '750'
-                    }
-                ]
-            },
-            trace: false
-        };
-
-        Logger.warn(`For issuer ${issuerId} issue-credential/send-offer body request '${issuerUrl}' -> `, data);
-        return request(issuerUrl)
-            .post('/issue-credential/send-offer')
-            .send(data)
-            .set('x-api-key', issuerApiKey)
-            .expect((res) => {
-                try {
-                    Logger.warn(`issue-credential/send-offer result -> ${res.status}`, res.body);
-                    expect(res.status).toBe(200);
-                    credentialExchangeId = res.body.credential_exchange_id;
-                } catch (e) {
-                    Logger.warn(`issue-credential/send errored result -> ${res.status}`, res.body);
-                    throw e;
-                }
-            });
-    });
-
-    it('Affirm Issuer credential status', async () => {
-        await ProtocolUtility.delay(5000);
-        return request(issuerUrl)
-            .get('/issue-credential/records')
-            .set('x-api-key', holderApiKey)
-            .send(invitation)
-            .expect((res) => {
-                expect(res.status).toBe(200);
-                expect(res.body.results.length).toBeGreaterThan(0);
-                const i = res.body.results.length - 1;
-                expect(res.body.results[i].state).toBe('credential_acked');
+                expect(res.body.results[0].state).toBe('credential_acked');
             });
     });
 
