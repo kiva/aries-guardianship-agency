@@ -20,17 +20,15 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     let holderApiKey;
     let invitation;
     let issuerConnectionId;
-    let holderConnectionId;
     let schemaId;
     let credentialDefinitionId;
     let credentialExchangeId;
     let presentationExchangeId;
     const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const hostUrl = 'http://localhost:3010';
-    const schemaName = 'sample_schema';
+    const schemaName = 'revocable_schema';
     const schemaVersion = '1.0';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
-    const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
 
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
@@ -63,10 +61,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             agentId: 'holder2',
             walletId: 'walletId222',
             walletKey: 'walletId222',
-            adminApiKey: holderApiKey,
-            seed: '000000000000000000000000000ncra1',
-            did: holderDid,
-            useTailsServer: true
+            adminApiKey: holderApiKey
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -100,7 +95,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect((res) => {
                 expect(res.status).toBe(200);
                 expect(res.body.connection_id).toBeDefined();
-                holderConnectionId = res.body.connection_id;
             });
     });
 
@@ -140,13 +134,14 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         const data = {
             schema_id: schemaId,
             support_revocation: true,
-            tag: 'tag2'
+            tag: 'revokable'
         };
         return request(issuerUrl)
             .post('/credential-definitions')
             .send(data)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
+                Logger.info(`cred def result -> ${res.status}`, res.body)
                 expect(res.status).toBe(200);
                 credentialDefinitionId = res.body.credential_definition_id;
             });
@@ -205,6 +200,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('issuer revoke credential', async () => {
+        await ProtocolUtility.delay(1000);
         const data = {
             cred_ex_id: credentialExchangeId,
             publish: true
