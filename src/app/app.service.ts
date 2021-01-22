@@ -25,8 +25,10 @@ export class AppService {
         const requestId = require('express-request-id')();
         app.use(requestId);
 
-        const logger = new Logger(DatadogLogger.getLogger());
+        const datadogInstance = DatadogLogger.getLogger();
+        const logger = new Logger(datadogInstance);
         app.useLogger(logger);
+
         // Increase json parse size to handle encoded images
         app.use(json({ limit: HttpConstants.JSON_LIMIT }));
         app.use(helmet());
