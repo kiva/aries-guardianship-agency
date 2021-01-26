@@ -196,9 +196,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .send(invitation)
             .expect((res) => {
                 expect(res.status).toBe(200);
-                expect(res.body.results.length).toBeGreaterThan(0);
-                const i = res.body.results.length - 1;
-                expect(res.body.results[i].state).toBe('credential_acked');
+                expect(res.body.results.length).toBe(1);
+                expect(res.body.results[0].state).toBe('credential_acked');
             });
     });
 
@@ -247,9 +246,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .send(invitation)
             .expect((res) => {
                 expect(res.status).toBe(200);
-                expect(res.body.results.length).toBeGreaterThan(0);
-                const i = res.body.results.length - 1;
-                expect(res.body.results[i].state).toBe('credential_acked');
+                expect(res.body.results.length).toBe(2);
+                expect(res.body.results[1].state).toBe('credential_acked');
             });
     });
 
