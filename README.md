@@ -9,7 +9,7 @@ If you have access to other protocol repos, you can get the values from those re
   
 Note the very first time you run this you need to ensure you have the latest aca py image in your docker cache.  
 ```
- docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.6
+ docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4
 ```
 
 
