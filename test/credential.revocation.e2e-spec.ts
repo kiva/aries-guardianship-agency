@@ -24,6 +24,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     let credentialDefinitionId;
     let credentialExchangeId;
     let presentationExchangeId;
+    const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const issuerAdminPort = 5011;
     const holderAdminPort = 5012;
     const hostUrl = 'http://localhost:3010';
@@ -46,7 +47,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             seed: '000000000000000000000000Steward1',
             did: issuerDid,
             useTailsServer: true,
-            adminApiPort: issuerAdminPort
+            // adminApiPort: issuerAdminPort
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -54,7 +55,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 issuerId = res.body.agentId;
-                issuerUrl = `http://localhost:${issuerAdminPort}`;
+                issuerUrl = `http://${issuerId}:${agentAdminPort}`;
+                // issuerUrl = `http://localhost:${issuerAdminPort}`;
             });
     });
 
@@ -64,7 +66,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             walletId: 'walletId222',
             walletKey: 'walletId222',
             adminApiKey: holderApiKey,
-            adminApiPort: holderAdminPort
+            // adminApiPort: holderAdminPort
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -72,7 +74,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 holderId = res.body.agentId;
-                holderUrl = `http://localhost:${holderAdminPort}`;
+                holderUrl = `http://${holderId}:${agentAdminPort}`;
+                // holderUrl = `http://localhost:${holderAdminPort}`;
             });
     });
 
