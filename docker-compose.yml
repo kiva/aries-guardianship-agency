@@ -69,7 +69,7 @@ services:
       - ./:/www
       - /var/run/docker.sock:/var/run/docker.sock
       # For dev purposes this simulates npm-link, since symbolic links on the mac won't work in the docker container
-      - ../aries-controller/dist:/www/node_modules/aries-controller
+      # - ../aries-controller/dist:/www/node_modules/aries-controller
     networks:
       - agency-network
     depends_on:
