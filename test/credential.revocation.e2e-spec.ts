@@ -189,7 +189,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('Affirm Issuer credential status', async () => {
-        await ProtocolUtility.delay(5000);
+        await ProtocolUtility.delay(1000);
         return request(issuerUrl)
             .get('/issue-credential/records')
             .set('x-api-key', holderApiKey)
@@ -224,13 +224,18 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('prover proves holders credential', async () => {
-        await ProtocolUtility.delay(1000);
+        await ProtocolUtility.delay(5000);
+        const timestamp = Math.floor(Date.now() / 1000);
         const data = {
             connection_id: issuerConnectionId,
             comment: 'requesting score above 50',
             proof_request: {
                 name: 'Proof of Score',
                 version: '1.0',
+                non_revoked: {
+                    from: timestamp-1,
+                    to: timestamp+1
+                },
                 requested_attributes: {
                     'score': {
                         name: 'score',
@@ -280,24 +285,24 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    // it('Spin down agent 1', () => {
-    //     const data = {
-    //         agentId: issuerId
-    //     };
-    //     return request(hostUrl)
-    //         .delete('/v1/manager')
-    //         .send(data)
-    //         .expect(200);
-    // });
+    it('Spin down agent 1', () => {
+        const data = {
+            agentId: issuerId
+        };
+        return request(hostUrl)
+            .delete('/v1/manager')
+            .send(data)
+            .expect(200);
+    });
 
-    // it('Spin down agent 2', () => {
-    //     const data = {
-    //         agentId: holderId
-    //     };
-    //     return request(hostUrl)
-    //         .delete('/v1/manager')
-    //         .send(data)
-    //         .expect(200);
-    // });
+    it('Spin down agent 2', () => {
+        const data = {
+            agentId: holderId
+        };
+        return request(hostUrl)
+            .delete('/v1/manager')
+            .send(data)
+            .expect(200);
+    });
 
 });
