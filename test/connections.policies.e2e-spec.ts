@@ -20,8 +20,8 @@ describe('Create Connections using policies (e2e)', () => {
     let invitation;
     let issuerConnectionId;
     let holderConnectionId;
-    const agent1AdminPort = 5011;
-    const agent2AdminPort = 5012;
+    const issuerAdminPort = 5011;
+    const holderAdminPort = 5012;
     const hostUrl = 'http://localhost:3010';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const holderDid = 'XTv4YCzYj8jqZgL1wVMGGL';
@@ -40,7 +40,7 @@ describe('Create Connections using policies (e2e)', () => {
             adminApiKey: issuerApiKey,
             seed: '000000000000000000000000Steward1',
             did: issuerDid,
-            adminApiPort: agent1AdminPort
+            adminApiPort: issuerAdminPort
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -48,7 +48,7 @@ describe('Create Connections using policies (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 issuerId = res.body.agentId;
-                issuerUrl = `http://localhost:${agent1AdminPort}`;
+                issuerUrl = `http://localhost:${issuerAdminPort}`;
             });
     });
 
@@ -60,7 +60,7 @@ describe('Create Connections using policies (e2e)', () => {
             adminApiKey: holderApiKey,
             seed: '000000000000000000000000000ncra1',
             did: holderDid,
-            adminApiPort: agent2AdminPort
+            adminApiPort: holderAdminPort
         };
         return request(hostUrl)
             .post('/v1/manager')
@@ -68,7 +68,7 @@ describe('Create Connections using policies (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 holderId = res.body.agentId;
-                holderUrl = `http://localhost:${agent2AdminPort}`;
+                holderUrl = `http://localhost:${holderAdminPort}`;
             });
     });
 
