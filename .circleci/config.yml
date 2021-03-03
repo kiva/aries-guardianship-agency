@@ -47,7 +47,7 @@ jobs:
           name: Running integration tests
           command: |
             sleep 5
-            docker exec -ti aries-guardianship-agency sh -c "npm run test"
+            npm run test
 
   production-dockerfile-test:
     machine:
