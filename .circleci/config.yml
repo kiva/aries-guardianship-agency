@@ -33,7 +33,7 @@ jobs:
       - run:
           name: setup docker environments
           command: |
-            docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4
+            docker pull bcgovimages/aries-cloudagent:py36-1.15-1_0.6.0
       - run:
           name: Start docker compose and wait for readiness
           command: |
@@ -47,7 +47,7 @@ jobs:
           name: Running integration tests
           command: |
             sleep 5
-            docker exec -ti aries-guardianship-agency sh -c "npm run test"
+            npm run test
 
   production-dockerfile-test:
     machine:
@@ -71,7 +71,7 @@ jobs:
       - run:
           name: setup docker environments
           command: |
-            docker pull bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4
+            docker pull bcgovimages/aries-cloudagent:py36-1.15-1_0.6.0
       - run:
           name: Start docker compose and wait for readiness
           command: |

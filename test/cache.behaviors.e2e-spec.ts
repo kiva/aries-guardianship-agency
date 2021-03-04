@@ -42,7 +42,7 @@ describe('Cache behaviors (e2e)', () => {
     beforeAll(async () => {
         // setup environment so we can create an agent without using agent manager
         ConfigModule.init('../src/config/env.json');
-        process.env.AGENT_DOCKER_IMAGE = 'bcgovimages/aries-cloudagent:py36-1.15-0_0.5.4';
+        process.env.AGENT_DOCKER_IMAGE = 'bcgovimages/aries-cloudagent:py36-1.15-1_0.6.0';
         process.env.AGENT_LOG_LENGTH = '0';
         process.env.INDY_POOL_TRANSACTIONS_GENESIS_PATH = './resources/pool_transactions_genesis_local_dev';
         process.env.INTERNAL_URL = 'http://aries-guardianship-agency:3010';
