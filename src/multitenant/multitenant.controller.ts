@@ -37,5 +37,5 @@ export class MultitenantController {
     public async connectAgent(@Body() body: any) {
         return await this.multitenantService.connectAgent(body.agentId, body.adminApiKey);
     }
-    
+
 }

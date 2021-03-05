@@ -4,7 +4,7 @@ import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { WalletCreateDto } from './dtos/wallet.create.dto';
 
 /**
- * 
+ *
  */
 @Injectable()
 export class MultitenantService {
@@ -18,40 +18,6 @@ export class MultitenantService {
         this.http = new ProtocolHttpService(httpService);
     }
 
-    /*
-    Send
-        {
-        "image_url": "https://aries.ca/images/sample.png",
-        "key_management_mode": "managed",
-        "label": "Alice",
-        "wallet_dispatch_type": "default",
-        "wallet_key": "MySecretKey123",
-        "wallet_name": "MyNewWallet",
-        "wallet_type": "indy",
-        "wallet_webhook_urls": [
-            "http://localhost:8022/webhooks"
-        ]
-        }
-    Returns
-        {   
-        "wallet_id": "20863d38-c661-46b7-9b7a-94b90984b7a0",
-        "settings": {
-            "wallet.type": "indy",
-            "wallet.name": "MyNewWallet",
-            "wallet.webhook_urls": [
-            "http://localhost:8022/webhooks"
-            ],
-            "wallet.dispatch_type": "default",
-            "default_label": "Alice",
-            "image_url": "https://aries.ca/images/sample.png",
-            "wallet.id": "20863d38-c661-46b7-9b7a-94b90984b7a0"
-        },
-        "key_management_mode": "managed",
-        "created_at": "2021-03-05 10:43:45.063521Z",
-        "updated_at": "2021-03-05 10:43:45.063521Z",
-        "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ3YWxsZXRfaWQiOiIyMDg2M2QzOC1jNjYxLTQ2YjctOWI3YS05NGI5MDk4NGI3YTAifQ.xLQ-bsuqlXpsac81hFKgC2Hvjwt3hqO8FxpncqMmLb0"
-        }
-    */
     public async createWallet(body: WalletCreateDto): Promise<any> {
         let result;
         try {
@@ -62,7 +28,7 @@ export class MultitenantService {
                 // TODO handle already exists case
             }
         }
-        
+
         Logger.log(result);
         await this.setAgentCache(body.walletId, body.ttl, result.token);
         if (body.autoConnect) {
@@ -85,7 +51,7 @@ export class MultitenantService {
             wallet_webhook_urls: [
                 body.controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${body.walletId}`
             ]
-        }
+        };
         const req: any = {
             method: 'POST',
             url,
@@ -121,8 +87,8 @@ export class MultitenantService {
             walletId,
             {
                 adminApiKey: process.env.MULTITENANT_API_KEY,
-                token: token,
-                ttl: ttl,
+                token,
+                ttl,
                 multitenant: true
             },
             {
@@ -134,11 +100,6 @@ export class MultitenantService {
         Logger.log('test' + walletId, test);
     }
 
-    /**
-     * {
-        "wallet_key": "MySecretKey123"
-        }
-     */
     public async removeWallet(walletKey: string): Promise<any> {
 
     }
