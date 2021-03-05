@@ -312,24 +312,24 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             });
     });
 
-    it('Spin down agent 1', () => {
-        const data = {
-            agentId: issuerId
-        };
-        return request(hostUrl)
-            .delete('/v1/manager')
-            .send(data)
-            .expect(200);
-    });
+    // it('Spin down agent 1', () => {
+    //     const data = {
+    //         agentId: issuerId
+    //     };
+    //     return request(hostUrl)
+    //         .delete('/v1/manager')
+    //         .send(data)
+    //         .expect(200);
+    // });
 
-    it('Spin down agent 2', () => {
-        const data = {
-            agentId: holderId
-        };
-        return request(hostUrl)
-            .delete('/v1/manager')
-            .send(data)
-            .expect(200);
-    });
+    // it('Spin down agent 2', () => {
+    //     const data = {
+    //         agentId: holderId
+    //     };
+    //     return request(hostUrl)
+    //         .delete('/v1/manager')
+    //         .send(data)
+    //         .expect(200);
+    // });
 
 });

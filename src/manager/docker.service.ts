@@ -41,6 +41,8 @@ export class DockerService implements IAgentManager {
             Cmd: config.getStartArgs(),
         };
 
+        Logger.log('CONFIG', config.getStartArgs());
+
         // allow for exposing admin ports when set as this might be needed during development.
         // to make the ports available to localhost, they need to be set to values other than
         // the defaults

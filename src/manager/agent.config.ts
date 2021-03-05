@@ -136,8 +136,10 @@ export class AgentConfig {
             '--webhook-url', this.webhookUrl,
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
-            '--auto-provision'
-
+            '--auto-provision',
+            '--multitenant',
+            '--multitenant-admin',
+            '--jwt-secret', 'very_secret_secret',
         ];
 
         if(this.useTailsServer) {
