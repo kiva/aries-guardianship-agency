@@ -53,8 +53,18 @@ export class MultitenantService {
         }
     */
     public async createWallet(body: WalletCreateDto): Promise<any> {
-        const result = await this.createMultitenantWallet(body);
+        let result;
+        try {
+            result = await this.createMultitenantWallet(body);
+        } catch (e) {
+            Logger.log('error', e);
+            if (e.details && e.details.includes('Wallet with name') && e.details.include('already exists')) {
+                // TODO handle already exists case
+            }
+        }
+        
         Logger.log(result);
+        await this.setAgentCache(body.walletId, body.ttl, result.token);
         if (body.autoConnect) {
             const res = await this.createConnection(result.token);
             Logger.log(res);
@@ -84,7 +94,6 @@ export class MultitenantService {
                 'x-api-key': process.env.MULTITENANT_API_KEY
             },
         };
-        Logger.log('calling multitenant', req);
         const res = await this.http.requestWithRetry(req);
         return res.data;
     }
@@ -102,6 +111,27 @@ export class MultitenantService {
 
         const res = await this.http.requestWithRetry(req);
         return res.data.invitation;
+    }
+
+    private async setAgentCache(walletId, ttl, token): Promise<void> {
+        // Generally we want the cache to last 1 second longer than the agent, except when set to an "infinite" value like 0 or -1
+        const cacheTtl = (ttl < 0) ? ttl : ttl + 1;
+        Logger.info(`record cache limit set to: ${cacheTtl}`);
+        await this.cache.set(
+            walletId,
+            {
+                adminApiKey: process.env.MULTITENANT_API_KEY,
+                token: token,
+                ttl: ttl,
+                multitenant: true
+            },
+            {
+                ttl: cacheTtl
+            }
+        );
+
+        const test = await this.cache.get(walletId);
+        Logger.log('test' + walletId, test);
     }
 
     /**

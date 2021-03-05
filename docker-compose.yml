@@ -69,7 +69,7 @@ services:
       - ./:/www
       - /var/run/docker.sock:/var/run/docker.sock
       # For dev purposes this simulates npm-link, since symbolic links on the mac won't work in the docker container
-      # - ../aries-controller/dist:/www/node_modules/aries-controller
+      - ../aries-controller/dist:/www/node_modules/aries-controller
     networks:
       - agency-network
     depends_on:
@@ -96,10 +96,10 @@ services:
         --log-level INFO
 
   # # Adding redis here for testing, not needed on docker-compose.ci.yml
-  # redis:
-  #   image: redis
-  #   container_name: redis
-  #   networks:
-  #     - agency-network
-  #   depends_on:
-  #     - indy-pool
+  redis:
+    image: redis
+    container_name: redis
+    networks:
+      - agency-network
+    depends_on:
+      - indy-pool

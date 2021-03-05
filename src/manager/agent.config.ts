@@ -137,9 +137,6 @@ export class AgentConfig {
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
             '--auto-provision',
-            '--multitenant',
-            '--multitenant-admin',
-            '--jwt-secret', 'very_secret_secret',
         ];
 
         if(this.useTailsServer) {

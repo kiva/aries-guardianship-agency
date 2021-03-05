@@ -1,4 +1,4 @@
-import { Injectable, HttpService, Inject, CACHE_MANAGER, CacheStore } from '@nestjs/common';
+import { Injectable, HttpService, Inject, CACHE_MANAGER, CacheStore, Logger } from '@nestjs/common';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { AgentGovernance } from 'aries-controller/controller/agent.governance';
 import { HandlersFactory } from 'aries-controller/controller/handler/handlers.factory';
@@ -21,9 +21,13 @@ export class AgentControllerService {
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
         const agent: any = await this.cache.get(agentId);
-        const adminPort = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);
-        // @tothink http/https?  should this be from the env?
-        const agentUrl = `http://${agentId}:${adminPort}`;
+        Logger.log(agentId, agent);
+        let agentUrl = 'http://multitenant:3021';
+        if (!agent.mutlitenant) {
+            const adminPort = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);
+            // @tothink http/https?  should this be from the env?
+            agentUrl = `http://${agentId}:${adminPort}`;
+        } 
 
         return await HandlersFactory.getHandler(this.agentGovernance, topic, this.http, this.cache)
             .handlePost(agentUrl, agentId, agent.adminApiKey, route, topic, body);
