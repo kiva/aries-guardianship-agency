@@ -2,6 +2,7 @@ import { Get, Controller, Body, Post, Delete } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProtocolValidationPipe } from 'protocol-common/protocol.validation.pipe';
 import { WalletCreateDto } from './dtos/wallet.create.dto';
+import { WalletRemoveDto } from './dtos/wallet.remove.dto';
 import { MultitenantService } from './mulittenant.service';
 
 /**
@@ -15,7 +16,7 @@ export class MultitenantController {
     constructor(private readonly multitenantService: MultitenantService) {}
 
     /**
-     * Spin up an agent with the passed in params
+     * Create a multitenant wallet
      */
     @Post()
     public async createWallet(@Body(new ProtocolValidationPipe()) body: WalletCreateDto) {
@@ -23,19 +24,10 @@ export class MultitenantController {
     }
 
     /**
-     * TODO DTOs
+     * Remove a wallet from multitenant memory (this doesn't delete the wallet DB record, just the easy access)
      */
     @Delete()
-    public async removeWallet(@Body() body: any) {
-        return await this.multitenantService.removeWallet(body.agentId);
+    public async removeWallet(@Body(new ProtocolValidationPipe()) body: WalletRemoveDto) {
+        return await this.multitenantService.removeWallet(body);
     }
-
-    /**
-     * Make a separate call to connect with the agent
-     */
-    @Post('connect')
-    public async connectAgent(@Body() body: any) {
-        return await this.multitenantService.connectAgent(body.agentId, body.adminApiKey);
-    }
-
 }

@@ -30,7 +30,7 @@ services:
     command: start
         --inbound-transport http '0.0.0.0' 3020
         --outbound-transport http
-        --endpoint http://multi-tenant:3020
+        --endpoint http://multitenant:3020
         --wallet-type 'indy'
         --wallet-name 'multitenant'
         --wallet-key 'multitenant_key'

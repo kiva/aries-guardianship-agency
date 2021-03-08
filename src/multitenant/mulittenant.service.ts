@@ -2,9 +2,12 @@ import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nes
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { WalletCreateDto } from './dtos/wallet.create.dto';
+import { WalletRemoveDto } from './dtos/wallet.remove.dto';
 
 /**
- *
+ * TODO auto remove wallet from multitenant after ttl
+ * TODO edge cases
+ * TODO method to look up wallet data from wallet id (in case cache isn't available)
  */
 @Injectable()
 export class MultitenantService {
@@ -24,17 +27,21 @@ export class MultitenantService {
             result = await this.createMultitenantWallet(body);
         } catch (e) {
             Logger.log('error', e);
-            if (e.details && e.details.includes('Wallet with name') && e.details.include('already exists')) {
-                // TODO handle already exists case
+            if (e.details && e.details.match(/Wallet with name \w+ already exists/g)) {
+                // TODO handle already exists case by fetch token
+                Logger.log('Handle duplicate wallet');
             }
         }
 
         Logger.log(result);
-        await this.setAgentCache(body.walletId, body.ttl, result.token);
+        await this.setAgentCache(body.walletName, body.ttl, result);
         if (body.autoConnect) {
-            const res = await this.createConnection(result.token);
-            Logger.log(res);
-            return res;
+            const invitation = await this.createConnection(result.token);
+            Logger.log(invitation);
+            return {
+                invitation,
+                token: result.token,
+            };
         }
         return result;
     }
@@ -46,10 +53,10 @@ export class MultitenantService {
             wallet_dispatch_type: 'default',
             wallet_type: 'indy',
             label: body.label,
-            wallet_name: body.walletId,
+            wallet_name: body.walletName,
             wallet_key: body.walletKey,
             wallet_webhook_urls: [
-                body.controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${body.walletId}`
+                body.controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${body.walletName}`
             ]
         };
         const req: any = {
@@ -79,7 +86,7 @@ export class MultitenantService {
         return res.data.invitation;
     }
 
-    private async setAgentCache(walletId, ttl, token): Promise<void> {
+    private async setAgentCache(walletId, ttl, result: any): Promise<void> {
         // Generally we want the cache to last 1 second longer than the agent, except when set to an "infinite" value like 0 or -1
         const cacheTtl = (ttl < 0) ? ttl : ttl + 1;
         Logger.info(`record cache limit set to: ${cacheTtl}`);
@@ -87,7 +94,8 @@ export class MultitenantService {
             walletId,
             {
                 adminApiKey: process.env.MULTITENANT_API_KEY,
-                token,
+                token: result.token,
+                walletId: result.wallet_id,
                 ttl,
                 multitenant: true
             },
@@ -100,13 +108,27 @@ export class MultitenantService {
         Logger.log('test' + walletId, test);
     }
 
-    public async removeWallet(walletKey: string): Promise<any> {
-
+    public async removeWallet(body: WalletRemoveDto): Promise<any> {
+        // Look up wallet id from wallet label
+        const agent: any = await this.cache.get(body.walletName);
+        // TODO edge cases
+        return await this.remoteMultitenantWallet(agent.walletId, body.walletKey);
     }
 
-    public async connectAgent(agentId: string, adminApiKey: string): Promise<any> {
-
+    private async remoteMultitenantWallet(walletId: string, walletKey: string): Promise<any> {
+        const url = `http://multitenant:3021/multitenancy/wallet/${walletId}/remove`;
+        const data = {
+            wallet_key: walletKey,
+        };
+        const req: any = {
+            method: 'POST',
+            url,
+            data,
+            headers: {
+                'x-api-key': process.env.MULTITENANT_API_KEY
+            },
+        };
+        const res = await this.http.requestWithRetry(req);
+        return res.data;
     }
-
-
 }
