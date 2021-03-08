@@ -67,7 +67,6 @@ workflows:
               only: /.*/
       - docker/publish:
           requires:
-            - integration-test
             - production-dockerfile-test 
           filters: # only run for semver tagged versions
             tags:
