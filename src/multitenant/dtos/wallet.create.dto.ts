@@ -13,11 +13,11 @@ export class WalletCreateDto {
     })
     @IsString() readonly walletKey: string;
 
-    @ApiProperty({
+    @ApiPropertyOptional({
         description: 'Label for the wallet, visible when making connections. (Previously this was the agentId)',
     })
-    @IsString() readonly label: string;
-    
+    @IsOptional() @IsString() readonly label?: string;
+
     @ApiPropertyOptional({
         description: '(Optional) Time-to-live in seconds for the wallet. Default: 3600 (1 hour)',
     })

@@ -52,7 +52,7 @@ export class MultitenantService {
             key_management_mode: 'managed',
             wallet_dispatch_type: 'default',
             wallet_type: 'indy',
-            label: body.label,
+            label: body.label ?? 'multitenant',
             wallet_name: body.walletName,
             wallet_key: body.walletKey,
             wallet_webhook_urls: [

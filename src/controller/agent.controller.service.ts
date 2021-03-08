@@ -22,7 +22,6 @@ export class AgentControllerService {
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
         const agent: any = await this.cache.get(agentId);
-        Logger.log('agency: ' + agentId, agent);
         let agentUrl = 'http://multitenant:3021';
         if (!agent.multitenant) {
             const adminPort = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);

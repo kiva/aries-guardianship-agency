@@ -95,7 +95,7 @@ services:
         --storage-path /tmp/tails-files
         --log-level INFO
 
-  # # Adding redis here for testing, not needed on docker-compose.ci.yml
+  # Adding redis here for testing, not needed on docker-compose.ci.yml
   redis:
     image: redis
     container_name: redis
