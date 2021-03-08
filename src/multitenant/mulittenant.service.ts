@@ -24,17 +24,17 @@ export class MultitenantService {
     public async createWallet(body: WalletCreateDto): Promise<any> {
         let result;
         try {
-            result = await this.createMultitenantWallet(body);
+            result = await this.callCreateWallet(body);
         } catch (e) {
             Logger.log('error', e);
             if (e.details && e.details.match(/Wallet with name \w+ already exists/g)) {
-                // TODO handle already exists case by fetch token
+                // TODO handle already exists case by fetching token
                 Logger.log('Handle duplicate wallet');
             }
         }
 
         Logger.log(result);
-        await this.setAgentCache(body.walletName, body.ttl, result);
+        await this.setAgentCache(body.walletName, body.ttl, result.wallet_id, result.token);
         if (body.autoConnect) {
             const invitation = await this.createConnection(result.token);
             Logger.log(invitation);
@@ -46,7 +46,7 @@ export class MultitenantService {
         return result;
     }
 
-    private async createMultitenantWallet(body: WalletCreateDto): Promise<any> {
+    private async callCreateWallet(body: WalletCreateDto): Promise<any> {
         const url = `http://multitenant:3021/multitenancy/wallet`;
         const data = {
             key_management_mode: 'managed',
@@ -86,16 +86,16 @@ export class MultitenantService {
         return res.data.invitation;
     }
 
-    private async setAgentCache(walletId, ttl, result: any): Promise<void> {
+    private async setAgentCache(walletName: string, ttl: number, walletId: string, token: string): Promise<void> {
         // Generally we want the cache to last 1 second longer than the agent, except when set to an "infinite" value like 0 or -1
         const cacheTtl = (ttl < 0) ? ttl : ttl + 1;
         Logger.info(`record cache limit set to: ${cacheTtl}`);
         await this.cache.set(
-            walletId,
+            walletName,
             {
                 adminApiKey: process.env.MULTITENANT_API_KEY,
-                token: result.token,
-                walletId: result.wallet_id,
+                token,
+                walletId,
                 ttl,
                 multitenant: true
             },
@@ -103,9 +103,6 @@ export class MultitenantService {
                 ttl: cacheTtl
             }
         );
-
-        const test = await this.cache.get(walletId);
-        Logger.log('test' + walletId, test);
     }
 
     public async removeWallet(body: WalletRemoveDto): Promise<any> {

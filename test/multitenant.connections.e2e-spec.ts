@@ -12,23 +12,26 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
  */
 describe('Create Connections using policies (e2e)', () => {
     let issuerConnectionId;
-    let holderConnectionId;
     let issuerToken;
     let holderInvitation;
     let holderToken;
     const multitenantApiKey = 'adminApiKey';
     const multitenantUrl = 'http://localhost:3021'
     const hostUrl = 'http://localhost:3010';
+    const wallet1Name = 'wallet1Name';
+    const wallet1Key = 'wallet1Key';
+    const wallet2Name = 'wallet2Name'
+    const wallet2Key = 'wallet2Key'
 
     beforeAll(async () => {
         jest.setTimeout(60000);
     });
 
-    it('Create wallet for issuer', async () => {
+    it('Create wallet for agent 1 (issuer)', async () => {
         const data = {
-            label: 'issuer',
-            walletName: 'walletId11',
-            walletKey: 'walletKey1',
+            label: 'agent1',
+            walletName: wallet1Name,
+            walletKey: wallet1Key,
             autoConnect: false
         };
         return request(hostUrl)
@@ -41,11 +44,11 @@ describe('Create Connections using policies (e2e)', () => {
             });
     });
 
-    it('Create wallet for holder', async () => {
+    it('Create wallet for agent 2 (holder)', async () => {
         const data = {
-            label: 'holder',
-            walletName: 'walletId21',
-            walletKey: 'walletKey2'
+            label: 'agent2',
+            walletName: wallet2Name,
+            walletKey: wallet2Key
         };
         return request(hostUrl)
             .post('/v2/multitenant')
@@ -114,10 +117,10 @@ describe('Create Connections using policies (e2e)', () => {
             });
     });
 
-    it('Spin down agent 1', () => {
+    it('Remove wallet for agent 1', () => {
         const data = {
-            walletName: 'walletId1',
-            walletKey: 'walletKey1'
+            walletName: wallet1Name,
+            walletKey: wallet1Key
         };
         return request(hostUrl)
             .delete('/v2/multitenant')
@@ -125,10 +128,10 @@ describe('Create Connections using policies (e2e)', () => {
             .expect(200);
     });
 
-    it('Spin down agent 2', () => {
+    it('Remove wallet for agent 2', () => {
         const data = {
-            walletName: 'walletId2',
-            walletKey: 'walletKey2'
+            walletName: wallet2Name,
+            walletKey: wallet2Key
         };
         return request(hostUrl)
             .delete('/v2/multitenant')
