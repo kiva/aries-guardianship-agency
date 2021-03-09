@@ -28,6 +28,6 @@ export class MultitenantController {
      */
     @Delete()
     public async removeWallet(@Body(new ProtocolValidationPipe()) body: WalletRemoveDto) {
-        return await this.multitenantService.removeWallet(body);
+        return await this.multitenantService.removeWallet(body.walletName, body.walletKey);
     }
 }
