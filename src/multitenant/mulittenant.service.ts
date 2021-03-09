@@ -32,7 +32,6 @@ export class MultitenantService {
         try {
             // Create/register wallet with multitenant
             const result = await this.callCreateWallet(body);
-            Logger.log(result);
             walletId = result.wallet_id;
             token = result.token;
         } catch (e) {
@@ -56,7 +55,6 @@ export class MultitenantService {
         // Handle auto connect
         if (body.autoConnect) {
             invitation = await this.callCreateConnection(token);
-            Logger.log(invitation);
         }
 
         // Only return token in local/test envs

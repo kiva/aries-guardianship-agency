@@ -1,4 +1,4 @@
-import { Get, Controller, Body, Post, Delete } from '@nestjs/common';
+import { Controller, Body, Post, Delete } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProtocolValidationPipe } from 'protocol-common/protocol.validation.pipe';
 import { WalletCreateDto } from './dtos/wallet.create.dto';
@@ -6,7 +6,7 @@ import { WalletRemoveDto } from './dtos/wallet.remove.dto';
 import { MultitenantService } from './mulittenant.service';
 
 /**
- * Base route is just for various health check endpoints
+ * Various routes for dealing with the multitenant aca-py agent
  */
 @Controller('v2/multitenant')
 @ApiTags('multitenant')

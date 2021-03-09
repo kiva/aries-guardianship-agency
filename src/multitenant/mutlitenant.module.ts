@@ -4,7 +4,7 @@ import { MultitenantService } from './mulittenant.service';
 import { MultitenantController } from './multitenant.controller';
 
 /**
- *
+ * Multitenant module
  */
 @Module({
     imports: [

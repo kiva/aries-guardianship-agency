@@ -2,7 +2,6 @@ import request from 'supertest';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolUtility } from 'protocol-common/protocol.utility';
 
-
 /*
     Integration test to show the gammit of the exchange of messages between
     agents for connection, credential and proof protocols

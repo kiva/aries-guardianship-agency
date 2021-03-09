@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolUtility } from 'protocol-common/protocol.utility';
 

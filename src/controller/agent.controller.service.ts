@@ -2,7 +2,6 @@ import { Injectable, HttpService, Inject, CACHE_MANAGER, CacheStore } from '@nes
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { AgentGovernance } from 'aries-controller/controller/agent.governance';
 import { HandlersFactory } from 'aries-controller/controller/handler/handlers.factory';
-import { Logger } from 'protocol-common/logger';
 
 /**
  * Agent acting on the behalf of a "citizen" or credential holder
@@ -22,7 +21,7 @@ export class AgentControllerService {
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
         const agent: any = await this.cache.get(agentId);
-        let agentUrl = 'http://multitenant:3021';
+        let agentUrl = process.env.MULTITENANT_URL;
         if (!agent.multitenant) {
             const adminPort = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);
             // @tothink http/https?  should this be from the env?
