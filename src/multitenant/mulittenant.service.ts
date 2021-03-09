@@ -130,7 +130,7 @@ export class MultitenantService {
             if (agent.walletKey === walletKey) {
                 return [agent.walletId, agent.token];
             }
-            Logger.warn(`Attempted to open wallet for walletName ${walletName} from cache but with wrong walletKey`);   
+            Logger.warn(`Attempted to open wallet for walletName ${walletName} from cache but with wrong walletKey`);
         } else {
             Logger.warn(`Attempted to open wallet for walletName ${walletName} but it wasn't in cache`);
         }
