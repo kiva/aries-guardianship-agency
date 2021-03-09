@@ -61,6 +61,23 @@ describe('Create Connections using policies (e2e)', () => {
             });
     });
 
+    it('Call create wallet a second time to ensure theres no error', async () => {
+        const data = {
+            label: 'agent2',
+            walletName: wallet2Name,
+            walletKey: wallet2Key
+        };
+        return request(hostUrl)
+            .post('/v2/multitenant')
+            .send(data)
+            .expect(201)
+            .expect((res) => {
+                holderInvitation = res.body.invitation;
+                holderToken = res.body.token;
+                Logger.log(res.body);
+            });
+    });
+
     it('Issuer receives holder connection invite', async () => {
         await ProtocolUtility.delay(5000);
         return request(multitenantUrl)
