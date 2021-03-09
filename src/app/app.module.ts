@@ -6,7 +6,7 @@ import data from '../config/env.json';
 import { AgentManagerModule } from '../manager/agent.manager.module';
 import { AgentRouterModule } from '../router/agent.router.module';
 import { AgentControllerModule } from '../controller/agent.controller.module';
-import { MultitenantModule } from 'multitenant/mutlitenant.module';
+import { MultitenantModule } from '../multitenant/mutlitenant.module';
 
 /**
  * Initializes the Nest application
