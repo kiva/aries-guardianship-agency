@@ -106,6 +106,7 @@ export class MultitenantService {
     }
 
     /**
+     * Sets a job in the future to remove/unregister the wallet after it's ttl has expired
      * ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
      */
     private setRemoveJob(walletId: string, walletKey: string, ttl: number): void {
