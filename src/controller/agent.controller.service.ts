@@ -21,12 +21,15 @@ export class AgentControllerService {
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
         const agent: any = await this.cache.get(agentId);
-        const adminPort = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);
-        // @tothink http/https?  should this be from the env?
-        const agentUrl = `http://${agentId}:${adminPort}`;
+        let agentUrl = process.env.MULTITENANT_URL;
+        if (!agent.multitenant) {
+            const adminPort = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);
+            // @tothink http/https?  should this be from the env?
+            agentUrl = `http://${agentId}:${adminPort}`;
+        }
 
         return await HandlersFactory.getHandler(this.agentGovernance, topic, this.http, this.cache)
-            .handlePost(agentUrl, agentId, agent.adminApiKey, route, topic, body);
+            .handlePost(agentUrl, agentId, agent.adminApiKey, route, topic, body, agent.token);
     }
 }
 
