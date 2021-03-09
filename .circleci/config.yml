@@ -38,44 +38,6 @@ jobs:
           name: Start docker compose and wait for readiness
           command: |
             docker network ls
-            docker-compose -f docker-compose.yml build
-            set -x
-            docker-compose -f docker-compose.yml up -d
-            sleep 20
-            docker-compose -f docker-compose.yml logs
-      - run:
-          name: Running integration tests
-          command: |
-            sleep 5
-            npm run test
-
-  production-dockerfile-test:
-    machine:
-      docker_layer_caching: true
-      image: ubuntu-1604:201903-01
-    steps:
-      - checkout
-      - run:
-          name: setup shell environment
-          command: |
-            cp dummy.env .env
-            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
-      - run:
-          name: node npm setup
-          command: |
-              npm install nodemon --save-dev
-              npm install
-              nvm install v14.15.1
-              node -v
-              nvm alias default v14.15.1
-      - run:
-          name: setup docker environments
-          command: |
-            docker pull bcgovimages/aries-cloudagent:py36-1.15-1_0.6.0
-      - run:
-          name: Start docker compose and wait for readiness
-          command: |
-            docker network ls
             docker-compose -f docker-compose.ci.yml build
             set -x
             docker-compose -f docker-compose.ci.yml up -d
@@ -85,6 +47,10 @@ jobs:
           name: Is Agency Reachable?
           command: |
             ./scripts/healthcheck.sh http://localhost:3010/healthz
+      - run:
+          name: run tests
+          command: |
+            npm run test
 
 workflows:
   build-test-deploy:
@@ -99,16 +65,9 @@ workflows:
           filters: # run for all branches AND tags
             tags:
               only: /.*/
-      - production-dockerfile-test:
-          requires:
-            - build-and-test
-          filters: # run for all branches AND tags
-            tags:
-              only: /.*/
       - docker/publish:
           requires:
             - integration-test
-            - production-dockerfile-test 
           filters: # only run for semver tagged versions
             tags:
               only: /^([0-9]+)\.([0-9]+)\.([0-9]+)/
