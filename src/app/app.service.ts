@@ -40,7 +40,6 @@ export class AppService {
             app.enableCors({origin: corsWhitelist.split(',')});
         }
         app.useGlobalFilters(new ProtocolExceptionFilter());
-        app.useGlobalInterceptors(new LoggingInterceptor());
 
         app.use(traceware(process.env.SERVICE_NAME));
 
