@@ -78,7 +78,7 @@ describe('Create Connections using policies (e2e)', () => {
     });
 
     it('Issuer receives holder connection invite', async () => {
-        await ProtocolUtility.delay(5000);
+        await ProtocolUtility.delay(500);
         return request(multitenantUrl)
             .post('/connections/receive-invitation')
             .set('x-api-key', multitenantApiKey)
@@ -93,7 +93,7 @@ describe('Create Connections using policies (e2e)', () => {
     });
 
     it('Confirm Issuer connections is ready', async () => {
-        await ProtocolUtility.delay(5000);
+        await ProtocolUtility.delay(500);
         return request(multitenantUrl)
             .get(`/connections`)
             .set('x-api-key', multitenantApiKey)
@@ -114,7 +114,6 @@ describe('Create Connections using policies (e2e)', () => {
     });
 
     it('send basic message from issuer to holder', async () => {
-        await ProtocolUtility.delay(2000);
         const data = {
             content: 'hello holder, are you ready to receive your credentials?'
         };

@@ -68,7 +68,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('Issuer receives connection invite', async () => {
-        await ProtocolUtility.delay(1000);
+        await ProtocolUtility.delay(500);
         return request(issuerUrl)
             .post('/connections/receive-invitation')
             .set('x-api-key', issuerApiKey)
@@ -81,7 +81,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('make issuer did public', async() => {
-        await ProtocolUtility.delay(1000);
         return request(issuerUrl)
             .post(`/wallet/did/public?did=${issuerDid}`)
             .set('x-api-key', issuerApiKey)
@@ -112,7 +111,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it ('issuer creates credential definition', async () => {
-        await ProtocolUtility.delay(1000);
         const data = {
             schema_id: schemaId,
             support_revocation: false,
@@ -129,7 +127,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('issuer sends credential using /send', async () => {
-        await ProtocolUtility.delay(5000);
+        await ProtocolUtility.delay(500);
         const data = {
             auto_remove: false,
             comment: 'pleading the 5th',
@@ -166,7 +164,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('Affirm Issuer credential status', async () => {
-        await ProtocolUtility.delay(5000);
+        await ProtocolUtility.delay(1000);
         return request(issuerUrl)
             .get('/issue-credential/records')
             .set('x-api-key', issuerApiKey)
@@ -217,7 +215,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('verify proof is proved', async () => {
-        await ProtocolUtility.delay(6000);
+        await ProtocolUtility.delay(500);
         return request(issuerUrl)
             .get(`/present-proof/records/${presentationExchangeId}`)
             .set('x-api-key', issuerApiKey)
