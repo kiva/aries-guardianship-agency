@@ -92,7 +92,7 @@ export class MultitenantService {
         await this.cache.set(
             walletName,
             {
-                adminApiKey: process.env.MULTITENANT_API_KEY,
+                adminApiKey: process.env.ACAPY_ADMIN_API_KEY,
                 token,
                 walletId,
                 walletKey,
@@ -156,7 +156,7 @@ export class MultitenantService {
             url,
             data,
             headers: {
-                'x-api-key': process.env.MULTITENANT_API_KEY
+                'x-api-key': process.env.ACAPY_ADMIN_API_KEY
             },
         };
         const res = await this.http.requestWithRetry(req);
@@ -176,7 +176,7 @@ export class MultitenantService {
             url,
             data,
             headers: {
-                'x-api-key': process.env.MULTITENANT_API_KEY
+                'x-api-key': process.env.ACAPY_ADMIN_API_KEY
             },
         };
         const res = await this.http.requestWithRetry(req);
@@ -189,7 +189,7 @@ export class MultitenantService {
             method: 'POST',
             url,
             headers: {
-                'x-api-key': process.env.MULTITENANT_API_KEY,
+                'x-api-key': process.env.ACAPY_ADMIN_API_KEY,
                 'Authorization': 'Bearer ' + token
             },
         };
