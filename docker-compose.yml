@@ -118,27 +118,9 @@ services:
     expose: 
       - "3020"
       - "3021"
+    env_file:
+      - .env
     volumes:
       - ./resources/:/home/indy/resources
     command: start
-        --inbound-transport http '0.0.0.0' 3020
-        --outbound-transport http
-        --endpoint http://multitenant:3020
-        --wallet-type 'indy'
-        --wallet-name 'multitenant'
-        --wallet-key '${MULTITENANT_WALLET_KEY}'
-        --wallet-storage-type 'postgres_storage'
-        --wallet-storage-config '{"url":"${WALLET_DB_HOST}:${WALLET_DB_PORT}","wallet_scheme":"MultiWalletSingleTable"}'
-        --wallet-storage-creds '{"account":"${WALLET_DB_USER}","password":"${WALLET_DB_PASS}","admin_account":"${WALLET_DB_ADMIN_USER}","admin_password":"${WALLET_DB_ADMIN_PASS}"}'
-        --seed '000000000000000000000000Steward1'
-        --admin '0.0.0.0' 3021
-        --admin-api-key '${MULTITENANT_API_KEY}'
-        --label multitenant
-        --webhook-url http://aries-guardianship-agency:3010/v1/controller/multitenant
-        --log-level debug
-        --wallet-local-did
-        --auto-provision
-        --multitenant
-        --multitenant-admin
-        --jwt-secret ${MULTITENANT_JWT_SECRET}
-        --genesis-file '/home/indy/resources/pool_transactions_genesis_local_dev'
+      --inbound-transport http '0.0.0.0' 3020
