@@ -8,7 +8,10 @@ import { Constants } from 'protocol-common/constants';
 
 /**
  * Various calls to add/remove wallets from multitenant aca-py
- * TODO need to handle case where cache gets recent but wallets are still registered
+ * TODO: right now aca-py only supports "managed" mode, meaning that the wallet_key is stored in memory. This is less secure
+ *   than the "unmanaged" mode which would require the wallet_key to be passed in. However it's not implemented yet:
+ *   https://github.com/hyperledger/aries-cloudagent-python/blob/main/aries_cloudagent/multitenant/admin/routes.py#L103
+ *   Once unmanaged mode is implemented lets switch to use it.
  */
 @Injectable()
 export class MultitenantService {
@@ -27,16 +30,15 @@ export class MultitenantService {
      * Creates a wallet in the multitenant aca-py instance, and if set to auto-connection start a connection
      */
     public async createWallet(body: WalletCreateDto): Promise<any> {
-        let walletId;
-        let token;
+        let walletId: string;
+        let token: string;
         try {
-            // Create/register wallet with multitenant
             const result = await this.callCreateWallet(body);
             walletId = result.wallet_id;
             token = result.token;
         } catch (e) {
             // Handle already registered case
-            if (e.details && e.details.match(/Wallet with name \w+ already exists/g)) {
+            if (e.details && (typeof e.details === 'string') && e.details.match(/Wallet with name \w+ already exists/g)) {
                 Logger.log('Wallet already exists, fetching data from storage');
                 [walletId, token] = await this.getTokenAndWalletId(body.walletName, body.walletKey);
             } else {
@@ -88,7 +90,7 @@ export class MultitenantService {
     private async addWalletToCache(walletName: string, walletKey: string, walletId: string, token: string, ttl: number): Promise<void> {
         // Generally we want the cache to last 1 second longer than the agent, except when set to an "infinite" value like 0 or -1
         const cacheTtl = (ttl < 0) ? ttl : ttl + 1;
-        Logger.info(`record cache limit set to: ${cacheTtl}`);
+        Logger.debug(`record cache limit set to: ${cacheTtl}`);
         await this.cache.set(
             walletName,
             {
@@ -123,7 +125,7 @@ export class MultitenantService {
      * We check the cache and return the wallet id and token
      * TODO handle case where wallet isn't in cache
      */
-    private async getTokenAndWalletId(walletName: string, walletKey: string): Promise<Array<string>> {
+    private async getTokenAndWalletId(walletName: string, walletKey: string): Promise<[string, string]> {
         const agent: any = await this.cache.get(walletName);
         if (agent) {
             if (agent.walletKey === walletKey) {
@@ -132,16 +134,72 @@ export class MultitenantService {
             Logger.warn(`Attempted to open wallet for walletName ${walletName} from cache but with wrong walletKey`);
         } else {
             Logger.warn(`Attempted to open wallet for walletName ${walletName} but it wasn't in cache`);
+            return await this.handleCacheMiss(walletName, walletKey);
         }
         throw new ProtocolException(ProtocolErrorCode.INTERNAL_SERVER_ERROR, 'Error creating wallet on multitenant');
     }
 
+    /**
+     * If the wallet isn't in the cache we need find the wallet id and token from multitenant aca-py
+     * First we fetch all the wallets and loop through them looking for the one that matches our wallet name
+     * Then we use that wallet id and the passed in wallet key to fetch the token
+     */
+    private async handleCacheMiss(walletName: string, walletKey: string): Promise<[string,string]> {
+        const allWallets = await this.callGetAllWallets();
+        let walletId = null;
+        for (const wallet of allWallets) {
+            if (wallet.settings[`wallet.name`] === walletName) {
+                walletId = wallet.wallet_id;
+                break; // we found our wallet so break out of loop
+            }
+        }
+        if (!walletId) {
+            Logger.warn(`Attempted to open wallet for walletName ${walletName} but it wasn't registered on multitenant`);
+            throw new ProtocolException(ProtocolErrorCode.INTERNAL_SERVER_ERROR, 'Error creating wallet on multitenant');
+        }
+        const token = await this.callGetToken(walletId, walletKey);
+        return [walletId, token];
+    }
+
     // -- Remote calls can eventually be moved to their own mockable class -- //
 
+    private async callGetAllWallets(): Promise<Array<any>> {
+        Logger.debug(`Fetching all wallets from multitenant`);
+        const url = `${process.env.MULTITENANT_URL}/multitenancy/wallets`;
+        const req: any = {
+            method: 'GET',
+            url,
+            headers: {
+                'x-api-key': process.env.ACAPY_ADMIN_API_KEY
+            },
+        };
+        const res = await this.http.requestWithRetry(req);
+        return res.data.results;
+    }
+
+    private async callGetToken(walletId: string, walletKey: string): Promise<string> {
+        Logger.debug(`Fetching token from multitenant ${walletId}`);
+        const url = `${process.env.MULTITENANT_URL}/multitenancy/wallet/${walletId}/token`;
+        const data = {
+            wallet_key: walletKey
+        };
+        const req: any = {
+            method: 'POST',
+            url,
+            data,
+            headers: {
+                'x-api-key': process.env.ACAPY_ADMIN_API_KEY
+            },
+        };
+        const res = await this.http.requestWithRetry(req);
+        return res.data.token;
+    }
+
     private async callCreateWallet(body: WalletCreateDto): Promise<any> {
+        Logger.debug(`Registering wallet with multitenant ${body.walletName}`);
         const url = `${process.env.MULTITENANT_URL}/multitenancy/wallet`;
         const data = {
-            key_management_mode: 'managed',
+            key_management_mode: 'managed', // TODO use unmanged when supported by aca-py (see note at top)
             wallet_dispatch_type: 'default',
             wallet_type: 'indy',
             label: body.label || 'multitenant',
@@ -167,6 +225,7 @@ export class MultitenantService {
      * Remove/unregister wallet from multitenant, note this requires a walletId UUID (not wallet name)
      */
     private async callRemoveWallet(walletId: string, walletKey: string): Promise<any> {
+        Logger.log(`Removing wallet from multitenant ${walletId}`);
         const url = `${process.env.MULTITENANT_URL}/multitenancy/wallet/${walletId}/remove`;
         const data = {
             wallet_key: walletKey,
@@ -184,6 +243,7 @@ export class MultitenantService {
     }
 
     private async callCreateConnection(token: string): Promise<any> {
+        Logger.debug(`Creating connection to wallet on multitenant`);
         const url = `${process.env.MULTITENANT_URL}/connections/create-invitation`;
         const req: any = {
             method: 'POST',
