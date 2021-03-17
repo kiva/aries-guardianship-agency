@@ -30,8 +30,8 @@ export class MultitenantService {
      * Creates a wallet in the multitenant aca-py instance, and if set to auto-connection start a connection
      */
     public async createWallet(body: WalletCreateDto): Promise<any> {
-        let walletId;
-        let token;
+        let walletId: string;
+        let token: string;
         try {
             const result = await this.callCreateWallet(body);
             walletId = result.wallet_id;
@@ -125,7 +125,7 @@ export class MultitenantService {
      * We check the cache and return the wallet id and token
      * TODO handle case where wallet isn't in cache
      */
-    private async getTokenAndWalletId(walletName: string, walletKey: string): Promise<Array<string>> {
+    private async getTokenAndWalletId(walletName: string, walletKey: string): Promise<[string, string]> {
         const agent: any = await this.cache.get(walletName);
         if (agent) {
             if (agent.walletKey === walletKey) {
@@ -144,7 +144,7 @@ export class MultitenantService {
      * First we fetch all the wallets and loop through them looking for the one that matches our wallet name
      * Then we use that wallet id and the passed in wallet key to fetch the token
      */
-    private async handleCacheMiss(walletName: string, walletKey: string): Promise<Array<string>> {
+    private async handleCacheMiss(walletName: string, walletKey: string): Promise<[string,string]> {
         const allWallets = await this.callGetAllWallets();
         let walletId = null;
         for (const wallet of allWallets) {
@@ -177,7 +177,7 @@ export class MultitenantService {
         return res.data.results;
     }
 
-    private async callGetToken(walletId: string, walletKey: string): Promise<Array<any>> {
+    private async callGetToken(walletId: string, walletKey: string): Promise<string> {
         Logger.debug(`Fetching token from multitenant ${walletId}`);
         const url = `${process.env.MULTITENANT_URL}/multitenancy/wallet/${walletId}/token`;
         const data = {
