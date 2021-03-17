@@ -233,7 +233,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 name: 'Proof of Score',
                 version: '1.0',
                 non_revoked: {
-                    to: timestamp
+                    to: 2152474220
                 },
                 requested_attributes: {
                     'score': {
