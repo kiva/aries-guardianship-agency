@@ -96,13 +96,13 @@ services:
         --log-level INFO
 
   # Adding redis here for testing, not needed on docker-compose.ci.yml
-  redis:
-    image: redis
-    container_name: redis
-    networks:
-      - agency-network
-    depends_on:
-      - indy-pool
+  # redis:
+  #   image: redis
+  #   container_name: redis
+  #   networks:
+  #     - agency-network
+  #   depends_on:
+  #     - indy-pool
 
   multitenant:
     image: bcgovimages/aries-cloudagent:py36-1.15-1_0.6.0

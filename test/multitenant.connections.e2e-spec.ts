@@ -38,6 +38,7 @@ describe('Create Connections using policies (e2e)', () => {
             .send(data)
             .expect(201)
             .expect((res) => {
+                expect(res.body.token).toBeDefined();
                 issuerToken = res.body.token;
                 Logger.log(res.body);
             });
@@ -54,26 +55,9 @@ describe('Create Connections using policies (e2e)', () => {
             .send(data)
             .expect(201)
             .expect((res) => {
+                expect(res.body.invitation).toBeDefined();
                 holderInvitation = res.body.invitation;
                 holderToken = res.body.token;
-                Logger.log(res.body);
-            });
-    });
-
-    it('Call create wallet a second time to ensure theres no error', async () => {
-        const data = {
-            label: 'agent2',
-            walletName: wallet2Name,
-            walletKey: wallet2Key
-        };
-        return request(hostUrl)
-            .post('/v2/multitenant')
-            .send(data)
-            .expect(201)
-            .expect((res) => {
-                holderInvitation = res.body.invitation;
-                holderToken = res.body.token;
-                Logger.log(res.body);
             });
     });
 
