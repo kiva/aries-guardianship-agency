@@ -182,7 +182,7 @@ export class MultitenantService {
         const url = `${process.env.MULTITENANT_URL}/multitenancy/wallet/${walletId}/token`;
         const data = {
             wallet_key: walletKey
-        }
+        };
         const req: any = {
             method: 'POST',
             url,
