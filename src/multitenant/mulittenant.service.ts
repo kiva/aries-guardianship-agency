@@ -38,7 +38,7 @@ export class MultitenantService {
             token = result.token;
         } catch (e) {
             // Handle already registered case
-            if (e.details && (typeof e.details === 'string') && e.details.match(/Wallet with name \w+ already exists/g)) {
+            if (e.details && (typeof e.details === 'string') && e.details.match(/Wallet with .+ already exists/g)) {
                 Logger.log('Wallet already exists, fetching data from storage');
                 [walletId, token] = await this.getTokenAndWalletId(body.walletName, body.walletKey);
             } else {
