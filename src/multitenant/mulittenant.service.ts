@@ -115,7 +115,11 @@ export class MultitenantService {
         if (ttl > 0) {
             setTimeout(
                 async () => {
-                    await this.callRemoveWallet(walletId, walletKey);
+                    try {
+                        await this.callRemoveWallet(walletId, walletKey);
+                    } catch (e) {
+                        Logger.warn(`Error auto-removing wallet ${walletId}`, e);
+                    }
                 }, ttl * 1000);
         }
     }
