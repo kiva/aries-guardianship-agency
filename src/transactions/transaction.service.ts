@@ -1,20 +1,20 @@
 import { AxiosRequestConfig } from 'axios';
-import { Injectable, Inject, HttpService } from '@nestjs/common';
+import { Injectable, Inject, HttpService, CACHE_MANAGER, CacheStore } from '@nestjs/common';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { AgentGovernance, ControllerCallback } from 'aries-controller/controller/agent.governance';
 import { Topics } from 'aries-controller/controller/handler/topics';
-import { AgentCaller} from 'aries-controller/agent/agent.caller';
 import { RegisterTdcDto } from './dtos/register.tdc.dto';
 import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
-import { agent } from 'supertest';
+import { ProtocolException } from 'protocol-common/protocol.exception';
+import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
 
 @Injectable()
 export class TransactionService {
     private readonly http: ProtocolHttpService;
     constructor(@Inject('AGENT_GOVERNANCE') private readonly agentGovernance: AgentGovernance,
-                private readonly agentCaller: AgentCaller,
+                @Inject(CACHE_MANAGER) private readonly cache: CacheStore,
                 httpService: HttpService,
     ) {
         this.http = new ProtocolHttpService(httpService);
@@ -49,9 +49,22 @@ export class TransactionService {
         }
 
     private async createAgentConnection(agentId: string): Promise<any> {
-        Logger.debug(`${agentId} createAgentConnection`);
-        const res = await this.agentCaller.callAgent(agentId, process.env.ACAPY_ADMIN_API_KEY, 'POST', 'connections/create-invitation');
-        return res.data.invitation;
+        const agentData: any = await this.cache.get(agentId);
+        if (agentData === undefined) {
+            throw new ProtocolException(ProtocolErrorCode.INVALID_BACKEND_OPERATION, `agent expected but not found`);
+        }
+        const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/create-invitation`;
+        const req: any = {
+            method: 'POST',
+            url,
+            headers: {
+                'x-api-key': agentData.adminApiKey,
+            },
+        };
+        Logger.debug(`${agentId} createAgentConnection ${url}`);
+        const res = await this.http.requestWithRetry(req);
+        Logger.debug(`${agentId} createAgentConnection results`, res.data);
+        return res.data;
     }
 
     /**
@@ -61,7 +74,7 @@ export class TransactionService {
         // 1 generate a connection invite from fsp agent
         const connection = await this.createAgentConnection(agentId);
         const url = `${body.tdcEndpoint}/v2/fsp/register`;
-        Logger.info(`TRO created this connection ${connection.connection_id} invitation`, connection);
+        Logger.debug(`TRO created this connection ${connection.connection_id} invitation`, connection.invitation);
 
         // 2 using body.tdcEndpoint, call: /fsp/register passing in a connection invite
         const data = {
@@ -76,7 +89,7 @@ export class TransactionService {
             data,
         };
         const result = await this.http.requestWithRetry(request);
-        Logger.info(`TRO registering with TDC ${request.url}, results data`, result.data);
+        Logger.debug(`TRO registering with TDC ${request.url}, results data`, result.data);
         // TODO do we need to save this information some where
         // TODO will we need to return this information to the caller:  thinking no
         return { connectionData: result.data.connectionData};
@@ -101,7 +114,7 @@ export class TransactionService {
             data,
         };
         const result = await this.http.requestWithRetry(request);
-        Logger.info(`TRO onetimekey with TDC ${request.url}, results data`);
+        Logger.debug(`TRO onetimekey with TDC ${request.url}, results data`);
         return result.data;
     }
 }
