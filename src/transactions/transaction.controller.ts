@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ProtocolValidationPipe } from 'protocol-common/protocol.validation.pipe';
+import { ProtocolValidationPipe } from 'protocol-common/validation/protocol.validation.pipe';
 import { TransactionService } from './transaction.service';
 import { RegisterTdcDto } from './dtos/register.tdc.dto';
 import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
