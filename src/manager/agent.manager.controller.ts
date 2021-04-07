@@ -1,7 +1,7 @@
 import { Controller, Body, Post, Delete } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AgentManagerService } from './agent.manager.service';
-import { ProtocolValidationPipe } from 'protocol-common/protocol.validation.pipe';
+import { ProtocolValidationPipe } from 'protocol-common/validation/protocol.validation.pipe';
 import { AgentCreateDto } from './dtos/agent.create.dto';
 
 /**

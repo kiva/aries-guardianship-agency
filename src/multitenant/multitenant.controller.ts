@@ -1,6 +1,6 @@
 import { Controller, Body, Post, Delete } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ProtocolValidationPipe } from 'protocol-common/protocol.validation.pipe';
+import { ProtocolValidationPipe } from 'protocol-common/validation/protocol.validation.pipe';
 import { WalletCreateDto } from './dtos/wallet.create.dto';
 import { WalletRemoveDto } from './dtos/wallet.remove.dto';
 import { MultitenantService } from './mulittenant.service';
