@@ -49,7 +49,7 @@ export class MultitenantService {
         const ttl = (body.ttl === null || body.ttl === undefined) ? this.DEFAULT_TTL_SECONDS : body.ttl;
         // Set remove job
         const timeoutId = await this.setRemoveJob(walletId, body.walletKey, ttl);
-        
+
         // Add to cache
         await this.addWalletToCache(body.walletName, body.walletKey, walletId, token, timeoutId, ttl);
 

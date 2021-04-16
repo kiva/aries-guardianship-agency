@@ -6,8 +6,6 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
  * Ensures our system works correctly when attempting to create wallets multiple times regardless of cache state
  */
 describe('Check cache behaviors (e2e)', () => {
-    const multitenantApiKey = 'adminApiKey';
-    const multitenantUrl = 'http://localhost:3021'
     const hostUrl = 'http://localhost:3010';
     const label1 = 'label1';
     const wallet1Name = 'wallet1Name';
@@ -68,7 +66,7 @@ describe('Check cache behaviors (e2e)', () => {
     });
 
     it('Call create wallet a second time to ensure theres no error with expired cache', async () => {
-        await ProtocolUtility.delay(1000);
+        await ProtocolUtility.delay(500);
         const data = {
             label: label2,
             walletName: wallet2Name,
@@ -95,14 +93,5 @@ describe('Check cache behaviors (e2e)', () => {
             .expect(200);
     });
 
-    it('Remove wallet for agent 2', () => {
-        const data = {
-            walletName: wallet2Name,
-            walletKey: wallet2Key
-        };
-        return request(hostUrl)
-            .delete('/v2/multitenant')
-            .send(data)
-            .expect(200);
-    });
+    // no need to remove agent 2 wallet as it's not in cache
 });
