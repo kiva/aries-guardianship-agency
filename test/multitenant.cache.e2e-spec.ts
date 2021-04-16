@@ -6,10 +6,6 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
  * Ensures our system works correctly when attempting to create wallets multiple times regardless of cache state
  */
 describe('Check cache behaviors (e2e)', () => {
-    let issuerConnectionId;
-    let issuerToken;
-    let holderInvitation;
-    let holderToken;
     const multitenantApiKey = 'adminApiKey';
     const multitenantUrl = 'http://localhost:3021'
     const hostUrl = 'http://localhost:3010';
@@ -40,6 +36,7 @@ describe('Check cache behaviors (e2e)', () => {
     });
 
     it('Call create wallet a second time to ensure theres no error', async () => {
+        await ProtocolUtility.delay(500);
         const data = {
             label: label1,
             walletName: wallet1Name,

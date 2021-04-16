@@ -18,7 +18,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     let holderToken;
     const issuerAdminPort = 5011;
     const hostUrl = 'http://localhost:3010';
-    const schemaName = 'sample_schema';
+    const schemaName = 'score_schema';
     const schemaVersion = '1.0';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
     const walletNameHolder = 'walletNameHolder'
@@ -93,7 +93,10 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         const data = {
             schema_version: schemaVersion,
             schema_name: schemaName,
-            attributes: [ 'score' ]
+            attributes: [ 
+                'score',
+                'secret_score'
+            ]
         };
         return request(issuerUrl)
             .post('/schemas')
@@ -142,6 +145,10 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                     {
                         name: 'score',
                         value: '750'
+                    },
+                    {
+                        name: 'secret_score',
+                        value: '25'
                     }
                 ]
             },
@@ -194,7 +201,18 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                         ]
                     }
                 },
-                requested_predicates: {}
+                requested_predicates: {
+                    'score_under_50': {
+                        name: 'secret_score',
+                        p_type: "<=",
+                        p_value: 50,
+                        restrictions: [
+                            {
+                                cred_def_id: credentialDefinitionId
+                            }
+                        ]
+                    }
+                }
             }
         };
         Logger.warn(`For issuer ${issuerId} /present-proof/send-request body request '${issuerUrl}' -> `, data);
@@ -215,7 +233,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('verify proof is proved', async () => {
-        await ProtocolUtility.delay(500);
+        await ProtocolUtility.delay(1000);
         return request(issuerUrl)
             .get(`/present-proof/records/${presentationExchangeId}`)
             .set('x-api-key', issuerApiKey)
