@@ -46,15 +46,15 @@ export class MultitenantService {
             }
         }
 
-        // Add to cache
         const ttl = (body.ttl === null || body.ttl === undefined) ? this.DEFAULT_TTL_SECONDS : body.ttl;
-        let invitation = null;
-        await this.addWalletToCache(body.walletName, body.walletKey, walletId, token, ttl);
-
         // Set remove job
-        await this.setRemoveJob(walletId, body.walletKey, ttl);
+        const timeoutId = await this.setRemoveJob(walletId, body.walletKey, ttl);
+
+        // Add to cache
+        await this.addWalletToCache(body.walletName, body.walletKey, walletId, token, timeoutId, ttl);
 
         // Handle auto connect
+        let invitation = null;
         if (body.autoConnect) {
             invitation = await this.callCreateConnection(token);
         }
@@ -86,11 +86,12 @@ export class MultitenantService {
 
     /**
      * Saves wallet info to cache for easy future access
+     * Note that removing the wallet doesn't involve the cache so no need to add a second to ttl
      */
-    private async addWalletToCache(walletName: string, walletKey: string, walletId: string, token: string, ttl: number): Promise<void> {
-        // Generally we want the cache to last 1 second longer than the agent, except when set to an "infinite" value like 0 or -1
-        const cacheTtl = (ttl < 0) ? ttl : ttl + 1;
-        Logger.debug(`record cache limit set to: ${cacheTtl}`);
+    private async addWalletToCache(
+        walletName: string, walletKey: string, walletId: string, token: string, timeoutId: number, ttl: number
+    ): Promise<void> {
+        Logger.debug(`record cache limit set to: ${ttl}`);
         await this.cache.set(
             walletName,
             {
@@ -99,10 +100,11 @@ export class MultitenantService {
                 walletId,
                 walletKey,
                 ttl,
-                multitenant: true
+                multitenant: true,
+                timeoutId
             },
             {
-                ttl: cacheTtl
+                ttl
             }
         );
     }
@@ -110,10 +112,12 @@ export class MultitenantService {
     /**
      * Sets a job in the future to remove/unregister the wallet after it's ttl has expired
      * ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
+     * Returns the NodeJS timeout id so that we can remove this timeout if the same wallet is added again later
+     *   Note clearTimeout doesn't error on null so it's fine to return null if we don't set a job
      */
-    private setRemoveJob(walletId: string, walletKey: string, ttl: number): void {
+    private setRemoveJob(walletId: string, walletKey: string, ttl: number): number {
         if (ttl > 0) {
-            setTimeout(
+            const timeout = setTimeout(
                 async () => {
                     try {
                         await this.callRemoveWallet(walletId, walletKey);
@@ -121,18 +125,23 @@ export class MultitenantService {
                         Logger.warn(`Error auto-removing wallet ${walletId}`, e);
                     }
                 }, ttl * 1000);
+            // The NodeJS.Timeout object can't be JSON.stringified (and cached) so we need to coerce to a primitive
+            return timeout[Symbol.toPrimitive]();
         }
+        return null;
     }
 
     /**
      * Handle case where wallet has already be created and registered with multitenant
      * We check the cache and return the wallet id and token
-     * TODO handle case where wallet isn't in cache
+     * Note: we also have special handling to extend the remove job, so we clear out the old timeout here
      */
     private async getTokenAndWalletId(walletName: string, walletKey: string): Promise<[string, string]> {
         const agent: any = await this.cache.get(walletName);
         if (agent) {
             if (agent.walletKey === walletKey) {
+                // before we return we need clear out the old remove wallet timeout
+                clearTimeout(agent.timeoutId);
                 return [agent.walletId, agent.token];
             }
             Logger.warn(`Attempted to open wallet for walletName ${walletName} from cache but with wrong walletKey`);
