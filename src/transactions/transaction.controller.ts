@@ -24,7 +24,7 @@ export class TransactionController {
      * For the TRO to make an aries compatible connection to the TDC
      * @param body
      */
-    @Post('/:agentId/register')
+    @Post(':agentId/register')
     public async registerWithTDC(
         @Param('agentId') agentId: string,
         @Body(new ProtocolValidationPipe()) body: RegisterTdcDto
@@ -32,7 +32,7 @@ export class TransactionController {
         return await this.transactionService.registerWithTDC(agentId, body);
     }
 
-    @Post('/:agentId/registerOnetimeKey')
+    @Post(':agentId/registerOnetimeKey')
     public async registerOnetimeKey(
         @Param('agentId') agentId: string,
         @Body(new ProtocolValidationPipe()) body: RegisterOneTimeKeyDto): Promise<any> {
