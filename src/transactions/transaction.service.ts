@@ -35,12 +35,13 @@ export class TransactionService {
     public basicMessageHandler: ControllerCallback =
         async (agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any, token?: string):
             Promise<any> => {
-            Logger.debug(`Aries-Guardianship-Agncey TransactionService received basic message for agent ${agentId}`, body);
-            switch (body.messageTypeId) {
+            Logger.debug(`Aries-Guardianship-Agency TransactionService received basic message for agent ${agentId}`, body);
+            const data = JSON.parse(body.content);
+            switch (data.messageTypeId) {
                 case `grant`:
-                    if (body.state === `completed`) {
+                    if (data.state === `completed`) {
                         // todo we need to determine database schema for storing and logic for responding to basicmessages
-                        Logger.info(`received completed grant information.`);
+                        Logger.info(`received completed grant information for agent ${agentId}.`);
                         // todo and send ack to TDC once the endpoints are setup and save connection information
                     }
                     break;
