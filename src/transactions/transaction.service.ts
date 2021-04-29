@@ -9,6 +9,7 @@ import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
 import { ProtocolException } from 'protocol-common/protocol.exception';
 import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
+import { agent } from "supertest";
 
 @Injectable()
 export class TransactionService {
@@ -34,7 +35,7 @@ export class TransactionService {
     public basicMessageHandler: ControllerCallback =
         async (agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any, token?: string):
             Promise<any> => {
-            Logger.debug(`Fsp TransactionService received basic message`, body);
+            Logger.debug(`Aries-Guardianship-Agncey TransactionService received basic message for agent ${agentId}`, body);
             switch (body.messageTypeId) {
                 case `grant`:
                     if (body.state === `completed`) {
@@ -73,7 +74,7 @@ export class TransactionService {
     public async registerWithTDC(agentId: string, body: RegisterTdcDto): Promise<RegisterTdcResponseDto> {
         // 1 generate a connection invite from fsp agent
         const connection = await this.createAgentConnection(agentId);
-        const url = `${body.tdcEndpoint}/v2/fsp/register`;
+        const url = `${body.tdcEndpoint}/v2/register`;
         Logger.debug(`TRO created this connection ${connection.connection_id} invitation`, connection.invitation);
 
         // 2 using body.tdcEndpoint, call: /fsp/register passing in a connection invite
@@ -99,10 +100,10 @@ export class TransactionService {
      * @param body: RegisterOneTimeKeyDto
      */
     public async registerOnetimeKey(agentId: string, body: RegisterOneTimeKeyDto): Promise<any> {
-        // 2 using body.tdcEndpoint, call: /fsp/register passing in a connection invite
+        // 2 using body.tdcEndpoint, call: /register passing in a connection invite
         // todo: replace tdcEndpoint with lookup since we have connection id
         Logger.info(`TRO sending onetimekey data`, body);
-        const url = `${body.tdcEndpoint}/v2/fsp/register/onetimekey`;
+        const url = `${body.tdcEndpoint}/v2/register/onetimekey`;
         const data = {
             connectionId: body.connectionId,
             oneTimeKey: body.oneTimeKey
