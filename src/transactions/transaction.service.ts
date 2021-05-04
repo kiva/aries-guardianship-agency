@@ -2,20 +2,22 @@ import { AxiosRequestConfig } from 'axios';
 import { Injectable, Inject, HttpService, CACHE_MANAGER, CacheStore } from '@nestjs/common';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
+import { ProtocolException } from 'protocol-common/protocol.exception';
+import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
 import { AgentGovernance, ControllerCallback } from 'aries-controller/controller/agent.governance';
 import { Topics } from 'aries-controller/controller/handler/topics';
+import { AgentService } from 'aries-controller/agent/agent.service';
+import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
 import { RegisterTdcDto } from './dtos/register.tdc.dto';
 import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
-import { ProtocolException } from 'protocol-common/protocol.exception';
-import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
-import { agent } from "supertest";
 
 @Injectable()
 export class TransactionService {
     private readonly http: ProtocolHttpService;
     constructor(@Inject('AGENT_GOVERNANCE') private readonly agentGovernance: AgentGovernance,
                 @Inject(CACHE_MANAGER) private readonly cache: CacheStore,
+                private readonly agentService: AgentService,
                 httpService: HttpService,
     ) {
         this.http = new ProtocolHttpService(httpService);
@@ -45,22 +47,36 @@ export class TransactionService {
                         // todo and send ack to TDC once the endpoints are setup and save connection information
                     }
                     break;
+                case `credit_transaction`:
+                    if (data.state === `started`) {
+                        // TODO validation
+                        // TODO save
+                        Logger.debug(`replying 'accepted' to transaction start message`);
+                        await this.sendTransactionMessage(agentId, adminApiKey, body.connection_id, 'accepted', data.id, data.transaction);
+                    }
+                    break;
             }
 
             return undefined;
         }
 
-    private async createAgentConnection(agentId: string): Promise<any> {
+    private async getAgentAdminApiKey(agentId: string): Promise<string> {
         const agentData: any = await this.cache.get(agentId);
         if (agentData === undefined) {
             throw new ProtocolException(ProtocolErrorCode.INVALID_BACKEND_OPERATION, `agent expected but not found`);
         }
+        return agentData.adminApiKey;
+    }
+
+    private async createAgentConnection(agentId: string): Promise<any> {
+        const adminApiKey = await this.getAgentAdminApiKey(agentId);
+
         const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/create-invitation`;
         const req: any = {
             method: 'POST',
             url,
             headers: {
-                'x-api-key': agentData.adminApiKey,
+                'x-api-key': adminApiKey,
             },
         };
         Logger.debug(`${agentId} createAgentConnection ${url}`);
@@ -118,5 +134,34 @@ export class TransactionService {
         const result = await this.http.requestWithRetry(request);
         Logger.debug(`TRO onetimekey with TDC ${request.url}, results data`);
         return result.data;
+    }
+
+    private async sendTransactionMessage(agentId: string, adminApiKey: string, connectionId: string,
+                                         state: string, id: string, eventJson: any): Promise<any> {
+        // Calling agent http://undefined:5001/connections/90ee8019-16b1-4920-8046-9073dabb7823/send-message
+        const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
+        const msg: CreditTransaction<any> = Object.assign(
+            new CreditTransaction<any>(), {
+                state,
+                id,
+                transaction: eventJson
+            }
+        );
+        const data = { content: JSON.stringify(msg) };
+        const req: any = {
+            method: 'POST',
+            url,
+            headers: {
+                'x-api-key': adminApiKey,
+            },
+            data
+        };
+
+        Logger.debug(`sendTransactionMessage to ${connectionId}`, msg);
+        const res = await this.http.requestWithRetry(req);
+        Logger.debug(`${agentId} sendTransactionMessage results`, res.data);
+        return res.data;
+
+        // return await this.agentService.sendBasicMessage(msg, connectionId);
     }
 }
