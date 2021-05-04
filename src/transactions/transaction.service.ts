@@ -53,6 +53,8 @@ export class TransactionService {
                         // TODO save
                         Logger.debug(`replying 'accepted' to transaction start message`);
                         await this.sendTransactionMessage(agentId, adminApiKey, body.connection_id, 'accepted', data.id, data.transaction);
+                    } else if (data.state === `completed`) {
+                        Logger.info(`transaction ${data.id} is complete`);
                     }
                     break;
             }
