@@ -11,6 +11,8 @@ import { CreditTransaction } from 'aries-controller/agent/messaging/credit.trans
 import { RegisterTdcDto } from './dtos/register.tdc.dto';
 import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
+import { DataService } from './persistence/data.service';
+import { AgentTransaction } from './persistence/agent.transaction';
 
 @Injectable()
 export class TransactionService {
@@ -18,6 +20,7 @@ export class TransactionService {
     constructor(@Inject('AGENT_GOVERNANCE') private readonly agentGovernance: AgentGovernance,
                 @Inject(CACHE_MANAGER) private readonly cache: CacheStore,
                 private readonly agentService: AgentService,
+                private readonly dbAccessor: DataService,
                 httpService: HttpService,
     ) {
         this.http = new ProtocolHttpService(httpService);
@@ -42,7 +45,6 @@ export class TransactionService {
             switch (data.messageTypeId) {
                 case `grant`:
                     if (data.state === `completed`) {
-                        // todo we need to determine database schema for storing and logic for responding to basicmessages
                         Logger.info(`received completed grant information for agent ${agentId}.`);
                         // todo and send ack to TDC once the endpoints are setup and save connection information
                     }
@@ -51,10 +53,19 @@ export class TransactionService {
                     if (data.state === `started`) {
                         // TODO validation
                         // TODO save
+                        const record: AgentTransaction = new AgentTransaction();
+                        record.agent_id = agentId;
+                        record.transaction_id = data.id;
+                        record.transaction_date = data.transaction.eventDate;
+                        record.issuer_hash = data.transaction.fspHash;
+                        record.fsp_id = data.transaction.fspId;
+                        record.transaction_details = data.transaction.eventJson;
+                        await this.dbAccessor.saveTransaction(record);
                         Logger.debug(`replying 'accepted' to transaction start message`);
                         await this.sendTransactionMessage(agentId, adminApiKey, body.connection_id, 'accepted', data.id, data.transaction);
                     } else if (data.state === `completed`) {
                         Logger.info(`transaction ${data.id} is complete`);
+                        // TODO: do we need to note transaction state?
                     }
                     break;
             }

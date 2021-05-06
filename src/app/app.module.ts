@@ -10,6 +10,8 @@ import { AgentRouterModule } from '../router/agent.router.module';
 import { AgentControllerModule } from '../controller/agent.controller.module';
 import { MultitenantModule } from '../multitenant/mutlitenant.module';
 import { TransactionModule } from '../transactions/transaction.module';
+import { OrmConfig } from '../ormconfig';
+import { PersistenceModule } from '../transactions/persistence/persistence.module';
 
 /**
  * Initializes the Nest application
@@ -17,11 +19,13 @@ import { TransactionModule } from '../transactions/transaction.module';
 @Module({
     imports: [
         ConfigModule.init(data),
+        OrmConfig(),
         AgentManagerModule,
         AgentRouterModule,
         AgentControllerModule,
         MultitenantModule,
-        TransactionModule
+        TransactionModule,
+        PersistenceModule
     ],
     controllers: [AppController],
     providers: [
