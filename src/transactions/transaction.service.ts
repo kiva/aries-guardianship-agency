@@ -53,12 +53,16 @@ export class TransactionService {
                     if (data.state === `started`) {
                         // TODO validation
                         // TODO save
+                        const maxMerkleOrder = await this.dbAccessor.getMaxMerkelOrder();
+                        Logger.debug(`maxMerkleOrder '${maxMerkleOrder}'`, maxMerkleOrder);
                         const record: AgentTransaction = new AgentTransaction();
                         record.agent_id = agentId;
                         record.transaction_id = data.id;
                         record.transaction_date = data.transaction.eventDate;
                         record.issuer_hash = data.transaction.fspHash;
                         record.fsp_id = data.transaction.fspId;
+                        record.merkel_order = maxMerkleOrder + 1;
+                        record.merkel_hash = data.transaction.fspHash;
                         record.transaction_details = data.transaction.eventJson;
                         await this.dbAccessor.saveTransaction(record);
                         Logger.debug(`replying 'accepted' to transaction start message`);

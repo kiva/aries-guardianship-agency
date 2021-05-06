@@ -20,6 +20,12 @@ export class AgentTransaction {
     @Column({ type: 'varchar', length: 64, nullable: false })
     transaction_id: string;
 
+    @Column( { type: 'int' })
+    merkel_order: number;
+
+    @Column({ type: 'varchar', length: 64, nullable: false })
+    merkel_hash: string;
+
     @Column({ type: 'timestamp' })
     transaction_date: Date;
 
