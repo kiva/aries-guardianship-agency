@@ -13,6 +13,7 @@ import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
 import { DataService } from './persistence/data.service';
 import { AgentTransaction } from './persistence/agent.transaction';
+import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
 
 @Injectable()
 export class TransactionService {
@@ -52,9 +53,8 @@ export class TransactionService {
                 case `credit_transaction`:
                     if (data.state === `started`) {
                         // TODO validation
-                        // TODO save
+                        // TODO: theres possible collision here if two transactions came in at the same time
                         const maxMerkleOrder = await this.dbAccessor.getMaxMerkelOrder();
-                        Logger.debug(`maxMerkleOrder '${maxMerkleOrder}'`, maxMerkleOrder);
                         const record: AgentTransaction = new AgentTransaction();
                         record.agent_id = agentId;
                         record.transaction_id = data.id;
@@ -70,6 +70,31 @@ export class TransactionService {
                     } else if (data.state === `completed`) {
                         Logger.info(`transaction ${data.id} is complete`);
                         // TODO: do we need to note transaction state?
+                    }
+                    break;
+                case `transaction_request`:
+                    if (data.state === `started`) {
+                        // TODO could do our own validation tsp id is allowed to request report
+                        // 1 let system know we acknowledge report request
+                        await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'accepted', data.id, data.tdcFspId, '');
+                        // 2 build the report
+                        const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions();
+                        // TODO: this needs to be type
+                        let reportRecs: {order: number, transactionId: string, credentialId: string, hash: string}[] = [];
+                        Logger.debug(`found ${transactions.length} records`);
+                        for (const record of transactions) {
+                            Logger.debug(`processing ${record.transaction_id}`);
+                            reportRecs.push({
+                                order: record.merkel_order,
+                                transactionId: record.transaction_id,
+                                credentialId: record.credential_id,
+                                hash: record.issuer_hash
+                            });
+                        }
+                        let obj = {};
+                        // reportRecs.forEach(item => obj[item.Field] = item.Value);
+                        // 3 send it out
+                        await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'completed', data.id, data.tdcFspId, JSON.stringify(reportRecs));
                     }
                     break;
             }
@@ -155,7 +180,6 @@ export class TransactionService {
 
     private async sendTransactionMessage(agentId: string, adminApiKey: string, connectionId: string,
                                          state: string, id: string, eventJson: any): Promise<any> {
-        // Calling agent http://undefined:5001/connections/90ee8019-16b1-4920-8046-9073dabb7823/send-message
         const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
         const msg: CreditTransaction<any> = Object.assign(
             new CreditTransaction<any>(), {
@@ -178,7 +202,32 @@ export class TransactionService {
         const res = await this.http.requestWithRetry(req);
         Logger.debug(`${agentId} sendTransactionMessage results`, res.data);
         return res.data;
+    }
 
-        // return await this.agentService.sendBasicMessage(msg, connectionId);
+    private async sendTransactionReportMessage(agentId: string, adminApiKey: string, connectionId: string,
+                                               state: string, id: string, tdcFspId: string, reportData: any): Promise<any> {
+        const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
+        const msg: TransactionRequest<any> = Object.assign(
+            new TransactionRequest<any>(), {
+                id,
+                state,
+                tdcFspId,
+                transactions: reportData
+            }
+        );
+        const data = { content: JSON.stringify(msg) };
+        const req: any = {
+            method: 'POST',
+            url,
+            headers: {
+                'x-api-key': adminApiKey,
+            },
+            data
+        };
+
+        Logger.debug(`sendTransactionMessage to ${connectionId}`, msg);
+        const res = await this.http.requestWithRetry(req);
+        Logger.debug(`${agentId} sendTransactionMessage results`, res.data);
+        return res.data;
     }
 }

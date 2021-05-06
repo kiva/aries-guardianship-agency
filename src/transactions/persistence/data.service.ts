@@ -17,11 +17,16 @@ export class DataService {
         return await this.connection.getRepository(AgentTransaction).save(record);
     }
 
+    public async getAllTransactions(): Promise<AgentTransaction[]> {
+        return await this.connection.getRepository(AgentTransaction).find();
+    }
+
     public async getMaxMerkelOrder(): Promise<any> {
-        let value: any = await this.connection.getRepository(AgentTransaction).query(`SELECT MAX(merkel_order) FROM agent_transactions`)[0];
-        Logger.debug(`getMaxMerkelOrder select returns |${value}|`);
-        if (value == null || value === undefined || value === NaN)
-            value = 0;
-        return value;
+        const value: any = await this.connection.getRepository(AgentTransaction).query(`SELECT MAX(merkel_order) FROM agent_transactions`);
+        let result = value[0];
+        Logger.debug(`getMaxMerkelOrder select returns |${result.max}|`, result);
+        if (result == null || result === undefined || isNaN(result.max))
+            return 0;
+        return result.max;
     }
 }

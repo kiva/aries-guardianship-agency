@@ -13,7 +13,7 @@ export class AgentTransactions1620304611265 implements MigrationInterface {
                 transaction_id varchar(64) NOT NULL,
                 transaction_date TIMESTAMP DEFAULT now(),
                 issuer_hash varchar(64) NOT NULL,
-                merkel_order int, 
+                merkel_order int,
                 merkel_hash varchar(64) NOT NULL,
                 credential_id varchar(64) NULL,
                 transaction_details text NULL
