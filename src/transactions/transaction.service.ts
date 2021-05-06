@@ -4,6 +4,7 @@ import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
 import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
+import { SecurityUtility } from 'protocol-common/security.utility';
 import { AgentGovernance, ControllerCallback } from 'aries-controller/controller/agent.governance';
 import { Topics } from 'aries-controller/controller/handler/topics';
 import { AgentService } from 'aries-controller/agent/agent.service';
@@ -87,7 +88,7 @@ export class TransactionService {
                             reportRecs.push({
                                 order: record.merkel_order,
                                 transactionId: record.transaction_id,
-                                credentialId: record.credential_id,
+                                credentialId: this.generateTransactionId(record.transaction_id),
                                 hash: record.issuer_hash
                             });
                         }
@@ -229,5 +230,10 @@ export class TransactionService {
         const res = await this.http.requestWithRetry(req);
         Logger.debug(`${agentId} sendTransactionMessage results`, res.data);
         return res.data;
+    }
+
+    // this is temporary
+    private generateTransactionId(hashableValue: string) : string {
+        return SecurityUtility.hash32(hashableValue).substr(10);
     }
 }
