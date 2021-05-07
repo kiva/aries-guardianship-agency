@@ -53,6 +53,8 @@ export class TransactionService {
                     break;
                 case `credit_transaction`:
                     if (data.state === `started`) {
+                        // TODO fix the credential ID problem.  Solution is to add more states and have this code in a later
+                        // state handler
                         // TODO validation
                         // TODO: theres possible collision here if two transactions came in at the same time
                         const maxMerkleOrder = await this.dbAccessor.getMaxMerkelOrder();
@@ -63,6 +65,7 @@ export class TransactionService {
                         record.issuer_hash = data.transaction.fspHash;
                         record.fsp_id = data.transaction.fspId;
                         record.merkel_order = maxMerkleOrder + 1;
+                        // this is temporary
                         record.merkel_hash = data.transaction.fspHash;
                         record.transaction_details = data.transaction.eventJson;
                         await this.dbAccessor.saveTransaction(record);
@@ -88,12 +91,11 @@ export class TransactionService {
                             reportRecs.push({
                                 order: record.merkel_order,
                                 transactionId: record.transaction_id,
+                                // this is temporary
                                 credentialId: this.generateTransactionId(record.transaction_id),
                                 hash: record.issuer_hash
                             });
                         }
-                        let obj = {};
-                        // reportRecs.forEach(item => obj[item.Field] = item.Value);
                         // 3 send it out
                         await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'completed', data.id, data.tdcFspId, JSON.stringify(reportRecs));
                     }
@@ -234,6 +236,6 @@ export class TransactionService {
 
     // this is temporary
     private generateTransactionId(hashableValue: string) : string {
-        return SecurityUtility.hash32(hashableValue).substr(10);
+        return SecurityUtility.hash32(hashableValue);
     }
 }
