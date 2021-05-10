@@ -65,12 +65,13 @@ export class TransactionService {
                         record.issuer_hash = data.transaction.fspHash;
                         record.fsp_id = data.transaction.fspId;
                         record.merkel_order = maxMerkleOrder + 1;
-                        // this is temporary
-                        record.merkel_hash = data.transaction.fspHash;
+                        record.merkel_hash = this.generateTransactionId(data.transaction.fspHash);
+                        record.credential_id = data.credentialId;
                         record.transaction_details = data.transaction.eventJson;
                         await this.dbAccessor.saveTransaction(record);
                         Logger.debug(`replying 'accepted' to transaction start message`);
-                        await this.sendTransactionMessage(agentId, adminApiKey, body.connection_id, 'accepted', data.id, data.transaction);
+                        await this.sendTransactionMessage(agentId, adminApiKey, body.connection_id, 'accepted',
+                            data.id, data.transaction);
                     } else if (data.state === `completed`) {
                         Logger.info(`transaction ${data.id} is complete`);
                         // TODO: do we need to note transaction state?
@@ -80,24 +81,25 @@ export class TransactionService {
                     if (data.state === `started`) {
                         // TODO could do our own validation tsp id is allowed to request report
                         // 1 let system know we acknowledge report request
-                        await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'accepted', data.id, data.tdcFspId, '');
+                        await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'accepted',
+                            data.id, data.tdcFspId, '');
                         // 2 build the report
                         const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions();
                         // TODO: this needs to be type
-                        let reportRecs: {order: number, transactionId: string, credentialId: string, hash: string}[] = [];
+                        const reportRecs: {order: number, transactionId: string, credentialId: string, hash: string}[] = [];
                         Logger.debug(`found ${transactions.length} records`);
                         for (const record of transactions) {
                             Logger.debug(`processing ${record.transaction_id}`);
                             reportRecs.push({
                                 order: record.merkel_order,
                                 transactionId: record.transaction_id,
-                                // this is temporary
-                                credentialId: this.generateTransactionId(record.transaction_id),
+                                credentialId: record.credential_id,
                                 hash: record.issuer_hash
                             });
                         }
                         // 3 send it out
-                        await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'completed', data.id, data.tdcFspId, JSON.stringify(reportRecs));
+                        await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'completed',
+                            data.id, data.tdcFspId, JSON.stringify(reportRecs));
                     }
                     break;
             }
