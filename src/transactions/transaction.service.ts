@@ -9,12 +9,13 @@ import { AgentGovernance, ControllerCallback } from 'aries-controller/controller
 import { Topics } from 'aries-controller/controller/handler/topics';
 import { AgentService } from 'aries-controller/agent/agent.service';
 import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
+import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
+import { VerifierService } from 'aries-controller/verifier/verifier.service';
 import { RegisterTdcDto } from './dtos/register.tdc.dto';
 import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
 import { DataService } from './persistence/data.service';
 import { AgentTransaction } from './persistence/agent.transaction';
-import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
 
 @Injectable()
 export class TransactionService {
@@ -22,11 +23,12 @@ export class TransactionService {
     constructor(@Inject('AGENT_GOVERNANCE') private readonly agentGovernance: AgentGovernance,
                 @Inject(CACHE_MANAGER) private readonly cache: CacheStore,
                 private readonly agentService: AgentService,
+                private readonly verifierService: VerifierService,
                 private readonly dbAccessor: DataService,
                 httpService: HttpService,
     ) {
         this.http = new ProtocolHttpService(httpService);
-        agentGovernance.registerHandler(Topics.BASIC_MESSAGES, this.basicMessageHandler);
+        agentGovernance.registerHandler('TX-SVCS', Topics.BASIC_MESSAGES, this.basicMessageHandler);
     }
 
     /**
@@ -44,11 +46,13 @@ export class TransactionService {
             Promise<any> => {
             Logger.debug(`Aries-Guardianship-Agency TransactionService received basic message for agent ${agentId}`, body);
             const data = JSON.parse(body.content);
+            let result: boolean = false;
             switch (data.messageTypeId) {
                 case `grant`:
                     if (data.state === `completed`) {
                         Logger.info(`received completed grant information for agent ${agentId}.`);
-                        // todo and send ack to TDC once the endpoints are setup and save connection information
+                        result = true;
+                        // todo and send ack to TDC once the endpoints are setup and save connection information?
                     }
                     break;
                 case `credit_transaction`:
@@ -72,9 +76,11 @@ export class TransactionService {
                         Logger.debug(`replying 'accepted' to transaction start message`);
                         await this.sendTransactionMessage(agentId, adminApiKey, body.connection_id, 'accepted',
                             data.id, data.transaction);
+                        result = true;
                     } else if (data.state === `completed`) {
                         Logger.info(`transaction ${data.id} is complete`);
                         // TODO: do we need to note transaction state?
+                        result = true;
                     }
                     break;
                 case `transaction_request`:
@@ -86,25 +92,38 @@ export class TransactionService {
                         // 2 build the report
                         const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions();
                         // TODO: this needs to be type
-                        const reportRecs: {order: number, transactionId: string, credentialId: string, hash: string}[] = [];
-                        Logger.debug(`found ${transactions.length} records`);
+                        const reportRecs: {
+                            order: number,
+                            transactionId: string,
+                            credentialId: string,
+                            proofId: string,
+                            hash: string,
+                            eventData: string,
+                        }[] = [];
+
                         for (const record of transactions) {
                             Logger.debug(`processing ${record.transaction_id}`);
                             reportRecs.push({
                                 order: record.merkel_order,
                                 transactionId: record.transaction_id,
                                 credentialId: record.credential_id,
-                                hash: record.issuer_hash
+                                proofId: '',
+                                hash: record.issuer_hash,
+                                eventData: record.transaction_details               // TODO this needs to come from the proof
                             });
                         }
                         // 3 send it out
                         await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'completed',
                             data.id, data.tdcFspId, JSON.stringify(reportRecs));
+                        result = true;
                     }
+                    break;
+                default:
+                    result = false;
                     break;
             }
 
-            return undefined;
+            return result;
         }
 
     private async getAgentAdminApiKey(agentId: string): Promise<string> {
