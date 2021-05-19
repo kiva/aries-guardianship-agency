@@ -64,3 +64,16 @@ docker-compose -f docker-compose.kiva-network.yml
 If you run into conflicts with docker images from another file clean things up with: `docker rm -f $(docker ps -aq)`.
 
 
+## Notes about the Transaction API
+The transaction APIs (eg `v2/transaction` namespace) require the TDC controller and agent.  These are 
+available in the `protocol-aries` repo.
+
+## Testing with local code base for aries-guardianship-agency
+(If this doesn't make sense, ask Matt.  He probably is no help though)
+1. Get protocol-aries code.  
+   `git clone https://github.com/kiva/protocol-aries`
+2. Get environment configured for code downloaded in #1 above.
+3. Build/Run docker-compose.yml in aries-guardianship-agency
+4. Configure the .env for ncra and tdc controller in `protocol-aries/implementation` to use wallets-db
+5. Run protocol-aries/implementation/docker-compose.local.yml
+6. Run what you need from scripts/setup.sh in protocol-aries    
