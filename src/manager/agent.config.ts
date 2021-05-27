@@ -88,7 +88,7 @@ export class AgentConfig {
         this.useTailsServer = (agentDto.useTailsServer === true); // defaults to false
         // Special handling - if 0 make Infinity, if unset make default
         if (agentDto.ttl === 0) {
-            this.ttl = Infinity
+            this.ttl = Infinity;
         } else {
             this.ttl = agentDto.ttl || this.DEFAULT_TTL_SECONDS;
         }
