@@ -16,14 +16,14 @@ import * as redisStore from 'cache-manager-redis-store';
                     host: process.env.REDIS_HOST,
                     auth_pass: process.env.REDIS_PASS,
                     port: 6379,
-                    ttl: 0
+                    ttl: parseInt(process.env.DEFAULT_CACHE_TTL, 10),
                 };
             } else {
                 Logger.log('Using file system cache');
                 return {
                     store: fsStore,
                     path:'/tmp/diskcache',
-                    ttl: Infinity,
+                    ttl: parseInt(process.env.DEFAULT_CACHE_TTL, 10),
                     max: 1000
                 };
             }
