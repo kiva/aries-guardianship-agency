@@ -213,7 +213,7 @@ export class AgentManagerService {
      * ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
      */
     private setSpinDownJob(agentConfig: AgentConfig): void {
-        if (agentConfig.ttl > 0) {
+        if (agentConfig.ttl > 0 && agentConfig.ttl !== Infinity) {
             setTimeout(
                 async () => {
                     await this.spinDownAgent(agentConfig.agentId);

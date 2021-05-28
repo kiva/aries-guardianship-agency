@@ -86,7 +86,12 @@ export class AgentConfig {
         this.adminPort = adminPort;
         this.seed = agentDto.seed;
         this.useTailsServer = (agentDto.useTailsServer === true); // defaults to false
-        this.ttl = agentDto.ttl || this.DEFAULT_TTL_SECONDS;
+        // Special handling - if 0 make Infinity, if unset make default
+        if (agentDto.ttl === 0) {
+            this.ttl = Infinity;
+        } else {
+            this.ttl = agentDto.ttl || this.DEFAULT_TTL_SECONDS;
+        }
         // The webhook url should be private on the network between the agent and the controller, since we don't want the admin api exposed publicly.
         // It's either the passed in controller URL, or the internal URL of the agency for this specific agent ID.
         this.webhookUrl = agentDto.controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${agentDto.agentId}`;
