@@ -87,10 +87,12 @@ export class MultitenantService {
     /**
      * Saves wallet info to cache for easy future access
      * Note that removing the wallet doesn't involve the cache so no need to add a second to ttl
+     * A ttl of 0 means store for Infinity
      */
     private async addWalletToCache(
         walletName: string, walletKey: string, walletId: string, token: string, timeoutId: number, ttl: number
     ): Promise<void> {
+        ttl = (ttl === 0) ? Infinity: ttl;
         Logger.debug(`record cache limit set to: ${ttl}`);
         await this.cache.set(
             walletName,
