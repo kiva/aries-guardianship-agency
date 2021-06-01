@@ -26,8 +26,7 @@ export class TransactionService {
                 httpService: HttpService,
     ) {
         this.http = new ProtocolHttpService(httpService);
-        const id = 'TODO';
-        agentGovernance.registerHandler(id, Topics.BASIC_MESSAGES, this.basicMessageHandler);
+        agentGovernance.registerHandler('AGA-TX-BASIC', Topics.BASIC_MESSAGES, this.basicMessageHandler);
     }
 
     /**
