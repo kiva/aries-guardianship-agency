@@ -29,6 +29,7 @@ export class TransactionService {
     ) {
         this.http = new ProtocolHttpService(httpService);
         agentGovernance.registerHandler('TX-SVCS', Topics.BASIC_MESSAGES, this.basicMessageHandler);
+        agentGovernance.registerHandler('TX-PROOF', Topics.PRESENT_PROOF, this.proofHandler);
     }
 
     /**
@@ -124,6 +125,16 @@ export class TransactionService {
             }
 
             return result;
+        }
+
+    public proofHandler: ControllerCallback =
+        async (agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any, token?: string):
+            Promise<any> => {
+            if (body.role === 'prover' && body.state === 'request_received' && body.presentation_request.name === 'Credit.TRO.Trx') {
+                Logger.debug(`holder found a credential proof`, body);
+                return true;
+            }
+            return false;
         }
 
     private async getAgentAdminApiKey(agentId: string): Promise<string> {
