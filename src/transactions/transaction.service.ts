@@ -84,7 +84,7 @@ export class TransactionService {
                         await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'accepted',
                             data.id, data.tdcFspId, '');
                         // 2 build the report
-                        const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions();
+                        const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions(agentId);
                         // TODO: this needs to be type
                         const reportRecs: {order: number, transactionId: string, credentialId: string, hash: string}[] = [];
                         Logger.debug(`found ${transactions.length} records`);
