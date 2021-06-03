@@ -17,8 +17,8 @@ export class DataService {
         return await this.connection.getRepository(AgentTransaction).save(record);
     }
 
-    public async getAllTransactions(): Promise<AgentTransaction[]> {
-        return await this.connection.getRepository(AgentTransaction).find();
+    public async getAllTransactions(agentId: string): Promise<AgentTransaction[]> {
+        return await this.connection.getRepository(AgentTransaction).find({agent_id: agentId});
     }
 
     public async getMaxMerkelOrder(): Promise<any> {
