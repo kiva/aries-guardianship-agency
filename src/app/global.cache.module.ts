@@ -1,6 +1,7 @@
-import { Global, Module, CacheModule, Logger } from '@nestjs/common';
+import { Global, Module, CacheModule } from '@nestjs/common';
 import * as fsStore from 'cache-manager-fs-hash';
 import * as redisStore from 'cache-manager-redis-store';
+import { Logger } from 'protocol-common/logger';
 
 /**
  * Supports both a redis cache in our deployed environments, and a file system cache for local testing

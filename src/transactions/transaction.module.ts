@@ -1,4 +1,4 @@
-import { Module, HttpModule, forwardRef } from '@nestjs/common';
+import { Module, HttpModule } from '@nestjs/common';
 import { AgentModule } from 'aries-controller/agent/agent.module';
 import { AgentGovernanceFactory } from 'aries-controller/controller/agent.governance.factory';
 import { GlobalCacheModule } from '../app/global.cache.module';
