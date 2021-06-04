@@ -30,7 +30,7 @@
     "@nestjs/swagger": "^4.7.16",
     "@nestjs/typeorm": "^7.1.5",
     "@types/dockerode": "^3.2.2",
-    "aries-controller": "1.0.55",
+    "aries-controller": "1.0.57",
     "cache-manager": "^3.4.1",
     "cache-manager-fs-hash": "^0.0.9",
     "cache-manager-redis-store": "^2.0.0",
