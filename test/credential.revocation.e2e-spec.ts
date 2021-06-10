@@ -189,7 +189,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     });
 
     it('Affirm Issuer credential status', async () => {
-        await ProtocolUtility.delay(1000);
+        await ProtocolUtility.delay(2000);
         return request(issuerUrl)
             .get('/issue-credential/records')
             .set('x-api-key', holderApiKey)
