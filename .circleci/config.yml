@@ -20,7 +20,7 @@ jobs:
       - run:
           name: setup shell environment
           command: |
-            cp dummy.env .env
+            ./scripts/setup_env.sh
             echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
       - run:
           name: node npm setup
