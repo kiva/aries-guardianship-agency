@@ -81,7 +81,7 @@ workflows:
           update-description: true
           dockerfile: ./docker/Dockerfile.production
           image: kivaprotocol/aries-guardianship-agency
-          tag: << pipeline.git.tag >>
+          tag: << pipeline.git.tag >>,latest
 
 orbs:
   node: circleci/node@1.1.6
