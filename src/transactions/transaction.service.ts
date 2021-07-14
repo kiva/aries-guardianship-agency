@@ -186,13 +186,11 @@ export class TransactionService {
     private async sendTransactionMessage(agentId: string, adminApiKey: string, connectionId: string,
                                          state: string, id: string, eventJson: any): Promise<any> {
         const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
-        const msg: CreditTransaction<any> = Object.assign(
-            new CreditTransaction<any>(), {
+        const msg: CreditTransaction<any> = new CreditTransaction<any>({
                 state,
                 id,
                 transaction: eventJson
-            }
-        );
+            });
         const data = { content: JSON.stringify(msg) };
         const req: any = {
             method: 'POST',
@@ -212,14 +210,12 @@ export class TransactionService {
     private async sendTransactionReportMessage(agentId: string, adminApiKey: string, connectionId: string,
                                                state: string, id: string, tdcFspId: string, reportData: any): Promise<any> {
         const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
-        const msg: TransactionRequest<any> = Object.assign(
-            new TransactionRequest<any>(), {
+        const msg: TransactionRequest<any> = new TransactionRequest<any>({
                 id,
                 state,
                 tdcFspId,
                 transactions: reportData
-            }
-        );
+            });
         const data = { content: JSON.stringify(msg) };
         const req: any = {
             method: 'POST',
