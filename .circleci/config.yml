@@ -25,7 +25,6 @@ jobs:
       - run:
           name: node npm setup
           command: |
-              npm install nodemon --save-dev
               npm install
               nvm install v14.15.1
               node -v
