@@ -14,7 +14,7 @@ networks:
             subnet: 10.0.0.0/24
 
 services:
-      # indy pool needs a static ip configured in the pool_transactions_genesis so need to start it first
+  # indy pool needs a static ip configured in the pool_transactions_genesis so need to start it first
   indy-pool:
     build:
       context: .
@@ -57,9 +57,8 @@ services:
       dockerfile: docker/Dockerfile.production
     env_file:
       - .env
-    image: aries-guardianship-agency
+    image: aries-guardianship-agency:latest
     container_name: aries-guardianship-agency
-    working_dir: /www
     ports:
       - "3010:3010"
     expose: 

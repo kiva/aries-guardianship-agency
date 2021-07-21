@@ -57,10 +57,8 @@ services:
       dockerfile: docker/Dockerfile
     env_file:
       - .env
-    command: npm run start:debug
-    image: aries-guardianship-agency
+    image: aries-guardianship-agency:latest
     container_name: aries-guardianship-agency
-    working_dir: /www
     ports:
       - "3010:3010"
     expose: 

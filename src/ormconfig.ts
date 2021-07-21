@@ -10,7 +10,7 @@ export function OrmConfig(): DynamicModule {
         synchronize: false,
         migrationsRun: true,
         entities: ['src/transactions/persistence/**/*.ts', 'dist/transactions/persistence/**/*.js'],
-        migrations: ['src/migration/**/*.ts', 'dist/migration/**/*.js'],
+        migrations: ['dist/migration/**/*.js'],
         host: process.env.WALLET_DB_HOST,
         username: process.env.WALLET_DB_USER,
         password: process.env.WALLET_DB_PASS,
