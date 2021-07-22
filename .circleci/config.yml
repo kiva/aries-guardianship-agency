@@ -131,7 +131,7 @@ workflows:
       - docker/publish:
           requires:
             - integration-test
-            - integration-test-context
+            - protocol-integration-tests
           filters: # only run for semver tagged versions
             tags:
               only: /^([0-9]+)\.([0-9]+)\.([0-9]+)/
