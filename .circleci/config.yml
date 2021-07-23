@@ -56,6 +56,57 @@ jobs:
               exit 1;
             fi
 
+  protocol-integration-tests:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+      - run:
+          name: Pull protocol-integration-tests
+          command: git clone https://github.com/kiva/protocol-integration-tests ./
+      - run:
+          name: Setup environment
+          command: |
+            ./scripts/setup_env.sh
+            echo $AUTH0_ENV | base64 --decode >> .env
+            echo ' [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> $BASH_ENV
+      - run:
+          name: Node npm setup
+          command: |
+            nvm install v14.15.1
+            node -v
+            nvm alias default v14.15.1
+      - run:
+          name: Get ACAPy
+          command: docker pull bcgovimages/aries-cloudagent:py36-1.15-1_0.6.0
+      - run:
+          name: Override for aries-guardianship-agency image
+          command: ./scripts/setup_override.sh -r aries-guardianship-agency -e scripts/useDummyEnv.sh
+      - run:
+          name: Start docker compose and wait for readiness
+          command: |
+            docker system prune -f
+            docker volume prune -f
+            docker-compose build --no-cache
+            docker-compose up --force-recreate -d
+            sleep 20
+            docker-compose logs
+      - run:
+          name: Healthcheck services
+          command: ./scripts/healthstack.sh
+      - run:
+          name: Setup integration tests
+          command: |
+            npm install
+            ./scripts/setup_fixtures.sh
+      - run:
+          name: Running integration tests
+          command: |
+            if ! npm run test ; then
+              echo "Tests failed. Server logs:";
+              docker-compose logs;
+              exit 1;
+            fi
+
 workflows:
   build-test-deploy:
     jobs:
@@ -69,9 +120,20 @@ workflows:
           filters: # run for all branches AND tags
             tags:
               only: /.*/
+      - protocol-integration-tests:
+          context:
+            - integration-test-context
+          requires:
+            - build-and-test
+          filters: # only run for semver tagged versions
+            tags:
+              only: /^([0-9]+)\.([0-9]+)\.([0-9]+)/
+            branches:
+              ignore: /.*/
       - docker/publish:
           requires:
             - integration-test
+            - protocol-integration-tests
           filters: # only run for semver tagged versions
             tags:
               only: /^([0-9]+)\.([0-9]+)\.([0-9]+)/
