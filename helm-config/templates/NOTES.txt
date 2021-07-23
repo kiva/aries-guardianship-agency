@@ -1,0 +1,8 @@
+You have installed {{ .Chart.Name }}
+
+Your release is named {{ .Release.Name }}
+
+Your application can be reached with at the following network location:
+
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl port-forward svc/{{ .Chart.Name }} 8080:{{ .Values.service.port }}

@@ -1,39 +1,70 @@
 replicaCount: 2
 
 image:
-  repository: kivaprotocol/agency
+  repository: kivaprotocol/aries-guardianship-agency
   tag: latest
   pullPolicy: Always
   imagePullSecrets:
     - name: "regcred"
 
-nameOverride: "protocol-agency"
-fullnameOverride: "protocol-agency"
-secrets: "protocol-agency-service-secrets"
+nameOverride: "aries-guardianship-agency"
+fullnameOverride: "aries-guardianship-agency"
+secrets: "aries-guardianship-agency-secrets"
 
 strategy:
   type: "RollingUpdate"
 
 service:
   type: ClusterIP
-  port: 443
+  port: 3010
   containerPort: 8080
   targetPort: 8080
-  portName: "https"
+  portName: http
 
 resources:
   limits:
     cpu: 1100m
-    memory: 512Mi
+    memory: 607164212
   requests:
     cpu: 1100m
-    memory: 256Mi
+    memory: 607164212
+
+readiness:
+  initialDelaySeconds: 20
+  timeoutSeconds: 1
+  path: /healthz
+
+liveness:
+  initialDelaySeconds: 20
+  timeoutSeconds: 10
+  path: /healthz
 
 ingress:
-  host: "protocol-gateway.dk1.kiva.org"
+  enabled: false # set to true if component needs ingress
+  host: "replaceme.replacethisdomain"
   class: nginx-ingress-external
-  tls: true
+  secret: "replaceme-tls"
 
+volume:
+  enabled: true
+  name: agency-data
+  claim: agency-vol
+  size: 8Gi
+  mountPath: "/tmp/diskcache"
+
+securityContext:
+  enabled: true
+  user: 102 # default user ID for the app user
+  fsGroup: 102
+
+# By default services should disable this option as it is used to give the pod
+# elevated k8s privileges
+serviceAccount:
+  enabled: true
+  name: agency-kubectl
+
+# Uncomment below to allocate pods to a specific node type.
+#
 #tolerations:
 #  - effect: NoSchedule
 #    key: crypto
@@ -42,3 +73,5 @@ ingress:
 #
 #nodeSelector:
 #    dedicated: crypto
+#
+#affinity: {}
