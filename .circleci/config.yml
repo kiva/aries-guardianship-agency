@@ -107,6 +107,26 @@ jobs:
               exit 1;
             fi
 
+  push-to-dev:
+    machine:
+      image: ubuntu-1604:201903-01
+    parameters:
+      tag:
+        default: latest
+        description: Tag of aries-guardianship-agency to push to dev
+        type: string
+    steps:
+      - checkout
+      - kube-orb/install
+      - kube-orb/install-kubeconfig:
+          kubeconfig: KUBECONFIG_BASE64
+      - aws-eks/install-aws-iam-authenticator
+      - helm/install-helm-client:
+          version: v3.2.4
+      - run:
+          name: Deploy to dev cloud
+          command: helm upgrade --install aries-guardianship-agency helm-config --set image.tag=<<parameters.tag>>
+
 workflows:
   build-test-deploy:
     jobs:
@@ -143,7 +163,21 @@ workflows:
           dockerfile: ./docker/Dockerfile.production
           image: kivaprotocol/aries-guardianship-agency
           tag: << pipeline.git.tag >>,latest
+      - push-to-dev:
+          context:
+            - continuous-deployment-dev
+          requires:
+            - docker/publish
+          filters: # only run for semver tagged versions
+            tags:
+              only: /^([0-9]+)\.([0-9]+)\.([0-9]+)/
+            branches:
+              ignore: /.*/
+          tag: << pipeline.git.tag >>
 
 orbs:
   node: circleci/node@1.1.6
   docker: circleci/docker@1.3.0
+  kube-orb: circleci/kubernetes@0.11.1
+  aws-eks: circleci/aws-eks@1.0.1
+  helm: circleci/helm@1.2.0
