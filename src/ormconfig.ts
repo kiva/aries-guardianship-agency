@@ -9,7 +9,7 @@ export function OrmConfig(): DynamicModule {
         type: 'postgres',
         synchronize: false,
         migrationsRun: true,
-        entities: ['src/transactions/persistence/**/*.ts', 'dist/transactions/persistence/**/*.js'],
+        entities: ['dist/transactions/persistence/**/*.js'],
         migrations: ['dist/migration/**/*.js'],
         host: process.env.WALLET_DB_HOST,
         username: process.env.WALLET_DB_USER,
