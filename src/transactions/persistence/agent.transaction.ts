@@ -35,6 +35,17 @@ export class AgentTransaction {
     @Column({ type: 'varchar', length: 64, nullable: true })
     credential_id: string;
 
+    @Column({ type: 'varchar', length: 64, nullable: true })
+    type_id: string;
+
+    @Column({ type: 'varchar', length: 64, nullable: true })
+    subject_id: string;
+
+    // to avoid problems with differences in currency locale demarcation
+    // save the amount as string.  we are not doing any math on it anyways
+    @Column({ type: 'varchar', length: 64, nullable: true })
+    amount: string;
+
     @Column({ type: 'varchar', nullable: false })
     transaction_details: string;
 }

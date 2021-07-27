@@ -67,6 +67,9 @@ export class TransactionService {
                         record.merkel_order = maxMerkleOrder + 1;
                         record.merkel_hash = this.generateTransactionId(data.transaction.fspHash);
                         record.credential_id = data.credentialId;
+                        record.type_id = data.typeId;
+                        record.subject_id = data.subjectId;
+                        record.amount = data.amount;
                         record.transaction_details = data.transaction.eventJson;
                         await this.dbAccessor.saveTransaction(record);
                         Logger.debug(`replying 'accepted' to transaction start message`);
@@ -86,15 +89,29 @@ export class TransactionService {
                         // 2 build the report
                         const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions(agentId);
                         // TODO: this needs to be type
-                        const reportRecs: {order: number, transactionId: string, credentialId: string, hash: string}[] = [];
+                        const reportRecs: {order: number,
+                            transactionId: string,
+                            typeId: string,
+                            subjectId: string,
+                            txDate: Date,
+                            amount: string,
+                            credentialId: string,
+                            hash: string,
+                            details: string,
+                        }[] = [];
                         Logger.debug(`found ${transactions.length} records`);
                         for (const record of transactions) {
                             Logger.debug(`processing ${record.transaction_id}`);
                             reportRecs.push({
                                 order: record.merkel_order,
                                 transactionId: record.transaction_id,
+                                typeId: record.type_id,
+                                subjectId: record.subject_id,
+                                txDate: record.transaction_date,
+                                amount: record.amount,
                                 credentialId: record.credential_id,
-                                hash: record.issuer_hash
+                                hash: record.issuer_hash,
+                                details: record.transaction_details
                             });
                         }
                         // 3 send it out
