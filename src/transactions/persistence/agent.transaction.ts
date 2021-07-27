@@ -42,7 +42,7 @@ export class AgentTransaction {
     subject_id: string;
 
     // to avoid problems with differences in currency locale demarcation
-    // save the amount as string.  we are doing any math on it anyways
+    // save the amount as string.  we are not doing any math on it anyways
     @Column({ type: 'varchar', length: 64, nullable: true })
     amount: string;
 

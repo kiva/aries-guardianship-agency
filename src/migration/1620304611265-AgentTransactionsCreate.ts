@@ -6,7 +6,7 @@ export class AgentTransactions1620304611265 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         Logger.info(`AgentTransactions1620304611265 Creating table`);
         // to avoid problems with differences in currency locale demarcation
-        // save the amount as string.  we are doing any math on it anyways
+        // save the amount as string.  we are not doing any math on it anyways
         await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS agent_transactions (
                 id serial PRIMARY KEY,
