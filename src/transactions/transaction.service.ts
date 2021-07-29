@@ -67,9 +67,10 @@ export class TransactionService {
                         record.merkel_order = maxMerkleOrder + 1;
                         record.merkel_hash = this.generateTransactionId(data.transaction.fspHash);
                         record.credential_id = data.credentialId;
-                        record.type_id = data.typeId;
-                        record.subject_id = data.subjectId;
-                        record.amount = data.amount;
+                        record.transaction_date = data.transaction.date;
+                        record.type_id = data.transaction.typeId;
+                        record.subject_id = data.transaction.subjectId;
+                        record.amount = data.transaction.amount;
                         record.transaction_details = data.transaction.eventJson;
                         await this.dbAccessor.saveTransaction(record);
                         Logger.debug(`replying 'accepted' to transaction start message`);
