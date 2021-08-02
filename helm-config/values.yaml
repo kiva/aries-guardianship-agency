@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 1
 
 image:
   repository: kivaprotocol/aries-guardianship-agency
@@ -17,8 +17,8 @@ strategy:
 service:
   type: ClusterIP
   port: 3010
-  containerPort: 8080
-  targetPort: 8080
+  containerPort: 3010
+  targetPort: 3010
   portName: http
 
 resources:
