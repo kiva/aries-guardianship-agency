@@ -9,7 +9,7 @@ image:
 
 nameOverride: "aries-guardianship-agency"
 fullnameOverride: "aries-guardianship-agency"
-secrets: "aries-guardianship-agency-secrets"
+secrets: "aries-guardianship-agency"
 
 strategy:
   type: "RollingUpdate"
