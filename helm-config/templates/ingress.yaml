@@ -14,8 +14,8 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: protocol-gateway
-          servicePort: 8080
+          serviceName: {{ .Chart.Name }}
+          servicePort: {{ .Values.service.port }}
         path: /
   tls:
   - hosts:
