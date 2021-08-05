@@ -54,42 +54,6 @@ export class TransactionService {
             if (handler)
                 await handler.respond(data);
 
-            switch (data.messageTypeId) {
-                case `grant`:
-                    break;
-                case `credit_transaction`:
-                    break;
-                case `transaction_request`:
-                    if (data.state === `started`) {
-                        // TODO could do our own validation tsp id is allowed to request report
-                        // 1 let system know we acknowledge report request
-                        await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'accepted',
-                            data.id, data.tdcFspId, '');
-                        // 2 build the report
-                        const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions(agentId);
-                        const reportRecs: TxReportResponseDto[] = [];
-                        Logger.debug(`found ${transactions.length} records`);
-                        for (const record of transactions) {
-                            Logger.debug(`processing ${record.transaction_id}`);
-                            reportRecs.push({
-                                order: record.merkel_order,
-                                transactionId: record.transaction_id,
-                                typeId: record.type_id,
-                                subjectId: record.subject_id,
-                                txDate: record.transaction_date,
-                                amount: record.amount,
-                                credentialId: record.credential_id,
-                                hash: record.issuer_hash,
-                                details: record.transaction_details
-                            });
-                        }
-                        // 3 send it out
-                        await this.sendTransactionReportMessage(agentId, adminApiKey, body.connection_id, 'completed',
-                            data.id, data.tdcFspId, JSON.stringify(reportRecs));
-                    }
-                    break;
-            }
-
             return undefined;
         }
 
@@ -167,59 +131,5 @@ export class TransactionService {
         const result = await this.http.requestWithRetry(request);
         Logger.debug(`TRO onetimekey with TDC ${request.url}, results data`);
         return result.data;
-    }
-
-    private async sendTransactionMessage(agentId: string, adminApiKey: string, connectionId: string,
-                                         state: string, id: string, eventJson: any): Promise<any> {
-        const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
-        const msg: CreditTransaction<any> = new CreditTransaction<any>({
-                state,
-                id,
-                transaction: eventJson
-            });
-        const data = { content: JSON.stringify(msg) };
-        const req: any = {
-            method: 'POST',
-            url,
-            headers: {
-                'x-api-key': adminApiKey,
-            },
-            data
-        };
-
-        Logger.debug(`sendTransactionMessage to ${connectionId}`, msg);
-        const res = await this.http.requestWithRetry(req);
-        Logger.debug(`${agentId} sendTransactionMessage results`, res.data);
-        return res.data;
-    }
-
-    private async sendTransactionReportMessage(agentId: string, adminApiKey: string, connectionId: string,
-                                               state: string, id: string, tdcFspId: string, reportData: any): Promise<any> {
-        const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
-        const msg: TransactionRequest<any> = new TransactionRequest<any>({
-                id,
-                state,
-                tdcFspId,
-                transactions: reportData
-            });
-        const data = { content: JSON.stringify(msg) };
-        const req: any = {
-            method: 'POST',
-            url,
-            headers: {
-                'x-api-key': adminApiKey,
-            },
-            data
-        };
-
-        Logger.debug(`sendTransactionMessage to ${connectionId}`, msg);
-        const res = await this.http.requestWithRetry(req);
-        Logger.debug(`${agentId} sendTransactionMessage results`, res.data);
-        return res.data;
-    }
-
-    // this is temporary
-    private generateTransactionId(hashableValue: string) : string {
-        return SecurityUtility.hash32(hashableValue);
     }
 }
