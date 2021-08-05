@@ -5,16 +5,17 @@ import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
 import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
 import { SecurityUtility } from 'protocol-common/security.utility';
+import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
+import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
+import { AgentService } from 'aries-controller/agent/agent.service';
 import { AgentGovernance, ControllerCallback } from 'aries-controller/controller/agent.governance';
 import { Topics } from 'aries-controller/controller/handler/topics';
-import { AgentService } from 'aries-controller/agent/agent.service';
-import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
+import { DataService } from './persistence/data.service';
+import { AgentTransaction } from './persistence/agent.transaction';
 import { RegisterTdcDto } from './dtos/register.tdc.dto';
 import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
-import { DataService } from './persistence/data.service';
-import { AgentTransaction } from './persistence/agent.transaction';
-import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
+import { TxReportResponseDto } from './dtos/tx.report.response.dto';
 
 @Injectable()
 export class TransactionService {
@@ -89,17 +90,7 @@ export class TransactionService {
                             data.id, data.tdcFspId, '');
                         // 2 build the report
                         const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions(agentId);
-                        // TODO: this needs to be type
-                        const reportRecs: {order: number,
-                            transactionId: string,
-                            typeId: string,
-                            subjectId: string,
-                            txDate: Date,
-                            amount: string,
-                            credentialId: string,
-                            hash: string,
-                            details: string,
-                        }[] = [];
+                        const reportRecs: TxReportResponseDto[] = [];
                         Logger.debug(`found ${transactions.length} records`);
                         for (const record of transactions) {
                             Logger.debug(`processing ${record.transaction_id}`);
