@@ -14,7 +14,7 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
                 private readonly dbAccessor: DataService, private readonly http: ProtocolHttpService) {
     }
 
-    public respond(message: any): boolean {
+    public async respond(message: any): Promise<boolean> {
         if (message.state === TransactionMessageStatesEnum.STARTED) {
             // TODO fix the credential ID problem.  Solution is to add more states and have this code in a later
             // state handler
@@ -36,7 +36,7 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
             record.amount = message.transaction.amount;
             record.transaction_details = message.transaction.eventJson;
             // TODO: what should we do on error
-            this.dbAccessor.saveTransaction(record).then();
+            await this.dbAccessor.saveTransaction(record);
 
             // TODO: eval -> not sure we really need to wait for this
             Logger.debug(`replying 'accepted' to transaction start message`);

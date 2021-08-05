@@ -1,4 +1,4 @@
 
 export interface IBasicMessageHandler {
-    respond(message: any): boolean;
+    respond(message: any):  Promise<boolean>;
 }

@@ -52,40 +52,12 @@ export class TransactionService {
             const handler: IBasicMessageHandler = this.responseFactory.getMessageHandler(agentId, adminApiKey, body.connection_id,
                 data.messageTypeId, this.dbAccessor);
             if (handler)
-                handler.respond(data);
+                await handler.respond(data);
 
             switch (data.messageTypeId) {
                 case `grant`:
                     break;
                 case `credit_transaction`:
-                    if (data.state === `started`) {
-                        // TODO fix the credential ID problem.  Solution is to add more states and have this code in a later
-                        // state handler
-                        // TODO validation
-                        // TODO: theres possible collision here if two transactions came in at the same time
-                        const maxMerkleOrder = await this.dbAccessor.getMaxMerkelOrder();
-                        const record: AgentTransaction = new AgentTransaction();
-                        record.agent_id = agentId;
-                        record.transaction_id = data.id;
-                        record.transaction_date = data.transaction.eventDate;
-                        record.issuer_hash = data.transaction.fspHash;
-                        record.fsp_id = data.transaction.fspId;
-                        record.merkel_order = maxMerkleOrder + 1;
-                        record.merkel_hash = this.generateTransactionId(data.transaction.fspHash);
-                        record.credential_id = data.credentialId;
-                        record.transaction_date = data.transaction.date;
-                        record.type_id = data.transaction.typeId;
-                        record.subject_id = data.transaction.subjectId;
-                        record.amount = data.transaction.amount;
-                        record.transaction_details = data.transaction.eventJson;
-                        await this.dbAccessor.saveTransaction(record);
-                        Logger.debug(`replying 'accepted' to transaction start message`);
-                        await this.sendTransactionMessage(agentId, adminApiKey, body.connection_id, 'accepted',
-                            data.id, data.transaction);
-                    } else if (data.state === `completed`) {
-                        Logger.info(`transaction ${data.id} is complete`);
-                        // TODO: do we need to note transaction state?
-                    }
                     break;
                 case `transaction_request`:
                     if (data.state === `started`) {
