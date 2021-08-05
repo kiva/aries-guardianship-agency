@@ -16,6 +16,7 @@ import { RegisterTdcDto } from './dtos/register.tdc.dto';
 import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
 import { TxReportResponseDto } from './dtos/tx.report.response.dto';
+import { TransactionMessageResponseFactory } from './messaging/transaction.message.response.factory';
 
 @Injectable()
 export class TransactionService {
@@ -24,6 +25,7 @@ export class TransactionService {
                 @Inject(CACHE_MANAGER) private readonly cache: CacheStore,
                 private readonly agentService: AgentService,
                 private readonly dbAccessor: DataService,
+                private readonly responseFactory: TransactionMessageResponseFactory,
                 httpService: HttpService,
     ) {
         this.http = new ProtocolHttpService(httpService);
