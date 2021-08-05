@@ -17,6 +17,7 @@ import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
 import { TxReportResponseDto } from './dtos/tx.report.response.dto';
 import { TransactionMessageResponseFactory } from './messaging/transaction.message.response.factory';
+import { IBasicMessageHandler } from './messaging/basic.message.handler';
 
 @Injectable()
 export class TransactionService {
@@ -47,12 +48,14 @@ export class TransactionService {
             Promise<any> => {
             Logger.debug(`Aries-Guardianship-Agency TransactionService received basic message for agent ${agentId}`, body);
             const data = JSON.parse(body.content);
+
+            const handler: IBasicMessageHandler = this.responseFactory.getMessageHandler(agentId, adminApiKey, body.connection_id,
+                data.messageTypeId, this.dbAccessor);
+            if (handler)
+                handler.respond(data);
+
             switch (data.messageTypeId) {
                 case `grant`:
-                    if (data.state === `completed`) {
-                        Logger.info(`received completed grant information for agent ${agentId}.`);
-                        // todo and send ack to TDC once the endpoints are setup and save connection information
-                    }
                     break;
                 case `credit_transaction`:
                     if (data.state === `started`) {
