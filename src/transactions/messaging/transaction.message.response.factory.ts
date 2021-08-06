@@ -15,16 +15,23 @@ export class TransactionMessageResponseFactory {
         this.http = new ProtocolHttpService(httpService);
     }
 
-    public getMessageHandler(agentId: string, adminApiKey: string, connectionId: string, messageTypeId: string,
-                             dbAccessor: DataService): IBasicMessageHandler {
+    /**
+     * All transaction basic messages have a messageTypeId which identifies the message type--its is the message type
+     * that determines the structure of the message.  Different classes process the different messages
+     * @param agentId
+     * @param adminApiKey
+     * @param connectionId
+     * @param messageTypeId
+     */
+    public getMessageHandler(agentId: string, adminApiKey: string, connectionId: string, messageTypeId: string): IBasicMessageHandler {
         Logger.debug(`processing BasicMessage.messageTypeId of ${messageTypeId} `);
         switch (messageTypeId) {
             case TransactionMessageTypesEnum.GRANT:
                 return new GrantMessageHandler(agentId);
             case TransactionMessageTypesEnum.CREDIT_TRANSACTION:
-                return new TransactionMessageHandler(agentId, adminApiKey, connectionId, dbAccessor, this.http);
+                return new TransactionMessageHandler(agentId, adminApiKey, connectionId, this.dataService, this.http);
             case TransactionMessageTypesEnum.TRANSACTION_REQUEST:
-                return new ReportMessageHandler(agentId, adminApiKey, connectionId, dbAccessor, this.http);
+                return new ReportMessageHandler(agentId, adminApiKey, connectionId, this.dataService, this.http);
             default:
                 Logger.warn(`BasicMessage.messageTypeId of ${messageTypeId} not recognized.`);
                 break;

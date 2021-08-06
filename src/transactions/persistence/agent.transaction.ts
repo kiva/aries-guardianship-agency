@@ -27,6 +27,9 @@ export class AgentTransaction {
     merkel_hash: string;
 
     @Column({ type: 'timestamp' })
+    event_date: Date;
+
+    @Column({ type: 'timestamp' })
     transaction_date: Date;
 
     @Column({ type: 'varchar', length: 64, nullable: false })

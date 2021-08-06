@@ -11,11 +11,9 @@ import { AgentService } from 'aries-controller/agent/agent.service';
 import { AgentGovernance, ControllerCallback } from 'aries-controller/controller/agent.governance';
 import { Topics } from 'aries-controller/controller/handler/topics';
 import { DataService } from './persistence/data.service';
-import { AgentTransaction } from './persistence/agent.transaction';
 import { RegisterTdcDto } from './dtos/register.tdc.dto';
 import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
 import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
-import { TxReportResponseDto } from './dtos/tx.report.response.dto';
 import { TransactionMessageResponseFactory } from './messaging/transaction.message.response.factory';
 import { IBasicMessageHandler } from './messaging/basic.message.handler';
 
@@ -35,6 +33,9 @@ export class TransactionService {
 
     /**
      * receives basicmessage notifications and will respond in kind to fsp basic messages received from the TDC
+     *
+     * the body of basic message is determined by acapy.  we use the content property to exchange our own message types.
+     * the structure will be different, which can be determined by messageTypeId parameter.
      * @param agentUrl
      * @param agentId
      * @param adminApiKey
@@ -50,7 +51,7 @@ export class TransactionService {
             const data = JSON.parse(body.content);
 
             const handler: IBasicMessageHandler = this.responseFactory.getMessageHandler(agentId, adminApiKey, body.connection_id,
-                data.messageTypeId, this.dbAccessor);
+                data.messageTypeId);
             if (handler)
                 await handler.respond(data);
 

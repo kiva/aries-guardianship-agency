@@ -24,7 +24,7 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
             const record: AgentTransaction = new AgentTransaction();
             record.agent_id = this.agentId;
             record.transaction_id = message.id;
-            record.transaction_date = message.transaction.eventDate;
+            record.event_date = message.transaction.eventDate;
             record.issuer_hash = message.transaction.fspHash;
             record.fsp_id = message.transaction.fspId;
             record.merkel_order = maxMerkleOrder + 1;
