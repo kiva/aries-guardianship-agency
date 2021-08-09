@@ -1,7 +1,8 @@
+{{- if .Values.ingress.enabled -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: protocol-gateway
+  name: {{ .Chart.Name }}
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     kubernetes.io/ingress.class: {{ .Values.ingress.class }}
@@ -13,10 +14,11 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: protocol-gateway
-          servicePort: 8080
+          serviceName: {{ .Chart.Name }}
+          servicePort: {{ .Values.service.port }}
         path: /
   tls:
   - hosts:
     - {{ .Values.ingress.host }}
-    secretName: protocol-gateway-service-tls
+    secretName: {{ .Values.ingress.secret }}
+{{- end -}}

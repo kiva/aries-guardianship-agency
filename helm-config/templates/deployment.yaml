@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "helm-config.fullname" . }}
+  name: {{ .Chart.Name }}
   labels:
-    app.kubernetes.io/name: {{ include "helm-config.name" . }}
-    helm.sh/chart: {{ include "helm-config.chart" . }}
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    helm.sh/chart: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
@@ -13,14 +13,22 @@ spec:
     type: {{ .Values.strategy.type }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "helm-config.name" . }}
+      app.kubernetes.io/name: {{ .Chart.Name }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: {{ include "helm-config.name" . }}
+        app.kubernetes.io/name: {{ .Chart.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+{{- if .Values.serviceAccount.enabled }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+{{- end }}
+{{- if .Values.securityContext.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.securityContext.user }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+{{- end }}
       containers:
       - args:
         name: {{ .Chart.Name }}
@@ -33,23 +41,34 @@ spec:
           - name: {{ .Values.service.portName }}
             containerPort: {{ .Values.service.containerPort }}
         readinessProbe:
+          initialDelaySeconds: {{ .Values.readiness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.readiness.timeoutSeconds }}
           httpGet:
-            path: /healthz
+            path: {{ .Values.readiness.path }}
             port: {{ .Values.service.containerPort }}
             httpHeaders:
             - name: x-request-id
               value: k8s-healthz
-          initialDelaySeconds: 20
         livenessProbe:
+          initialDelaySeconds: {{ .Values.liveness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.liveness.timeoutSeconds }}
           httpGet:
-            path: /healthz
+            path: {{ .Values.liveness.path }}
             port: {{ .Values.service.containerPort }}
             httpHeaders:
             - name: x-request-id
               value: k8s-healthz
-          initialDelaySeconds: 20
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
+{{- if .Values.volume.enabled }}
+        volumeMounts:
+          - mountPath: {{ .Values.volume.mountPath }}
+            name: {{ .Values.volume.name }}
+      volumes:
+        - name: {{ .Values.volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.volume.claim }}
+{{- end }}
       imagePullSecrets:
         {{- with .Values.image.imagePullSecrets }}
           {{- toYaml . | nindent 8 }}

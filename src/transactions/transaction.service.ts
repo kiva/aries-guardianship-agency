@@ -67,6 +67,10 @@ export class TransactionService {
                         record.merkel_order = maxMerkleOrder + 1;
                         record.merkel_hash = this.generateTransactionId(data.transaction.fspHash);
                         record.credential_id = data.credentialId;
+                        record.transaction_date = data.transaction.date;
+                        record.type_id = data.transaction.typeId;
+                        record.subject_id = data.transaction.subjectId;
+                        record.amount = data.transaction.amount;
                         record.transaction_details = data.transaction.eventJson;
                         await this.dbAccessor.saveTransaction(record);
                         Logger.debug(`replying 'accepted' to transaction start message`);
@@ -86,15 +90,29 @@ export class TransactionService {
                         // 2 build the report
                         const transactions: AgentTransaction[] = await this.dbAccessor.getAllTransactions(agentId);
                         // TODO: this needs to be type
-                        const reportRecs: {order: number, transactionId: string, credentialId: string, hash: string}[] = [];
+                        const reportRecs: {order: number,
+                            transactionId: string,
+                            typeId: string,
+                            subjectId: string,
+                            txDate: Date,
+                            amount: string,
+                            credentialId: string,
+                            hash: string,
+                            details: string,
+                        }[] = [];
                         Logger.debug(`found ${transactions.length} records`);
                         for (const record of transactions) {
                             Logger.debug(`processing ${record.transaction_id}`);
                             reportRecs.push({
                                 order: record.merkel_order,
                                 transactionId: record.transaction_id,
+                                typeId: record.type_id,
+                                subjectId: record.subject_id,
+                                txDate: record.transaction_date,
+                                amount: record.amount,
                                 credentialId: record.credential_id,
-                                hash: record.issuer_hash
+                                hash: record.issuer_hash,
+                                details: record.transaction_details
                             });
                         }
                         // 3 send it out
@@ -186,13 +204,11 @@ export class TransactionService {
     private async sendTransactionMessage(agentId: string, adminApiKey: string, connectionId: string,
                                          state: string, id: string, eventJson: any): Promise<any> {
         const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
-        const msg: CreditTransaction<any> = Object.assign(
-            new CreditTransaction<any>(), {
+        const msg: CreditTransaction<any> = new CreditTransaction<any>({
                 state,
                 id,
                 transaction: eventJson
-            }
-        );
+            });
         const data = { content: JSON.stringify(msg) };
         const req: any = {
             method: 'POST',
@@ -212,14 +228,12 @@ export class TransactionService {
     private async sendTransactionReportMessage(agentId: string, adminApiKey: string, connectionId: string,
                                                state: string, id: string, tdcFspId: string, reportData: any): Promise<any> {
         const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
-        const msg: TransactionRequest<any> = Object.assign(
-            new TransactionRequest<any>(), {
+        const msg: TransactionRequest<any> = new TransactionRequest<any>({
                 id,
                 state,
                 tdcFspId,
                 transactions: reportData
-            }
-        );
+            });
         const data = { content: JSON.stringify(msg) };
         const req: any = {
             method: 'POST',
