@@ -33,7 +33,7 @@ jobs:
       - run:
           name: setup docker environments
           command: |
-            docker pull bcgovimages/aries-cloudagent:py36-1.15-1_0.6.0
+            docker pull bcgovimages/aries-cloudagent:py36-1.16-1_0.7.0
       - run:
           name: Start docker compose and wait for readiness
           command: |
