@@ -5,6 +5,7 @@ import { GlobalCacheModule } from '../app/global.cache.module';
 import { TransactionController } from './transaction.controller';
 import { TransactionService } from './transaction.service';
 import { DataService } from './persistence/data.service';
+import { TransactionMessageResponseFactory } from './messaging/transaction.message.response.factory';
 
 /**
  *
@@ -19,7 +20,8 @@ import { DataService } from './persistence/data.service';
     providers: [
         AgentGovernanceFactory,
         TransactionService,
-        DataService
+        DataService,
+        TransactionMessageResponseFactory
     ],
 })
 export class TransactionModule {}

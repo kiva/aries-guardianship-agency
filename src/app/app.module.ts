@@ -5,13 +5,14 @@ import { ConfigModule } from 'protocol-common/config.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import data from '../config/env.json';
+import { OrmConfig } from '../ormconfig';
 import { AgentManagerModule } from '../manager/agent.manager.module';
 import { AgentRouterModule } from '../router/agent.router.module';
 import { AgentControllerModule } from '../controller/agent.controller.module';
 import { MultitenantModule } from '../multitenant/mutlitenant.module';
 import { TransactionModule } from '../transactions/transaction.module';
-import { OrmConfig } from '../ormconfig';
 import { PersistenceModule } from '../transactions/persistence/persistence.module';
+import { TransactionMessagingModule } from '../transactions/messaging/transaction.messaging.module';
 
 /**
  * Initializes the Nest application
@@ -25,7 +26,8 @@ import { PersistenceModule } from '../transactions/persistence/persistence.modul
         AgentControllerModule,
         MultitenantModule,
         TransactionModule,
-        PersistenceModule
+        PersistenceModule,
+        TransactionMessagingModule
     ],
     controllers: [AppController],
     providers: [
