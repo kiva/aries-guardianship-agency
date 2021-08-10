@@ -14,6 +14,7 @@ export class AgentTransactions1620304611265 implements MigrationInterface {
                 fsp_id varchar(64) NOT NULL,
                 transaction_id varchar(64) NOT NULL,
                 transaction_date TIMESTAMP DEFAULT now(),
+                event_date TIMESTAMP DEFAULT now(),
                 issuer_hash varchar(64) NOT NULL,
                 merkel_order int,
                 merkel_hash varchar(64) NOT NULL,
