@@ -6,9 +6,9 @@
  *       https://github.com/kiva/aries-controller/tree/main/src/agent/messaging
  */
 export enum TransactionMessageTypesEnum {
-    GRANT = `grant`,
     // TODO rename to TRANSACTION_REQUEST
     CREDIT_TRANSACTION = `credit_transaction`,
+    GRANT = `grant`,
     // TODO: rename to REPORT_REQUEST
     TRANSACTION_REQUEST = `transaction_request`
 }
