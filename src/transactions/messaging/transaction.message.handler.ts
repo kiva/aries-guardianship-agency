@@ -40,7 +40,7 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
 
             // TODO: eval -> not sure we really need to wait for this
             Logger.debug(`replying 'accepted' to transaction start message`);
-            this.sendTransactionMessage(this.connectionId, TransactionMessageStatesEnum.ACCEPTED,
+            await this.sendTransactionMessage(this.connectionId, TransactionMessageStatesEnum.ACCEPTED,
                 message.id, message.transaction).then();
         } else if (message.state === TransactionMessageStatesEnum.COMPLETED) {
             Logger.info(`transaction ${message.id} is complete`);

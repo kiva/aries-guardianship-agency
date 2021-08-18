@@ -7,13 +7,14 @@ import cacheManager from 'cache-manager';
 import { Logger } from 'protocol-common/logger';
 import { AgentService } from 'aries-controller/agent/agent.service';
 import { CALLER, ICaller } from 'aries-controller/caller/caller.interface';
+import { ProfileManager } from 'aries-controller/profile/profile.manager';
+import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
 import { DataService } from '../src/transactions/persistence/data.service';
 import { AgentTransaction } from '../src/transactions/persistence/agent.transaction';
 import { TransactionMessageResponseFactory } from '../src/transactions/messaging/transaction.message.response.factory';
 import { TransactionMessageTypesEnum } from '../src/transactions/messaging/transaction.message.types.enum';
-import { ProfileManager } from '../../aries-controller/src/profile/profile.manager';
-import { TransactionMessageStatesEnum } from '../dist/transactions/messaging/transaction.message.states.enum';
-import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
+import { TransactionMessageStatesEnum } from '../src/transactions/messaging/transaction.message.states.enum';
+import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
 
 class MockRepository {
     constructor(private readonly record: AgentTransaction) {
@@ -37,13 +38,14 @@ class TestCaller implements ICaller {
     }
 
     public callAgentCallback: any;
-    public callAgent(method: any, route: string, params?: any, data?: any): Promise<any> {
+    public async callAgent(method: any, route: string, params?: any, data?: any): Promise<any> {
         expect(method).toBe('POST');
         const expectedRoute: string = `connections/${this.connectionId}/send-message`;
         expect(expectedRoute).toBe(route);
 
         if (this.callAgentCallback)
-            this.callAgentCallback(data);
+            return await this.callAgentCallback(data);
+
         return Promise.resolve(undefined);
     }
 
@@ -79,7 +81,6 @@ describe('Transaction unit tests', () => {
         record.amount = '500';
         record.transaction_details = 'message.transaction.eventJson';
         const mockRepository = new MockRepository(record);
-        const factory = new TransactionMessageResponseFactory(mockRepository as unknown as DataService);
 
         const memoryCache = cacheManager.caching({store: 'memory', max: 100, ttl: 10/*seconds*/});
 
@@ -149,33 +150,25 @@ describe('Transaction unit tests', () => {
         await handler.respond(msg);
     });
 
-    it('this test should fail', async () => {
+    it('tests ReportMessageHandler succeeds with correct data structure', async ()=> {
         const factory: TransactionMessageResponseFactory = app.get<TransactionMessageResponseFactory>(TransactionMessageResponseFactory);
         const agentService: AgentService = app.get<AgentService>(AgentService);
         const testCaller: TestCaller = app.get<TestCaller>(CALLER);
         // this is the actual test validation
-        testCaller.callAgentCallback = async (data?: any) => {
-            // this will fail as shown in the output but nest doesn't fail the entire test
-            await expect(1).toBe(2);
+        testCaller.callAgentCallback = (data?: any) => {
+            expect(data).toBeDefined();
+            expect(data.content).toBeDefined();
+            Logger.debug(`ReportMessageHandler callback data.content`, data.content);
+            const record: TransactionRequest<any> = new TransactionRequest<any>(JSON.parse(data.content));
+            expect(record.messageTypeId).toBe('transaction_request');
         };
-        const handler = factory.getMessageHandler(agentService, agentId, '999', connectionId, TransactionMessageTypesEnum.CREDIT_TRANSACTION);
+        const handler = factory.getMessageHandler(agentService, agentId, '999', connectionId, TransactionMessageTypesEnum.TRANSACTION_REQUEST);
         expect(handler).toBeDefined();
 
-        const tx = {
-            tdcTroId: 'tdc_tro_id',
-            tdcFspId: 'tdc_fsp_id',
+        const msg: TransactionRequest<any> = new TransactionRequest<any>({
             id: 'transactionId',
-            typeId: 'typeId',
-            subjectId: 'subjectId',
-            amount: 'amount',
-            date: Date.now(),
-            eventData: JSON.stringify('{data}')
-        };
-        const msg: CreditTransaction<any> = new CreditTransaction<any>({
             state: TransactionMessageStatesEnum.STARTED,
-            id: '1234567890',
-            credentialId: '1234567890',
-            transaction: tx
+            tdcFspId: 'tdc_tro_id',
         });
         await handler.respond(msg);
     });
