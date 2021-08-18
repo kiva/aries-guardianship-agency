@@ -1,65 +1,22 @@
 import request from 'supertest';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
 import { CACHE_MANAGER, INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import cacheManager from 'cache-manager';
 import { Logger } from 'protocol-common/logger';
 import { AgentService } from 'aries-controller/agent/agent.service';
-import { CALLER, ICaller } from 'aries-controller/caller/caller.interface';
+import { CALLER } from 'aries-controller/caller/caller.interface';
 import { ProfileManager } from 'aries-controller/profile/profile.manager';
 import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
+import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
 import { DataService } from '../src/transactions/persistence/data.service';
 import { AgentTransaction } from '../src/transactions/persistence/agent.transaction';
 import { TransactionMessageResponseFactory } from '../src/transactions/messaging/transaction.message.response.factory';
 import { TransactionMessageTypesEnum } from '../src/transactions/messaging/transaction.message.types.enum';
 import { TransactionMessageStatesEnum } from '../src/transactions/messaging/transaction.message.states.enum';
-import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
+import { SimpleAgentTransactionMockRepository } from './mock/simple.agent.transaction.repository';
+import { ConnectionsMockCaller } from './mock/connections.mock.caller';
 
-class MockRepository {
-    constructor(private readonly record: AgentTransaction) {
-    }
-    public async saveTransaction(record: AgentTransaction): Promise<any> {
-        return record;
-    }
-
-    public async getAllTransactions(agentId: string): Promise<AgentTransaction[]> {
-        return [this.record];
-    }
-
-    public async getMaxMerkelOrder(): Promise<any> {
-        return this.record.merkel_order;
-    }
-}
-
-class TestCaller implements ICaller {
-
-    constructor(private readonly agentId: string, private readonly connectionId: string) {
-    }
-
-    public callAgentCallback: any;
-    public async callAgent(method: any, route: string, params?: any, data?: any): Promise<any> {
-        expect(method).toBe('POST');
-        const expectedRoute: string = `connections/${this.connectionId}/send-message`;
-        expect(expectedRoute).toBe(route);
-
-        if (this.callAgentCallback)
-            return await this.callAgentCallback(data);
-
-        return Promise.resolve(undefined);
-    }
-
-    public spinDownAgent(): Promise<any> {
-        return Promise.resolve(undefined);
-    }
-
-    public spinUpAgent(): Promise<any> {
-        return Promise.resolve(undefined);
-    }
-
-}
-
-describe('Transaction unit tests', () => {
+describe('Transaction Messaging Unit Tests', () => {
     let app: INestApplication;
     const agentId: string = 'agentId';
     const connectionId: string = 'connectionId';
@@ -80,7 +37,7 @@ describe('Transaction unit tests', () => {
         record.subject_id = 'message.transaction.subjectId';
         record.amount = '500';
         record.transaction_details = 'message.transaction.eventJson';
-        const mockRepository = new MockRepository(record);
+        const mockRepository = new SimpleAgentTransactionMockRepository(record);
 
         const memoryCache = cacheManager.caching({store: 'memory', max: 100, ttl: 10/*seconds*/});
 
@@ -101,7 +58,7 @@ describe('Transaction unit tests', () => {
                 },
                 {
                     provide: CALLER,
-                    useValue: new TestCaller(agentId, connectionId)
+                    useValue: new ConnectionsMockCaller(agentId, connectionId)
                 }
             ]
         }).compile();
@@ -118,7 +75,7 @@ describe('Transaction unit tests', () => {
     it('tests TransactionMessageHandler succeeds with correct data structure', async ()=> {
         const factory: TransactionMessageResponseFactory = app.get<TransactionMessageResponseFactory>(TransactionMessageResponseFactory);
         const agentService: AgentService = app.get<AgentService>(AgentService);
-        const testCaller: TestCaller = app.get<TestCaller>(CALLER);
+        const testCaller: ConnectionsMockCaller = app.get<ConnectionsMockCaller>(CALLER);
         // this is the actual test validation
         testCaller.callAgentCallback = (data?: any) => {
             expect(data).toBeDefined();
@@ -153,7 +110,7 @@ describe('Transaction unit tests', () => {
     it('tests ReportMessageHandler succeeds with correct data structure', async ()=> {
         const factory: TransactionMessageResponseFactory = app.get<TransactionMessageResponseFactory>(TransactionMessageResponseFactory);
         const agentService: AgentService = app.get<AgentService>(AgentService);
-        const testCaller: TestCaller = app.get<TestCaller>(CALLER);
+        const testCaller: ConnectionsMockCaller = app.get<ConnectionsMockCaller>(CALLER);
         // this is the actual test validation
         testCaller.callAgentCallback = (data?: any) => {
             expect(data).toBeDefined();
