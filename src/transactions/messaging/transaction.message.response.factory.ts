@@ -1,5 +1,4 @@
-import { HttpService, Injectable } from '@nestjs/common';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
+import { Injectable } from '@nestjs/common';
 import { Logger } from 'protocol-common/logger';
 import { AgentService } from 'aries-controller/agent/agent.service';
 import { IBasicMessageHandler } from './basic.message.handler';
