@@ -40,7 +40,6 @@ class TestCaller implements ICaller {
     public callAgent(method: any, route: string, params?: any, data?: any): Promise<any> {
         expect(method).toBe('POST');
         const expectedRoute: string = `connections/${this.connectionId}/send-message`;
-        Logger.warn(`expect ${expectedRoute} toBe ${route} `);
         expect(expectedRoute).toBe(route);
 
         if (this.callAgentCallback)
@@ -121,10 +120,12 @@ describe('Transaction unit tests', () => {
         const testCaller: TestCaller = app.get<TestCaller>(CALLER);
         // this is the actual test validation
         testCaller.callAgentCallback = (data?: any) => {
-            Logger.debug(`TransactionMessageHandler callback data`, data);
             expect(data).toBeDefined();
-            expect(data.messageTypeId).toBe('credit_transaction');
-            expect(data.state).toBe(TransactionMessageStatesEnum.ACCEPTED);
+            expect(data.content).toBeDefined();
+            Logger.debug(`TransactionMessageHandler callback data.content`, data.content);
+            const record: CreditTransaction<any> = new CreditTransaction<any>(JSON.parse(data.content));
+            expect(record.state).toBe(TransactionMessageStatesEnum.ACCEPTED);
+            expect(record.messageTypeId).toBe('credit_transaction');
         };
         const handler = factory.getMessageHandler(agentService, agentId, '999', connectionId, TransactionMessageTypesEnum.CREDIT_TRANSACTION);
         expect(handler).toBeDefined();
@@ -139,7 +140,38 @@ describe('Transaction unit tests', () => {
             date: Date.now(),
             eventData: JSON.stringify('{data}')
         };
-        const msg: CreditTransaction<any> =new CreditTransaction<any>({
+        const msg: CreditTransaction<any> = new CreditTransaction<any>({
+            state: TransactionMessageStatesEnum.STARTED,
+            id: '1234567890',
+            credentialId: '1234567890',
+            transaction: tx
+        });
+        await handler.respond(msg);
+    });
+
+    it('this test should fail', async () => {
+        const factory: TransactionMessageResponseFactory = app.get<TransactionMessageResponseFactory>(TransactionMessageResponseFactory);
+        const agentService: AgentService = app.get<AgentService>(AgentService);
+        const testCaller: TestCaller = app.get<TestCaller>(CALLER);
+        // this is the actual test validation
+        testCaller.callAgentCallback = async (data?: any) => {
+            // this will fail as shown in the output but nest doesn't fail the entire test
+            await expect(1).toBe(2);
+        };
+        const handler = factory.getMessageHandler(agentService, agentId, '999', connectionId, TransactionMessageTypesEnum.CREDIT_TRANSACTION);
+        expect(handler).toBeDefined();
+
+        const tx = {
+            tdcTroId: 'tdc_tro_id',
+            tdcFspId: 'tdc_fsp_id',
+            id: 'transactionId',
+            typeId: 'typeId',
+            subjectId: 'subjectId',
+            amount: 'amount',
+            date: Date.now(),
+            eventData: JSON.stringify('{data}')
+        };
+        const msg: CreditTransaction<any> = new CreditTransaction<any>({
             state: TransactionMessageStatesEnum.STARTED,
             id: '1234567890',
             credentialId: '1234567890',
