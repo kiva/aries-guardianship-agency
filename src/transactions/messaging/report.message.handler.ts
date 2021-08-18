@@ -2,7 +2,6 @@ import { Logger } from 'protocol-common/logger';
 import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
 import { IBasicMessageHandler } from './basic.message.handler';
 import { DataService } from '../persistence/data.service';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { AgentService } from 'aries-controller/agent/agent.service';
 import { AgentTransaction } from '../persistence/agent.transaction';
 import { TxReportResponseDto } from '../dtos/tx.report.response.dto';
@@ -12,7 +11,7 @@ import { TransactionMessageStatesEnum } from './transaction.message.states.enum'
 export class ReportMessageHandler implements IBasicMessageHandler {
     constructor(private readonly agentService: AgentService,
                 private readonly agentId: string, private readonly connectionId: string,
-                private readonly dbAccessor: DataService, private readonly http: ProtocolHttpService) {
+                private readonly dbAccessor: DataService) {
     }
 
     public async respond(message: any): Promise<boolean> {

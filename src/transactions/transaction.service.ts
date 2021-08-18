@@ -33,6 +33,8 @@ export class TransactionService {
      *
      * the body of basic message is determined by acapy.  we use the content property to exchange our own message types.
      * the structure will be different, which can be determined by messageTypeId parameter.
+     *
+     * the following parameters and function signature are defined by acapy
      * @param agentUrl
      * @param agentId
      * @param adminApiKey
@@ -47,7 +49,7 @@ export class TransactionService {
             Logger.debug(`Aries-Guardianship-Agency TransactionService received basic message for agent ${agentId}`, body);
             const data = JSON.parse(body.content);
 
-            const handler: IBasicMessageHandler = this.responseFactory.getMessageHandler(agentId, adminApiKey, body.connection_id,
+            const handler: IBasicMessageHandler = this.responseFactory.getMessageHandler(this.agentService, agentId, adminApiKey, body.connection_id,
                 data.messageTypeId);
             if (handler)
                 await handler.respond(data);

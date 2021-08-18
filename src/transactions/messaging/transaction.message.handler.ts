@@ -1,6 +1,4 @@
-import { HttpService } from '@nestjs/common';
 import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { Logger } from 'protocol-common/logger';
 import { SecurityUtility } from 'protocol-common/security.utility';
 import { AgentService } from 'aries-controller/agent/agent.service';
@@ -13,7 +11,7 @@ import { TransactionMessageStatesEnum } from './transaction.message.states.enum'
 export class TransactionMessageHandler implements IBasicMessageHandler {
     constructor(private readonly agentService: AgentService,
                 private readonly agentId: string, private readonly connectionId: string,
-                private readonly dbAccessor: DataService, private readonly http: ProtocolHttpService) {
+                private readonly dbAccessor: DataService) {
     }
 
     public async respond(message: any): Promise<boolean> {

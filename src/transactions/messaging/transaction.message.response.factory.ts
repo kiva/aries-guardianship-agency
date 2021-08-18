@@ -12,9 +12,7 @@ import { DataService } from '../persistence/data.service';
 
 @Injectable()
 export class TransactionMessageResponseFactory {
-    private readonly http: ProtocolHttpService;
-    constructor(private readonly dataService: DataService, httpService: HttpService) {
-        this.http = new ProtocolHttpService(httpService);
+    constructor(private readonly dataService: DataService) {
     }
 
     /**
@@ -35,9 +33,9 @@ export class TransactionMessageResponseFactory {
             case TransactionMessageTypesEnum.GRANT:
                 return new GrantMessageHandler(agentId);
             case TransactionMessageTypesEnum.CREDIT_TRANSACTION:
-                return new TransactionMessageHandler(agentService, agentId, connectionId, this.dataService, this.http);
+                return new TransactionMessageHandler(agentService, agentId, connectionId, this.dataService);
             case TransactionMessageTypesEnum.TRANSACTION_REQUEST:
-                return new ReportMessageHandler(agentService, agentId, connectionId, this.dataService, this.http);
+                return new ReportMessageHandler(agentService, agentId, connectionId, this.dataService);
             default:
                 Logger.warn(`BasicMessage.messageTypeId of ${messageTypeId} not recognized.`);
                 break;
