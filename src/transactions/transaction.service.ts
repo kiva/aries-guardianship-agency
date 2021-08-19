@@ -4,9 +4,6 @@ import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolException } from 'protocol-common/protocol.exception';
 import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
-import { SecurityUtility } from 'protocol-common/security.utility';
-import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
-import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
 import { AgentService } from 'aries-controller/agent/agent.service';
 import { AgentGovernance, ControllerCallback } from 'aries-controller/controller/agent.governance';
 import { Topics } from 'aries-controller/controller/handler/topics';
@@ -36,6 +33,8 @@ export class TransactionService {
      *
      * the body of basic message is determined by acapy.  we use the content property to exchange our own message types.
      * the structure will be different, which can be determined by messageTypeId parameter.
+     *
+     * the following parameters and function signature are defined by acapy
      * @param agentUrl
      * @param agentId
      * @param adminApiKey
@@ -50,7 +49,7 @@ export class TransactionService {
             Logger.debug(`Aries-Guardianship-Agency TransactionService received basic message for agent ${agentId}`, body);
             const data = JSON.parse(body.content);
 
-            const handler: IBasicMessageHandler = this.responseFactory.getMessageHandler(agentId, adminApiKey, body.connection_id,
+            const handler: IBasicMessageHandler = this.responseFactory.getMessageHandler(this.agentService, agentId, adminApiKey, body.connection_id,
                 data.messageTypeId);
             if (handler)
                 await handler.respond(data);
