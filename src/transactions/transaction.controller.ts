@@ -1,4 +1,4 @@
-import { Controller, Post, Param, Body } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ProtocolValidationPipe } from 'protocol-common/validation/protocol.validation.pipe';
 import { TransactionService } from './transaction.service';
@@ -37,5 +37,12 @@ export class TransactionController {
         @Param('agentId') agentId: string,
         @Body(new ProtocolValidationPipe()) body: RegisterOneTimeKeyDto): Promise<any> {
         return await this.transactionService.registerOnetimeKey(agentId, body);
+    }
+
+    @Post(':agentId/ids')
+    public async getOneTimeKeyIds(
+        @Param('agentId') agentId: string,
+        @Body(new ProtocolValidationPipe()) body: RegisterOneTimeKeyDto): Promise<any> {
+        return await this.transactionService.getOneTimeKeyIds(agentId, body);
     }
 }

@@ -129,7 +129,19 @@ export class TransactionService {
             data,
         };
         const result = await this.http.requestWithRetry(request);
-        Logger.debug(`TRO onetimekey with TDC ${request.url}, results data`);
+        Logger.debug(`TRO onetimekey with TDC ${request.url}, results data`, result.data);
+        return result.data;
+    }
+
+    public async getOneTimeKeyIds(agentId: string, body: RegisterOneTimeKeyDto): Promise<any> {
+        const url = `${body.tdcEndpoint}/v2/transaction/ids/${body.oneTimeKey}`;
+        Logger.debug(`calling TDC ${url}`);
+        const request: AxiosRequestConfig = {
+            method: 'GET',
+            url
+        };
+        const result = await this.http.requestWithRetry(request);
+        Logger.debug(`TRO getOneTimeKeyId with TDC ${request.url}, results data`, result.data);
         return result.data;
     }
 }
