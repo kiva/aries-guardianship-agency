@@ -8,6 +8,7 @@ import { CALLER } from 'aries-controller/caller/caller.interface';
 import { ProfileManager } from 'aries-controller/profile/profile.manager';
 import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
 import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
+import { CONTROLLER_HANDLER } from 'aries-controller/controller.handler/controller.handler.interface';
 import { DataService } from '../src/transactions/persistence/data.service';
 import { AgentTransaction } from '../src/transactions/persistence/agent.transaction';
 import { TransactionMessageResponseFactory } from '../src/transactions/messaging/transaction.message.response.factory';
@@ -59,6 +60,10 @@ describe('Transaction Messaging Unit Tests', () => {
                 {
                     provide: CALLER,
                     useValue: new ConnectionsMockCaller(agentId, connectionId)
+                },
+                {
+                    provide: CONTROLLER_HANDLER,
+                    useValue: new ConnectionsMockCaller('', '')
                 }
             ]
         }).compile();
