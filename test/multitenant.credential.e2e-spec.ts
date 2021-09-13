@@ -54,7 +54,8 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         const data = {
             label: 'holder',
             walletName: walletNameHolder,
-            walletKey: walletKeyHolder
+            walletKey: walletKeyHolder,
+            returnToken: true,
         };
         return request(hostUrl)
             .post('/v2/multitenant')

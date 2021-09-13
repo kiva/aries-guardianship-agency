@@ -33,4 +33,8 @@ export class WalletCreateDto {
     })
     @IsOptional() @IsBoolean() readonly autoConnect?: boolean = true;
 
+    @ApiPropertyOptional({
+        description: '(Optional) Return token on agent startup. Default: false',
+    })
+    @IsOptional() @IsBoolean() readonly returnToken?: boolean = false;
 }
