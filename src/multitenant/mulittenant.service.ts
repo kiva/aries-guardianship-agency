@@ -59,8 +59,8 @@ export class MultitenantService {
             invitation = await this.callCreateConnection(token);
         }
 
-        // Only return token in local/test envs
-        if (process.env.NODE_ENV !== Constants.LOCAL) {
+        // Only return token if requested to
+        if (!body.returnToken) {
             token = null;
         }
 
