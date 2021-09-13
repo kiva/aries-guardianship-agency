@@ -31,7 +31,8 @@ describe('Create Connections using policies (e2e)', () => {
             label: 'agent1',
             walletName: wallet1Name,
             walletKey: wallet1Key,
-            autoConnect: false
+            autoConnect: false,
+            returnToken: true,
         };
         return request(hostUrl)
             .post('/v2/multitenant')
@@ -48,7 +49,8 @@ describe('Create Connections using policies (e2e)', () => {
         const data = {
             label: 'agent2',
             walletName: wallet2Name,
-            walletKey: wallet2Key
+            walletKey: wallet2Key,
+            returnToken: true,
         };
         return request(hostUrl)
             .post('/v2/multitenant')
