@@ -37,7 +37,7 @@ export class TransactionMessageResponseFactory {
             case TransactionMessageTypesEnum.CREDIT_TRANSACTION:
                 return new TransactionMessageHandler(agentService, agentId, adminApiKey, connectionId, this.dataService, this.http);
             case TransactionMessageTypesEnum.TRANSACTION_REQUEST:
-                return new ReportMessageHandler(agentService, agentId, connectionId, this.dataService);
+                return new ReportMessageHandler(agentService, agentId, adminApiKey, connectionId, this.dataService, this.http);
             default:
                 Logger.warn(`BasicMessage.messageTypeId of ${messageTypeId} not recognized.`);
                 break;
