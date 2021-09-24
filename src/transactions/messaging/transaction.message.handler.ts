@@ -54,7 +54,8 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
     }
 
 
-    private async sendTransactionMessage(agentId: string, adminApiKey: string, connectionId: string, state: string, id: string, eventJson: any): Promise<any> {
+    private async sendTransactionMessage(agentId: string, adminApiKey: string, connectionId: string,
+                                         state: string, id: string, eventJson: any): Promise<any> {
         /*
         const msg: CreditTransaction<any> = new CreditTransaction<any>({
             state,
