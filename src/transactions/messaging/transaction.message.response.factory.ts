@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import { Logger } from 'protocol-common/logger';
+import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { AgentService } from 'aries-controller/agent/agent.service';
 import { IBasicMessageHandler } from './basic.message.handler';
 import { TransactionMessageTypesEnum } from './transaction.message.types.enum';
@@ -11,7 +12,9 @@ import { DataService } from '../persistence/data.service';
 
 @Injectable()
 export class TransactionMessageResponseFactory {
-    constructor(private readonly dataService: DataService) {
+    private readonly http: ProtocolHttpService;
+    constructor(private readonly dataService: DataService, httpService: HttpService) {
+        this.http = new ProtocolHttpService(httpService);
     }
 
     /**
@@ -32,9 +35,9 @@ export class TransactionMessageResponseFactory {
             case TransactionMessageTypesEnum.GRANT:
                 return new GrantMessageHandler(agentId);
             case TransactionMessageTypesEnum.CREDIT_TRANSACTION:
-                return new TransactionMessageHandler(agentService, agentId, connectionId, this.dataService);
+                return new TransactionMessageHandler(agentService, agentId, adminApiKey, connectionId, this.dataService, this.http);
             case TransactionMessageTypesEnum.TRANSACTION_REQUEST:
-                return new ReportMessageHandler(agentService, agentId, connectionId, this.dataService);
+                return new ReportMessageHandler(agentService, agentId, adminApiKey, connectionId, this.dataService, this.http);
             default:
                 Logger.warn(`BasicMessage.messageTypeId of ${messageTypeId} not recognized.`);
                 break;
