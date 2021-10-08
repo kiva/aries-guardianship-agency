@@ -134,7 +134,7 @@ export class TransactionService {
     }
 
     public async getOneTimeKeyIds(agentId: string, body: RegisterOneTimeKeyDto): Promise<any> {
-        const url = `${body.tdcEndpoint}/v2/transactions/ids/${body.oneTimeKey}`;
+        const url = `${body.tdcEndpoint}/v2/transactions/ids/${body.oneTimeKey}/tro`;
         Logger.debug(`calling TDC ${url}`);
         const request: AxiosRequestConfig = {
             method: 'GET',
