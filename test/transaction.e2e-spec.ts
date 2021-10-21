@@ -7,7 +7,7 @@ import { AgentService } from 'aries-controller/agent/agent.service';
 import { CALLER } from 'aries-controller/caller/caller.interface';
 import { ProfileManager } from 'aries-controller/profile/profile.manager';
 import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
-import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
+import { TransactionReportRequest } from 'aries-controller/agent/messaging/transaction.report.request';
 import { CONTROLLER_HANDLER } from 'aries-controller/controller.handler/controller.handler.interface';
 import { DataService } from '../src/transactions/persistence/data.service';
 import { AgentTransaction } from '../src/transactions/persistence/agent.transaction';
@@ -133,7 +133,7 @@ describe('Transaction Messaging Unit Tests', () => {
             expect(data).toBeDefined();
             expect(data.content).toBeDefined();
             Logger.debug(`ReportMessageHandler callback data.content`, data.content);
-            const record: TransactionRequest<any> = new TransactionRequest<any>(JSON.parse(data.content));
+            const record: TransactionReportRequest<any> = new TransactionReportRequest<any>(JSON.parse(data.content));
             expect(record.messageTypeId).toBe('transaction_request');
         };
         const handler = factory.getMessageHandler(agentService, agentId, '999', connectionId, TransactionMessageTypesEnum.TRANSACTION_REQUEST);
