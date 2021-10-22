@@ -18,6 +18,12 @@ import { SimpleAgentTransactionMockRepository } from './mock/simple.agent.transa
 import { ConnectionsMockCaller } from './mock/connections.mock.caller';
 
 describe('Transaction Messaging Unit Tests', () => {
+    /*
+    // we cannot test these until 1 of 3 things happen:
+    //    1 create a mock for nextjs HttpService
+    //    2 change how ProtocolHttpService is constructed (maybe injected)
+    //    3 basic message send works in multitennant
+
     let app: INestApplication;
     const agentId: string = 'agentId';
     const connectionId: string = 'connectionId';
@@ -40,7 +46,7 @@ describe('Transaction Messaging Unit Tests', () => {
         record.transaction_details = 'message.transaction.eventJson';
         const mockRepository = new SimpleAgentTransactionMockRepository(record);
 
-        const memoryCache = cacheManager.caching({store: 'memory', max: 100, ttl: 10/*seconds*/});
+        const memoryCache = cacheManager.caching({store: 'memory', max: 100, ttl: 10});
 
         const moduleFixture = await Test.createTestingModule({
             imports: [],
@@ -84,11 +90,6 @@ describe('Transaction Messaging Unit Tests', () => {
         expect(handler).toBeUndefined();
     });
     
-/*
-    // we cannot test these until 1 of 3 things happen:
-    //    1 create a mock for nextjs HttpService
-    //    2 change how ProtocolHttpService is constructed (maybe injected)
-    //    3 basic message send works in multitennant
     it('tests TransactionMessageHandler succeeds with correct data structure', async ()=> {
         const factory: TransactionMessageResponseFactory = app.get<TransactionMessageResponseFactory>(TransactionMessageResponseFactory);
         const agentService: AgentService = app.get<AgentService>(AgentService);
