@@ -1,12 +1,13 @@
 import { Logger } from 'protocol-common/logger';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { TransactionRequest } from 'aries-controller/agent/messaging/transaction.request';
-import { IBasicMessageHandler } from './basic.message.handler';
-import { DataService } from '../persistence/data.service';
+import { TransactionReportRequest } from 'aries-controller/agent/messaging/transaction.report.request';
 import { AgentService } from 'aries-controller/agent/agent.service';
+import { DataService } from '../persistence/data.service';
 import { AgentTransaction } from '../persistence/agent.transaction';
 import { TxReportResponseDto } from '../dtos/tx.report.response.dto';
+import { IBasicMessageHandler } from './basic.message.handler';
 import { TransactionMessageStatesEnum } from './transaction.message.states.enum';
+
 
 
 
@@ -62,7 +63,7 @@ export class ReportMessageHandler implements IBasicMessageHandler {
         return await this.agentService.sendBasicMessage(msg, connectionId);
         */
         const url = `http://${agentId}:${process.env.AGENT_ADMIN_PORT}/connections/${connectionId}/send-message`;
-        const msg: TransactionRequest<any> = new TransactionRequest<any>({
+        const msg: TransactionReportRequest<any> = new TransactionReportRequest<any>({
             id,
             state,
             tdcFspId,
