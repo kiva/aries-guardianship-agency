@@ -28,6 +28,7 @@ export class MultitenantService {
 
     /**
      * Creates a wallet in the multitenant aca-py instance, and if set to auto-connection start a connection
+     * Note that the ttl applies to just how long the token and data is cached, not to spinning up or down the agent (since it's multitenant)
      */
     public async createWallet(body: WalletCreateDto): Promise<any> {
         let walletId: string;
@@ -47,11 +48,9 @@ export class MultitenantService {
         }
 
         const ttl = (body.ttl === null || body.ttl === undefined) ? this.DEFAULT_TTL_SECONDS : body.ttl;
-        // Set remove job
-        const timeoutId = await this.setRemoveJob(walletId, body.walletKey, ttl);
 
         // Add to cache
-        await this.addWalletToCache(body.walletName, body.walletKey, walletId, token, timeoutId, ttl);
+        await this.addWalletToCache(body.walletName, body.walletKey, walletId, token, ttl);
 
         // Handle auto connect
         let invitation = null;
@@ -72,7 +71,7 @@ export class MultitenantService {
     }
 
     /**
-     * Remove or unregister a wallet from multitenant
+     * Remove a wallet from multitenant and delete all credentials
      * TODO handle case where wallet isn't in cache
      */
     public async removeWallet(walletName: string, walletKey: string): Promise<any> {
@@ -86,11 +85,10 @@ export class MultitenantService {
 
     /**
      * Saves wallet info to cache for easy future access
-     * Note that removing the wallet doesn't involve the cache so no need to add a second to ttl
      * A ttl of 0 means store for Infinity
      */
     private async addWalletToCache(
-        walletName: string, walletKey: string, walletId: string, token: string, timeoutId: number, ttl: number
+        walletName: string, walletKey: string, walletId: string, token: string, ttl: number
     ): Promise<void> {
         ttl = (ttl === 0) ? Infinity: ttl;
         Logger.debug(`record cache limit set to: ${ttl}`);
@@ -103,7 +101,6 @@ export class MultitenantService {
                 walletKey,
                 ttl,
                 multitenant: true,
-                timeoutId
             },
             {
                 ttl
@@ -112,38 +109,13 @@ export class MultitenantService {
     }
 
     /**
-     * Sets a job in the future to remove/unregister the wallet after it's ttl has expired
-     * ttl = time to live is expected to be in seconds (which we convert to milliseconds).  if 0, then live in eternity
-     * Returns the NodeJS timeout id so that we can remove this timeout if the same wallet is added again later
-     *   Note clearTimeout doesn't error on null so it's fine to return null if we don't set a job
-     */
-    private setRemoveJob(walletId: string, walletKey: string, ttl: number): number {
-        if (ttl > 0) {
-            const timeout = setTimeout(
-                async () => {
-                    try {
-                        await this.callRemoveWallet(walletId, walletKey);
-                    } catch (e) {
-                        Logger.warn(`Error auto-removing wallet ${walletId}`, e);
-                    }
-                }, ttl * 1000);
-            // The NodeJS.Timeout object can't be JSON.stringified (and cached) so we need to coerce to a primitive
-            return timeout[Symbol.toPrimitive]();
-        }
-        return null;
-    }
-
-    /**
      * Handle case where wallet has already be created and registered with multitenant
      * We check the cache and return the wallet id and token
-     * Note: we also have special handling to extend the remove job, so we clear out the old timeout here
      */
     private async getTokenAndWalletId(walletName: string, walletKey: string): Promise<[string, string]> {
         const agent: any = await this.cache.get(walletName);
         if (agent) {
             if (agent.walletKey === walletKey) {
-                // before we return we need clear out the old remove wallet timeout
-                clearTimeout(agent.timeoutId);
                 return [agent.walletId, agent.token];
             }
             Logger.warn(`Attempted to open wallet for walletName ${walletName} from cache but with wrong walletKey`);
@@ -237,7 +209,7 @@ export class MultitenantService {
     }
 
     /**
-     * Remove/unregister wallet from multitenant, note this requires a walletId UUID (not wallet name)
+     * Remove wallet from multitenant and remove all credentials, note this requires a walletId UUID (not wallet name)
      */
     private async callRemoveWallet(walletId: string, walletKey: string): Promise<any> {
         Logger.log(`Removing wallet from multitenant ${walletId}`);
