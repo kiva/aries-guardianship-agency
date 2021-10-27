@@ -24,7 +24,7 @@ export class MultitenantController {
     }
 
     /**
-     * Remove a wallet from multitenant memory (this doesn't delete the wallet DB record, just the easy access)
+     * Remove a wallet from multitenant - this will remove all stored credentials so only use when you want to fully delete
      */
     @Delete()
     public async removeWallet(@Body(new ProtocolValidationPipe()) body: WalletRemoveDto) {
