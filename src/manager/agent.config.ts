@@ -58,6 +58,8 @@ export class AgentConfig {
 
     readonly ttl: number;
 
+    readonly maxRequestSize: number;
+
     /**
      * Sets up the agent config, using smart defaults from the AgentCreateDto
      */
@@ -97,6 +99,7 @@ export class AgentConfig {
         this.webhookUrl = agentDto.controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${agentDto.agentId}`;
         // The agent's endpoint is the one that is exposed publicly via the agency
         this.endpoint = `${process.env.PUBLIC_URL}/v1/router/${agentDto.agentId}`;
+        this.maxRequestSize = 16;
     }
 
     private getWalletStorageConfig() {
@@ -142,6 +145,7 @@ export class AgentConfig {
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
             '--auto-provision',
+            '--admin-client-max-request-size', this.maxRequestSize,
         ];
 
         if(this.useTailsServer) {
