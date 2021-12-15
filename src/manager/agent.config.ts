@@ -160,7 +160,6 @@ export class AgentConfig {
             args.push('--tails-server-base-url', process.env.TAILS_URL);
         }
         
-
         if (this.seed) {
             args.push('--seed', this.seed);
         }
