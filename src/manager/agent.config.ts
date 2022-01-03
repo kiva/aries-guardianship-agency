@@ -8,6 +8,8 @@ import { AgentCreateDto } from './dtos/agent.create.dto';
 export class AgentConfig {
     private readonly DEFAULT_TTL_SECONDS: number = 3600;
 
+    private readonly DEFAULT_MAX_REQUEST_SIZE: string = '16';
+
     readonly admin: string; // Admin url
 
     readonly adminApiKey: string;
@@ -58,6 +60,8 @@ export class AgentConfig {
 
     readonly ttl: number;
 
+    readonly maxRequestSize: string;
+
     /**
      * Sets up the agent config, using smart defaults from the AgentCreateDto
      */
@@ -97,6 +101,11 @@ export class AgentConfig {
         this.webhookUrl = agentDto.controllerUrl || `${process.env.INTERNAL_URL}/v1/controller/${agentDto.agentId}`;
         // The agent's endpoint is the one that is exposed publicly via the agency
         this.endpoint = `${process.env.PUBLIC_URL}/v1/router/${agentDto.agentId}`;
+        if(process.env.MAX_REQUEST_SIZE) {
+            this.maxRequestSize = process.env.MAX_REQUEST_SIZE;
+        } else {
+            this.maxRequestSize = this.DEFAULT_MAX_REQUEST_SIZE;
+        }
     }
 
     private getWalletStorageConfig() {
@@ -142,12 +151,12 @@ export class AgentConfig {
             '--log-level', this.logLevel,
             '--wallet-local-did', // TODO this could be an arg on the config
             '--auto-provision',
+            '--admin-client-max-request-size', this.maxRequestSize,
         ];
 
         if(this.useTailsServer) {
             args.push('--tails-server-base-url', process.env.TAILS_URL);
         }
-
         if (this.seed) {
             args.push('--seed', this.seed);
         }
