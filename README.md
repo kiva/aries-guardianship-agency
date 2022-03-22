@@ -76,4 +76,15 @@ available in the `protocol-aries` repo.
 3. Build/Run docker-compose.yml in aries-guardianship-agency
 4. Configure the .env for ncra and tdc controller in `protocol-aries/implementation` to use wallets-db
 5. Run protocol-aries/implementation/docker-compose.local.yml
-6. Run what you need from scripts/setup.sh in protocol-aries    
+6. Run what you need from scripts/setup.sh in protocol-aries
+
+# Deployment Notes
+## Postgres connections limitation
+Postgres defaults to 100 active connections. ACAPY appears to use several connections per agent (needs to be confirmed). 
+So we need to make sure our database connection limits are increased to allow for more traffic without errors.
+
+Please review these slackexchange posts for more information:
+1. [by config](https://stackoverflow.com/questions/30778015/how-to-increase-the-max-connections-in-postgres)
+2. [by sql commands](https://stackoverflow.com/questions/36085499/how-to-change-max-connections-for-postgres-through-sql-command)
+
+
