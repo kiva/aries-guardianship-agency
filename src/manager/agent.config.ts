@@ -74,7 +74,7 @@ export class AgentConfig {
         this.ledgerPoolName = process.env.INDY_POOL_NAME;
         this.networkName = process.env.NETWORK_NAME;
         this.logLevel = process.env.AGENT_LOG_LEVEL;
-        this.agentLogLength = parseInt(process.env.AGENT_LOG_LENGTH || `100`, 10);
+        this.agentLogLength = parseInt(process.env.AGENT_LOG_LENGTH || '100', 10);
         this.genesisTransactions = AgentConfig.getGenesisFile();
         this.walletType = 'indy';
         this.walletStorageType = 'postgres_storage';

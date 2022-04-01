@@ -22,9 +22,9 @@ export class DataService {
     }
 
     public async getMaxMerkelOrder(): Promise<any> {
-        const value: any = await this.connection.getRepository(AgentTransaction).query(`SELECT MAX(merkel_order) FROM agent_transactions`);
+        const value: any = await this.connection.getRepository(AgentTransaction).query('SELECT MAX(merkel_order) FROM agent_transactions');
         const result = value[0];
-        Logger.debug(`getMaxMerkelOrder select returns |${result.max}|`, result);
+        Logger.debug(`getMaxMerkelOrder select returns |${result.max as number}|`, result);
         if (result == null || result === undefined || isNaN(result.max))
             return 0;
         return result.max;

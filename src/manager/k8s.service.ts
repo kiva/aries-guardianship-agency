@@ -155,21 +155,21 @@ export class K8sService implements IAgentManager {
     // Check to see if pod is ready
     private async isReadyPod(name: string): Promise<boolean> {
       const res = await this.kapi.readNamespacedPodStatus(name, this.namespace);
-      const isStatus = (item: V1PodCondition, index: number, array: V1PodCondition[]): boolean => {
+      const isStatus = (item: V1PodCondition): boolean => {
         return item.status === 'True';
       };
       let max = new Date();
-      res.body.status.conditions.forEach((item: V1PodCondition, index: number, array: V1PodCondition[]): void => {
+      res.body.status.conditions.forEach((item: V1PodCondition): void => {
         const t = item.lastTransitionTime;
         if (max < t) {
           max = t;
         }
       });
-      const isLatest = (item: V1PodCondition, index: number, array: V1PodCondition[]): boolean => {
+      const isLatest = (item: V1PodCondition): boolean => {
         return item.lastTransitionTime === max;
       };
       let ready = false;
-      res.body.status.conditions.filter(isStatus).filter(isLatest).forEach((item: V1PodCondition, index: number, array: V1PodCondition[]): void => {
+      res.body.status.conditions.filter(isStatus).filter(isLatest).forEach((item: V1PodCondition): void => {
         if (item.type === 'Ready') {
           ready = true;
         }

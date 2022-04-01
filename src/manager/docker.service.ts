@@ -45,7 +45,7 @@ export class DockerService implements IAgentManager {
         // to make the ports available to localhost, they need to be set to values other than
         // the defaults
         if (config.adminPort !== parseInt(process.env.AGENT_ADMIN_PORT, 10) && Constants.LOCAL === process.env.NODE_ENV) {
-            Logger.info(`setting up ports to be exposed`);
+            Logger.info('setting up ports to be exposed');
             containerOptions.ExposedPorts = {
                 [`${config.adminPort}/tcp`]: {}
             };

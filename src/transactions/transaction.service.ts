@@ -35,6 +35,7 @@ export class TransactionService {
      * the structure will be different, which can be determined by messageTypeId parameter.
      *
      * the following parameters and function signature are defined by acapy
+     *
      * @param agentUrl
      * @param agentId
      * @param adminApiKey
@@ -44,6 +45,7 @@ export class TransactionService {
      * @param token
      */
     public basicMessageHandler: ControllerCallback =
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async (agentUrl: string, agentId: string, adminApiKey: string, route: string, topic: string, body: any, token?: string):
             Promise<any> => {
             Logger.debug(`Aries-Guardianship-Agency TransactionService received basic message for agent ${agentId}`, body);
@@ -55,12 +57,12 @@ export class TransactionService {
                 await handler.respond(data);
 
             return undefined;
-        }
+        };
 
     private async getAgentAdminApiKey(agentId: string): Promise<string> {
         const agentData: any = await this.cache.get(agentId);
         if (agentData === undefined) {
-            throw new ProtocolException(ProtocolErrorCode.INVALID_BACKEND_OPERATION, `agent expected but not found`);
+            throw new ProtocolException(ProtocolErrorCode.INVALID_BACKEND_OPERATION, 'agent expected but not found');
         }
         return agentData.adminApiKey;
     }
@@ -89,12 +91,12 @@ export class TransactionService {
         // 1 generate a connection invite from fsp agent
         const connection = await this.createAgentConnection(agentId);
         const url = `${body.tdcEndpoint}/v2/register`;
-        Logger.debug(`TRO created this connection ${connection.connection_id} invitation`, connection.invitation);
+        Logger.debug(`TRO created this connection ${connection.connection_id as string} invitation`, connection.invitation);
 
         // 2 using body.tdcEndpoint, call: /fsp/register passing in a connection invite
         const data = {
             alias: connection.invitation.label,
-            identityProfileId: `citizen.identity`,
+            identityProfileId: 'citizen.identity',
             invitation: connection.invitation
         };
         Logger.info(`connecting to TDC ${url} with data`, data);
@@ -116,7 +118,7 @@ export class TransactionService {
     public async registerOnetimeKey(agentId: string, body: RegisterOneTimeKeyDto): Promise<any> {
         // 2 using body.tdcEndpoint, call: /register passing in a connection invite
         // todo: replace tdcEndpoint with lookup since we have connection id
-        Logger.info(`TRO sending onetimekey data`, body);
+        Logger.info('TRO sending onetimekey data', body);
         const url = `${body.tdcEndpoint}/v2/register/onetimekey`;
         const data = {
             connectionId: body.connectionId,

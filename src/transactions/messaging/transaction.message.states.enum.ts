@@ -7,6 +7,6 @@
  */
 export enum TransactionMessageStatesEnum {
     ACCEPTED = 'accepted',
-    COMPLETED = `completed`,
-    STARTED = `started`
+    COMPLETED = 'completed',
+    STARTED = 'started'
 }
