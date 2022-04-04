@@ -10,17 +10,16 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
     run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Create Connections using policies (e2e)', () => {
-    let issuerConnectionId;
-    let issuerToken;
+    let issuerConnectionId: string;
+    let issuerToken: string;
     let holderInvitation;
-    let holderToken;
     const multitenantApiKey = 'adminApiKey';
-    const multitenantUrl = 'http://localhost:3021'
+    const multitenantUrl = 'http://localhost:3021';
     const hostUrl = 'http://localhost:3010';
     const wallet1Name = 'wallet1Name';
     const wallet1Key = 'wallet1Key';
-    const wallet2Name = 'wallet2Name'
-    const wallet2Key = 'wallet2Key'
+    const wallet2Name = 'wallet2Name';
+    const wallet2Key = 'wallet2Key';
 
     beforeAll(async () => {
         jest.setTimeout(60000);
@@ -59,7 +58,6 @@ describe('Create Connections using policies (e2e)', () => {
             .expect((res) => {
                 expect(res.body.invitation).toBeDefined();
                 holderInvitation = res.body.invitation;
-                holderToken = res.body.token;
             });
     });
 
@@ -68,7 +66,7 @@ describe('Create Connections using policies (e2e)', () => {
         return request(multitenantUrl)
             .post('/connections/receive-invitation')
             .set('x-api-key', multitenantApiKey)
-            .set('Authorization', 'Bearer ' + issuerToken)
+            .set('Authorization', `Bearer ${issuerToken}`)
             .send(holderInvitation)
             .expect((res) => {
                 expect(res.status).toBe(200);
@@ -81,13 +79,13 @@ describe('Create Connections using policies (e2e)', () => {
     it('Confirm Issuer connections is ready', async () => {
         await ProtocolUtility.delay(500);
         return request(multitenantUrl)
-            .get(`/connections`)
+            .get('/connections')
             .set('x-api-key', multitenantApiKey)
             .set('Authorization', 'Bearer ' + issuerToken)
             .expect((res) => {
                 expect(res.status).toBe(200);
 
-                let found: boolean = false;
+                let found = false;
                 res.body.results.forEach(conn => {
                     if (conn.connection_id === issuerConnectionId) {
                         found = true;

@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { Logger } from 'protocol-common/logger';
 import { ProtocolUtility } from 'protocol-common/protocol.utility';
 
 /**
@@ -10,9 +9,9 @@ describe('Check cache behaviors (e2e)', () => {
     const label1 = 'label1';
     const wallet1Name = 'wallet1Name';
     const wallet1Key = 'wallet1Key';
-    const label2 = 'label2'
-    const wallet2Name = 'wallet2Name'
-    const wallet2Key = 'wallet2Key'
+    const label2 = 'label2';
+    const wallet2Name = 'wallet2Name';
+    const wallet2Key = 'wallet2Key';
 
     beforeAll(async () => {
         jest.setTimeout(60000);
@@ -54,7 +53,8 @@ describe('Check cache behaviors (e2e)', () => {
             label: label2,
             walletName: wallet2Name,
             walletKey: wallet2Key,
-            ttl: 0 // Note: cache 0 has a slightly odd behavior which is useful here, it doesn't unregister the agent, but doesn't keep it in cache either
+            // Note: cache 0 has a slightly odd behavior which is useful here, it doesn't unregister the agent, but doesn't keep it in cache either
+            ttl: 0
         };
         return request(hostUrl)
             .post('/v2/multitenant')

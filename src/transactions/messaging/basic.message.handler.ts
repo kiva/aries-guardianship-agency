@@ -6,5 +6,5 @@
  * the `TransactionMessageResponseFactory` determines which implementation to use.
  */
 export interface IBasicMessageHandler {
-    respond(message: any):  Promise<boolean>
+    respond(message: any):  Promise<boolean>;
 }

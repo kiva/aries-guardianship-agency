@@ -7,22 +7,21 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
  * The credentials are then issued as usual
  */
 describe('Issue and Prove credentials using policies (e2e)', () => {
-    let issuerUrl;
-    let issuerId;
+    let issuerUrl: string;
+    let issuerId: string;
     let invitation;
     let holderConnectionId;
     let schemaId;
     let credentialDefinitionId;
-    let presentationExchangeId;
+    let presentationExchangeId: string;
     let holderInvitation;
-    let holderToken;
     const issuerAdminPort = 5011;
     const hostUrl = 'http://localhost:3010';
     const schemaName = 'score_schema';
     const schemaVersion = '1.0';
     const issuerDid = 'Th7MpTaRZVRYnPiabds81Y';
-    const walletNameHolder = 'walletNameHolder'
-    const walletKeyHolder = 'walletKeyHolder'
+    const walletNameHolder = 'walletNameHolder';
+    const walletKeyHolder = 'walletKeyHolder';
     const issuerApiKey = 'adminApiKey';
 
     beforeAll(async () => {
@@ -94,7 +93,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
         const data = {
             schema_version: schemaVersion,
             schema_name: schemaName,
-            attributes: [ 
+            attributes: [
                 'score',
                 'secret_score'
             ]
@@ -141,7 +140,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             schema_id: schemaId,
             issuer_did: issuerDid,
             credential_proposal: {
-            '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
+            '@type': 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview',
                 attributes: [
                     {
                         name: 'score',
@@ -205,7 +204,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 requested_predicates: {
                     'score_under_50': {
                         name: 'secret_score',
-                        p_type: "<=",
+                        p_type: '<=',
                         p_value: 50,
                         restrictions: [
                             {

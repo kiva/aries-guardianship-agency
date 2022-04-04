@@ -18,8 +18,8 @@ describe('Create Connections using policies (e2e)', () => {
     let holderApiKey;
     let holderUrl;
     let invitation;
-    let issuerConnectionId;
-    let holderConnectionId;
+    let issuerConnectionId: string;
+    let holderConnectionId: string;
     const issuerAdminPort = 5011;
     const holderAdminPort = 5012;
     const hostUrl = 'http://localhost:3010';
@@ -105,12 +105,12 @@ describe('Create Connections using policies (e2e)', () => {
     it('Confirm Issuer connections is ready', async () => {
         await ProtocolUtility.delay(5000);
         return request(issuerUrl)
-            .get(`/connections`)
+            .get('/connections')
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
                 expect(res.status).toBe(200);
 
-                let found: boolean = false;
+                let found = false;
                 res.body.results.forEach(conn => {
                     if (conn.connection_id === issuerConnectionId) {
                         found = true;
@@ -124,11 +124,11 @@ describe('Create Connections using policies (e2e)', () => {
 
     it('Confirm Holder connection is ready', async () => {
         return request(holderUrl)
-            .get(`/connections`)
+            .get('/connections')
             .set('x-api-key', holderApiKey)
             .expect((res) => {
                 expect(res.status).toBe(200);
-                let found: boolean = false;
+                let found = false;
                 res.body.results.forEach(conn => {
                     if (conn.connection_id === holderConnectionId) {
                         found = true;
@@ -181,12 +181,12 @@ describe('Create Connections using policies (e2e)', () => {
     it('List Issuer connections', async () => {
         await ProtocolUtility.delay(5000);
         return request(issuerUrl)
-            .get(`/connections`)
+            .get('/connections')
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
                 expect(res.status).toBe(200);
 
-                let found: boolean = false;
+                let found = false;
                 res.body.results.forEach(conn => {
                    if (conn.connection_id === issuerConnectionId) {
                        found = true;
@@ -200,11 +200,11 @@ describe('Create Connections using policies (e2e)', () => {
 
     it('List Holder connections', async () => {
         return request(holderUrl)
-            .get(`/connections`)
+            .get('/connections')
             .set('x-api-key', holderApiKey)
             .expect((res) => {
                 expect(res.status).toBe(200);
-                let found: boolean = false;
+                let found = false;
                 res.body.results.forEach(conn => {
                     if (conn.connection_id === holderConnectionId) {
                         found = true;

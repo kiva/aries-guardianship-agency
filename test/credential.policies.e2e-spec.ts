@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolUtility } from 'protocol-common/protocol.utility';
 
@@ -12,19 +11,17 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
     run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Issue and Prove credentials using policies (e2e)', () => {
-    let issuerUrl;
-    let issuerId;
+    let issuerUrl: string;
+    let issuerId: string;
     let issuerApiKey;
     let holderUrl;
     let holderId;
     let holderApiKey;
     let invitation;
     let issuerConnectionId;
-    let holderConnectionId;
     let schemaId;
     let credentialDefinitionId;
-    let credentialExchangeId;
-    let presentationExchangeId;
+    let presentationExchangeId: string;
     const issuerAdminPort = 5011;
     const holderAdminPort = 5012;
     const hostUrl = 'http://localhost:3010';
@@ -101,7 +98,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect((res) => {
                 expect(res.status).toBe(200);
                 expect(res.body.connection_id).toBeDefined();
-                holderConnectionId = res.body.connection_id;
             });
     });
 
@@ -164,7 +160,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             schema_id: schemaId,
             issuer_did: issuerDid,
             credential_proposal: {
-            '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
+            '@type': 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview',
                 attributes: [
                     {
                         name: 'score',
@@ -183,7 +179,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 try {
                     Logger.warn(`issue-credential/send result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
-                    credentialExchangeId = res.body.credential_exchange_id;
                 } catch (e) {
                     Logger.warn(`issue-credential/send errored result -> ${res.status}`, res.body);
                     throw e;
@@ -214,7 +209,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             connection_id: issuerConnectionId,
             cred_def_id: credentialDefinitionId,
             credential_preview: {
-            '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
+            '@type': 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview',
                 attributes: [
                     {
                         name: 'score',
@@ -234,7 +229,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
                 try {
                     Logger.warn(`issue-credential/send-offer result -> ${res.status}`, res.body);
                     expect(res.status).toBe(200);
-                    credentialExchangeId = res.body.credential_exchange_id;
                 } catch (e) {
                     Logger.warn(`issue-credential/send errored result -> ${res.status}`, res.body);
                     throw e;

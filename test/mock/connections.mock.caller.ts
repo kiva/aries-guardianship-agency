@@ -8,7 +8,7 @@ export class ConnectionsMockCaller  implements ICaller {
     public callAgentCallback: any;
     public async callAgent(method: any, route: string, params?: any, data?: any): Promise<any> {
         expect(method).toBe('POST');
-        const expectedRoute: string = `connections/${this.connectionId}/send-message`;
+        const expectedRoute = `connections/${this.connectionId}/send-message`;
         expect(expectedRoute).toBe(route);
 
         if (this.callAgentCallback)
