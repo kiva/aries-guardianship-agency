@@ -23,7 +23,7 @@ export class AgentControllerService {
         const agent: any = await this.cache.get(agentId);
         let agentUrl = process.env.MULTITENANT_URL;
         if (!agent.multitenant) {
-            const adminPort = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);
+            const adminPort: string = (agent ? agent.adminApiPort : process.env.AGENT_ADMIN_PORT);
             // @tothink http/https?  should this be from the env?
             agentUrl = `http://${agentId}:${adminPort}`;
         }

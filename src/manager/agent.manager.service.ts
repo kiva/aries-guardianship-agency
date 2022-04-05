@@ -73,7 +73,7 @@ export class AgentManagerService {
             await this.cache.del(agentId);
             await this.manager.stopAgent(agentId);
         } catch (e) {
-            Logger.warn(`error shutting down agent: '${e.message}'`, e);
+            Logger.warn(`error shutting down agent: '${e.message as string}'`, e);
         }
     }
 
@@ -215,6 +215,7 @@ export class AgentManagerService {
     private setSpinDownJob(agentConfig: AgentConfig): void {
         if (agentConfig.ttl > 0 && agentConfig.ttl !== Infinity) {
             setTimeout(
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
                 async () => {
                     await this.spinDownAgent(agentConfig.agentId);
                 }, agentConfig.ttl * 1000);

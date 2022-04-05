@@ -3,7 +3,6 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
 import { ConfigModule } from 'protocol-common/config.module';
 import { DockerService } from '../src/manager/docker.service';
 import { AgentConfig } from '../src/manager/agent.config';
-import { Logger } from 'protocol-common/logger';
 import { AgentCreateDto } from '../src/manager/dtos/agent.create.dto';
 
 /*
@@ -14,12 +13,10 @@ import { AgentCreateDto } from '../src/manager/dtos/agent.create.dto';
     run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Cache behaviors (e2e)', () => {
-    let firstAgentId;
+    let firstAgentId: string;
     const adminApiKey = 'adminApiKey';
-    let firstAgentUrl;
     let secondAgentId;
     let thirdAgentId;
-    const agentAdminPort = process.env.AGENT_ADMIN_PORT || 5001;
     const hostUrl = 'http://localhost:3010';
     const agentDid = 'Th7MpTaRZVRYnPiabds81Y';
 
@@ -70,7 +67,6 @@ describe('Cache behaviors (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 firstAgentId = res.body.agentId;
-                firstAgentUrl = `http://${firstAgentId}:${agentAdminPort}`;
             });
     });
 
@@ -91,7 +87,6 @@ describe('Cache behaviors (e2e)', () => {
             .expect(201)
             .expect((res) => {
                 firstAgentId = res.body.agentId;
-                firstAgentUrl = `http://${firstAgentId}:${agentAdminPort}`;
             });
     });
 

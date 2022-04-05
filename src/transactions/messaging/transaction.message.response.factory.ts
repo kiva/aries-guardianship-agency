@@ -20,6 +20,7 @@ export class TransactionMessageResponseFactory {
     /**
      * All transaction basic messages have a messageTypeId which identifies the message type--its is the message type
      * that determines the structure of the message.  Different classes process the different messages
+     *
      * @param agentId
      * @param adminApiKey
      * @param connectionId

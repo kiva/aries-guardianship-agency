@@ -4,7 +4,6 @@ import { ProtocolException } from 'protocol-common/protocol.exception';
 import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
 import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
 import { WalletCreateDto } from './dtos/wallet.create.dto';
-import { Constants } from 'protocol-common/constants';
 
 /**
  * Various calls to add/remove wallets from multitenant aca-py
@@ -135,7 +134,7 @@ export class MultitenantService {
         const allWallets = await this.callGetAllWallets();
         let walletId = null;
         for (const wallet of allWallets) {
-            if (wallet.settings[`wallet.name`] === walletName) {
+            if (wallet.settings['wallet.name'] === walletName) {
                 walletId = wallet.wallet_id;
                 break; // we found our wallet so break out of loop
             }
@@ -151,7 +150,7 @@ export class MultitenantService {
     // -- Remote calls can eventually be moved to their own mockable class -- //
 
     private async callGetAllWallets(): Promise<Array<any>> {
-        Logger.debug(`Fetching all wallets from multitenant`);
+        Logger.debug('Fetching all wallets from multitenant');
         const url = `${process.env.MULTITENANT_URL}/multitenancy/wallets`;
         const req: any = {
             method: 'GET',
@@ -230,7 +229,7 @@ export class MultitenantService {
     }
 
     private async callCreateConnection(token: string): Promise<any> {
-        Logger.debug(`Creating connection to wallet on multitenant`);
+        Logger.debug('Creating connection to wallet on multitenant');
         const url = `${process.env.MULTITENANT_URL}/connections/create-invitation`;
         const req: any = {
             method: 'POST',

@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { INestApplication } from '@nestjs/common';
 import { Logger } from 'protocol-common/logger';
 import { ProtocolUtility } from 'protocol-common/protocol.utility';
 
@@ -12,8 +11,8 @@ import { ProtocolUtility } from 'protocol-common/protocol.utility';
     run `docker-compose up` in the aries-guardianship-agency directory
  */
 describe('Issue and Prove credentials using policies (e2e)', () => {
-    let issuerUrl;
-    let issuerId;
+    let issuerUrl: string;
+    let issuerId: string;
     let issuerApiKey;
     let holderUrl;
     let holderId;
@@ -23,7 +22,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     let schemaId;
     let credentialDefinitionId;
     let credentialExchangeId;
-    let presentationExchangeId;
+    let presentationExchangeId: string;
     const issuerAdminPort = 5011;
     const holderAdminPort = 5012;
     const hostUrl = 'http://localhost:3010';
@@ -144,7 +143,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .send(data)
             .set('x-api-key', issuerApiKey)
             .expect((res) => {
-                Logger.info(`cred def result -> ${res.status}`, res.body)
+                Logger.info(`cred def result -> ${res.status}`, res.body);
                 expect(res.status).toBe(200);
                 credentialDefinitionId = res.body.credential_definition_id;
             });
@@ -161,7 +160,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             schema_id: schemaId,
             issuer_did: issuerDid,
             credential_proposal: {
-            '@type': `did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview`,
+            '@type': 'did:sov:BzCbsNYhMrjHiqZDTUASHg;spec/issue-credential/1.0/credential-preview',
                 attributes: [
                     {
                         name: 'score',
@@ -197,14 +196,12 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect((res) => {
                 expect(res.status).toBe(200);
                 expect(res.body.results.length).toBeGreaterThan(0);
-                const i = res.body.results.length - 1;
                 expect(res.body.results[0].state).toBe('credential_acked');
             });
     });
 
     it('prover proves holders credential (round 1)', async () => {
         await ProtocolUtility.delay(5000);
-        const timestamp = Math.floor(Date.now() / 1000);
         const data = {
             connection_id: issuerConnectionId,
             comment: 'requesting score',
@@ -270,7 +267,7 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             publish: true
         };
         return request(issuerUrl)
-        .post(`/revocation/revoke`)
+        .post('/revocation/revoke')
         .set('x-api-key', issuerApiKey)
         .send(data)
         .expect((res) => {
@@ -286,7 +283,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     it('prover proves holders credential (round 2)', async () => {
         await ProtocolUtility.delay(5000);
-        const timestamp = Math.floor(Date.now() / 1000);
         const data = {
             connection_id: issuerConnectionId,
             comment: 'requesting score',

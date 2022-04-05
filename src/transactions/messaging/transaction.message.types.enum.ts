@@ -7,8 +7,8 @@
  */
 export enum TransactionMessageTypesEnum {
     // TODO rename to TRANSACTION_REQUEST
-    CREDIT_TRANSACTION = `credit_transaction`,
-    GRANT = `grant`,
+    CREDIT_TRANSACTION = 'credit_transaction',
+    GRANT = 'grant',
     // TODO: rename to REPORT_REQUEST
-    TRANSACTION_REQUEST = `transaction_request`
+    TRANSACTION_REQUEST = 'transaction_request'
 }

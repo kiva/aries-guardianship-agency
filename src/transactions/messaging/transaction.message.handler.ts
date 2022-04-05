@@ -24,7 +24,7 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
             // state handler
             // TODO validation
             // TODO: theres possible collision here if two transactions came in at the same time
-            const maxMerkleOrder = await this.dbAccessor.getMaxMerkelOrder();
+            const maxMerkleOrder: number = await this.dbAccessor.getMaxMerkelOrder();
             const record: AgentTransaction = new AgentTransaction();
             record.agent_id = this.agentId;
             record.transaction_id = message.id;
@@ -43,11 +43,11 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
             await this.dbAccessor.saveTransaction(record);
 
             // TODO: eval -> not sure we really need to wait for this
-            Logger.debug(`replying 'accepted' to transaction start message`);
+            Logger.debug('replying \'accepted\' to transaction start message');
             await this.sendTransactionMessage(this.agentId, this.adminApiKey, this.connectionId, TransactionMessageStatesEnum.ACCEPTED,
                 message.id, message.transaction).then();
         } else if (message.state === TransactionMessageStatesEnum.COMPLETED) {
-            Logger.info(`transaction ${message.id} is complete`);
+            Logger.info(`transaction ${message.id as string} is complete`);
             // TODO: do we need to note transaction state?
         }
         return false;
