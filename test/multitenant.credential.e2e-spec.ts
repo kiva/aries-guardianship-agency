@@ -63,7 +63,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
             .expect((res) => {
                 expect(res.body.invitation).toBeDefined();
                 holderInvitation = res.body.invitation;
-                holderToken = res.body.token;
             });
     });
 
