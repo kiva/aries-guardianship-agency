@@ -3,6 +3,8 @@ import { HttpConstants } from 'protocol-common/http-context/http.constants';
 import { AgentConfig } from '../manager/agent.config';
 import { DisableAutoLogging } from 'protocol-common/disable.auto.logging.decorator';
 import { EnableAutoLogging } from 'protocol-common/enable.auto.logging.decorator';
+import { AppService } from './app.service';
+import { ServiceReportDto } from './dtos/service.report.dto';
 
 /**
  * Base route is just for various health check endpoints
@@ -10,6 +12,9 @@ import { EnableAutoLogging } from 'protocol-common/enable.auto.logging.decorator
 @DisableAutoLogging()
 @Controller()
 export class AppController {
+
+    constructor(private readonly service: AppService) {
+    }
 
     @Get()
     base(): string {
@@ -34,4 +39,13 @@ export class AppController {
     getGenesisFile(): string {
         return AgentConfig.getGenesisFile();
     }
+
+    /**
+     * For the uptime statists report (see Uptime feature brief)
+     */
+    @Get('stats')
+    async generateStatsReport() : Promise<ServiceReportDto> {
+        return await this.service.generateStatsReport();
+    }
+
 }
