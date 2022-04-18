@@ -49,6 +49,7 @@ export class AppService {
         report.serviceName = process.env.SERVICE_NAME;
         report.startedAt = AppService.startedAt.toDateString();
         report.currentTime = new Date().toDateString();
+        report.versions = [ 'none'];
 
         // TODO: once we determine which items we want to check versions on
         // TODO: we will add the version checks here
