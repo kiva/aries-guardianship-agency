@@ -41,11 +41,12 @@ export class AppController {
     }
 
     /**
-     * For the uptime statists report (see Uptime feature brief)
+     * Called by the protocol-services-support service
+     * for uptime statistics reporting "engine".
      */
     @Get('stats')
-    async generateStatsReport() : Promise<ServiceReportDto> {
-        return await this.service.generateStatsReport();
+    generateStatsReport() : ServiceReportDto {
+        return this.service.generateStatsReport();
     }
 
 }
