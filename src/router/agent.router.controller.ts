@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AgentRouterService } from './agent.router.service';
+import { AgentRouterService } from './agent.router.service.js';
 
 /**
  * TODO the routing is handled via http-proxy, so we may not need an explicit controller here

@@ -1,4 +1,4 @@
-import { ICaller } from 'aries-controller/caller/caller.interface';
+import { ICaller } from 'aries-controller';
 
 export class ConnectionsMockCaller  implements ICaller {
 

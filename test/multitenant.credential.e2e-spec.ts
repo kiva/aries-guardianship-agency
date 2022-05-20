@@ -1,6 +1,9 @@
 import request from 'supertest';
-import { Logger } from 'protocol-common/logger';
-import { ProtocolUtility } from 'protocol-common/protocol.utility';
+import { jest } from '@jest/globals';
+import { ProtocolUtility } from 'protocol-common';
+import { Logger } from '@nestjs/common';
+
+jest.setTimeout(60000);
 
 /**
  * These tests require an issuer as a separate agent (since it needs a seed), but a holder in multitenancy.
@@ -26,7 +29,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
 
     beforeAll(async () => {
         issuerUrl = `http://localhost:${issuerAdminPort}`;
-        jest.setTimeout(60000);
     });
 
     it('Spin up agent 1 (issuer) as separate agent', async () => {

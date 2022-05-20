@@ -1,11 +1,11 @@
-import { Module, HttpModule } from '@nestjs/common';
-import { AgentModule } from 'aries-controller/agent/agent.module';
-import { AgentGovernanceFactory } from 'aries-controller/controller/agent.governance.factory';
-import { GlobalCacheModule } from '../app/global.cache.module';
-import { TransactionController } from './transaction.controller';
-import { TransactionService } from './transaction.service';
-import { DataService } from './persistence/data.service';
-import { TransactionMessageResponseFactory } from './messaging/transaction.message.response.factory';
+import { Module } from '@nestjs/common';
+import { AgentModule, AgentGovernanceFactory } from 'aries-controller';
+import { GlobalCacheModule } from '../app/global.cache.module.js';
+import { TransactionController } from './transaction.controller.js';
+import { TransactionService } from './transaction.service.js';
+import { DataService } from './persistence/data.service.js';
+import { TransactionMessageResponseFactory } from './messaging/transaction.message.response.factory.js';
+import { ProtocolHttpModule } from 'protocol-common';
 
 /**
  *
@@ -13,7 +13,7 @@ import { TransactionMessageResponseFactory } from './messaging/transaction.messa
 @Module({
     imports: [
         AgentModule,
-        HttpModule,
+        ProtocolHttpModule,
         GlobalCacheModule,
     ],
     controllers: [TransactionController],

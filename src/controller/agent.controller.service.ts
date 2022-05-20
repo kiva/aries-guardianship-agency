@@ -1,23 +1,18 @@
-import { Injectable, HttpService, Inject, CACHE_MANAGER, CacheStore } from '@nestjs/common';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { AgentGovernance } from 'aries-controller/controller/agent.governance';
-import { HandlersFactory } from 'aries-controller/controller/handler/handlers.factory';
+import { Injectable, Inject, CACHE_MANAGER, CacheStore } from '@nestjs/common';
+import { ProtocolHttpService } from 'protocol-common';
+import { AgentGovernance, HandlersFactory } from 'aries-controller';
 
 /**
  * Agent acting on the behalf of a "citizen" or credential holder
- *
  */
 @Injectable()
 export class AgentControllerService {
 
-    private readonly http: ProtocolHttpService;
-
     constructor(
-        httpService: HttpService,
+        private readonly http: ProtocolHttpService,
         @Inject(CACHE_MANAGER) private readonly cache: CacheStore,
-        @Inject('AGENT_GOVERNANCE') private readonly agentGovernance: AgentGovernance) {
-        this.http = new ProtocolHttpService(httpService);
-    }
+        @Inject('AGENT_GOVERNANCE') private readonly agentGovernance: AgentGovernance
+    ) {}
 
     async handleRequest(agentId: string, route: string, topic: string, body: any) {
         const agent: any = await this.cache.get(agentId);

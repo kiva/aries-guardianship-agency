@@ -1,8 +1,8 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import { AgentRouterService } from './agent.router.service';
-import { AgentRouterController } from './agent.router.controller';
-import { GlobalCacheModule } from '../app/global.cache.module';
+import { AgentRouterService } from './agent.router.service.js';
+import { AgentRouterController } from './agent.router.controller.js';
+import { GlobalCacheModule } from '../app/global.cache.module.js';
 
 /**
  * TODO rename AgentRouterModule

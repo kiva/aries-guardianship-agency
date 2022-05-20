@@ -1,10 +1,12 @@
 import request from 'supertest';
-import { Logger } from 'protocol-common/logger';
-import { ProtocolUtility } from 'protocol-common/protocol.utility';
+import { jest } from '@jest/globals';
+import { ProtocolUtility } from 'protocol-common';
+import { Logger } from '@nestjs/common';
 
+jest.setTimeout(60000);
 
 /*
-    Integration test to show the gammit of the exchange of messages between
+    Integration test to show the gamut of the exchange of messages between
     agents for connection, credential and proof protocols
 
     Required: manually start aries agency prior to running tests
@@ -33,7 +35,6 @@ describe('Issue and Prove credentials using policies (e2e)', () => {
     beforeAll(async () => {
         issuerApiKey = 'adminApiKey';
         holderApiKey = 'adminApiKey';
-        jest.setTimeout(60000);
     });
 
     it('Spin up agent 1 (issuer)', async () => {

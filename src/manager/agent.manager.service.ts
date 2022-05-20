@@ -1,13 +1,10 @@
-import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nestjs/common';
-import { Logger } from 'protocol-common/logger';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { ProtocolException } from 'protocol-common/protocol.exception';
-import { ProtocolUtility } from 'protocol-common/protocol.utility';
-import { DockerService } from './docker.service';
-import { IAgentManager } from './agent.manager.interface';
-import { AgentConfig } from './agent.config';
-import { K8sService } from './k8s.service';
-import { AgentCreateDto } from './dtos/agent.create.dto';
+import { Injectable, CacheStore, CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
+import { DockerService } from './docker.service.js';
+import { IAgentManager } from './agent.manager.interface.js';
+import { AgentConfig } from './agent.config.js';
+import { K8sService } from './k8s.service.js';
+import { AgentCreateDto } from './dtos/agent.create.dto.js';
+import { ProtocolException, ProtocolHttpService, ProtocolUtility } from 'protocol-common';
 
 /**
  * TODO validation, error cases, etc
@@ -17,14 +14,10 @@ export class AgentManagerService {
 
     private manager: IAgentManager;
 
-    // TODO expose a non-retry call to ProtocolHttpService so we don't need to keep both
-    private http: ProtocolHttpService;
-
     constructor(
-        private readonly httpService: HttpService,
+        private readonly http: ProtocolHttpService,
         @Inject(CACHE_MANAGER) private readonly cache: CacheStore
     ) {
-        this.http = new ProtocolHttpService(httpService);
         // TODO move this logic to an agent manager factory, which can be injected via a module
         // We can also use env type to infer this
         if (process.env.MANAGER_TYPE === 'DOCKER') {
@@ -80,7 +73,7 @@ export class AgentManagerService {
     public async isAgentServerUp(agentId: string, adminPort: number, adminApiKey: string): Promise<boolean> {
         try {
             const url = `http://${agentId}:${adminPort}/status`;
-            Logger.info(`agent admin url is ${url}`);
+            Logger.log(`agent admin url is ${url}`);
             const req: any = {
                 method: 'GET',
                 url,
@@ -89,8 +82,7 @@ export class AgentManagerService {
                     accept: 'application/json'
                 },
             };
-            // TODO we should either add a non-retry call to ProtocolHttpService, or make the existing requestWithRetry more configurable
-            const res = await this.httpService.request(req).toPromise();
+            const res = await this.http.requestWithoutRetry(req);
             if (res.status === 200) {
                 return true;
             }
@@ -127,7 +119,7 @@ export class AgentManagerService {
             // attempt a status check, if successful call it good and return, otherwise retry until duration is exceeded
             try {
                 if (true === await this.isAgentServerUp(agentId, adminPort, adminApiKey)) {
-                    Logger.info(`agent ${agentId} is up and responding`);
+                    Logger.log(`agent ${agentId} is up and responding`);
                     return;
                 }
             } catch (e) {
@@ -195,7 +187,7 @@ export class AgentManagerService {
     private async setAgentCache(agentConfig: AgentConfig): Promise<void> {
         // Generally we want the cache to last 1 second longer than the agent, except when set to an "infinite" value like 0 or -1
         const cacheTtl = (agentConfig.ttl < 0) ? agentConfig.ttl : agentConfig.ttl + 1;
-        Logger.info(`record cache limit set to: ${cacheTtl}`);
+        Logger.log(`record cache limit set to: ${cacheTtl}`);
         await this.cache.set(
             agentConfig.agentId,
             {

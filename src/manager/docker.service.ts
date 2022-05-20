@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import Dockerode, { ContainerCreateOptions } from 'dockerode';
-import { Logger } from 'protocol-common/logger';
-import { Constants } from 'protocol-common/constants';
-import { IAgentManager } from './agent.manager.interface';
-import { AgentConfig } from './agent.config';
+import { IAgentManager } from './agent.manager.interface.js';
+import { AgentConfig } from './agent.config.js';
+import { Constants } from 'protocol-common';
 
 /**
  *
@@ -45,7 +44,7 @@ export class DockerService implements IAgentManager {
         // to make the ports available to localhost, they need to be set to values other than
         // the defaults
         if (config.adminPort !== parseInt(process.env.AGENT_ADMIN_PORT, 10) && Constants.LOCAL === process.env.NODE_ENV) {
-            Logger.info('setting up ports to be exposed');
+            Logger.log('setting up ports to be exposed');
             containerOptions.ExposedPorts = {
                 [`${config.adminPort}/tcp`]: {}
             };

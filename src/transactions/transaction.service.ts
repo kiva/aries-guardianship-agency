@@ -1,30 +1,24 @@
 import { AxiosRequestConfig } from 'axios';
-import { Injectable, Inject, HttpService, CACHE_MANAGER, CacheStore } from '@nestjs/common';
-import { Logger } from 'protocol-common/logger';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { ProtocolException } from 'protocol-common/protocol.exception';
-import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
-import { AgentService } from 'aries-controller/agent/agent.service';
-import { AgentGovernance, ControllerCallback } from 'aries-controller/controller/agent.governance';
-import { Topics } from 'aries-controller/controller/handler/topics';
-import { DataService } from './persistence/data.service';
-import { RegisterTdcDto } from './dtos/register.tdc.dto';
-import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
-import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
-import { TransactionMessageResponseFactory } from './messaging/transaction.message.response.factory';
-import { IBasicMessageHandler } from './messaging/basic.message.handler';
+import { Injectable, Inject, CACHE_MANAGER, CacheStore, Logger } from '@nestjs/common';
+import { ProtocolHttpService, ProtocolException, ProtocolErrorCode } from 'protocol-common';
+import { AgentService, AgentGovernance, ControllerCallback, Topics } from 'aries-controller';
+import { DataService } from './persistence/data.service.js';
+import { RegisterTdcDto } from './dtos/register.tdc.dto.js';
+import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto.js';
+import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto.js';
+import { TransactionMessageResponseFactory } from './messaging/transaction.message.response.factory.js';
+import { IBasicMessageHandler } from './messaging/basic.message.handler.js';
 
 @Injectable()
 export class TransactionService {
-    private readonly http: ProtocolHttpService;
-    constructor(@Inject('AGENT_GOVERNANCE') private readonly agentGovernance: AgentGovernance,
-                @Inject(CACHE_MANAGER) private readonly cache: CacheStore,
-                private readonly agentService: AgentService,
-                private readonly dbAccessor: DataService,
-                private readonly responseFactory: TransactionMessageResponseFactory,
-                httpService: HttpService,
+    constructor(
+        @Inject('AGENT_GOVERNANCE') private readonly agentGovernance: AgentGovernance,
+        @Inject(CACHE_MANAGER) private readonly cache: CacheStore,
+        private readonly agentService: AgentService,
+        private readonly dbAccessor: DataService,
+        private readonly responseFactory: TransactionMessageResponseFactory,
+        private readonly http: ProtocolHttpService
     ) {
-        this.http = new ProtocolHttpService(httpService);
         agentGovernance.registerHandler('AGA-TX-BASIC', Topics.BASIC_MESSAGES, this.basicMessageHandler);
     }
 
@@ -99,7 +93,7 @@ export class TransactionService {
             identityProfileId: 'citizen.identity',
             invitation: connection.invitation
         };
-        Logger.info(`connecting to TDC ${url} with data`, data);
+        Logger.log(`connecting to TDC ${url} with data`, data);
         const request: AxiosRequestConfig = {
             method: 'POST',
             url,
@@ -118,7 +112,7 @@ export class TransactionService {
     public async registerOnetimeKey(agentId: string, body: RegisterOneTimeKeyDto): Promise<any> {
         // 2 using body.tdcEndpoint, call: /register passing in a connection invite
         // todo: replace tdcEndpoint with lookup since we have connection id
-        Logger.info('TRO sending onetimekey data', body);
+        Logger.log('TRO sending onetimekey data', body);
         const url = `${body.tdcEndpoint}/v2/register/onetimekey`;
         const data = {
             connectionId: body.connectionId,

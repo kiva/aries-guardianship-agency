@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { IAgentManager } from './agent.manager.interface';
-import { AgentConfig } from './agent.config';
+import { IAgentManager } from './agent.manager.interface.js';
+import { AgentConfig } from './agent.config.js';
 import { KubeConfig, CoreV1Api, V1PodCondition, V1Pod } from '@kubernetes/client-node';
 import { readFileSync } from 'fs';
 

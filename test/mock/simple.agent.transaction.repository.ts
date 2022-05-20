@@ -1,4 +1,4 @@
-import { AgentTransaction } from '../../src/transactions/persistence/agent.transaction';
+import { AgentTransaction } from '../../dist/transactions/persistence/agent.transaction.js';
 
 export class SimpleAgentTransactionMockRepository {
     constructor(private readonly record: AgentTransaction) {

@@ -1,10 +1,10 @@
 import {MigrationInterface, QueryRunner} from 'typeorm';
-import { Logger } from 'protocol-common/logger';
+import { Logger } from '@nestjs/common';
 
 export class AgentTransactions1620304611265 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        Logger.info('AgentTransactions1620304611265 Creating table');
+        Logger.log('AgentTransactions1620304611265 Creating table');
         // to avoid problems with differences in currency locale demarcation
         // save the amount as string.  we are not doing any math on it anyways
         await queryRunner.query(`
@@ -28,7 +28,7 @@ export class AgentTransactions1620304611265 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        Logger.info('AgentTransactions1620304611265 dropping table');
+        Logger.log('AgentTransactions1620304611265 dropping table');
         await queryRunner.query(
             'DROP TABLE IF EXISTS agent_transactions;'
         );

@@ -1,24 +1,23 @@
-import { Logger } from 'protocol-common/logger';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { TransactionReportRequest } from 'aries-controller/agent/messaging/transaction.report.request';
-import { AgentService } from 'aries-controller/agent/agent.service';
-import { DataService } from '../persistence/data.service';
-import { AgentTransaction } from '../persistence/agent.transaction';
-import { TxReportResponseDto } from '../dtos/tx.report.response.dto';
-import { IBasicMessageHandler } from './basic.message.handler';
-import { TransactionMessageStatesEnum } from './transaction.message.states.enum';
-
-
+import { ProtocolHttpService } from 'protocol-common';
+import { AgentService, TransactionReportRequest } from 'aries-controller';
+import { DataService } from '../persistence/data.service.js';
+import { AgentTransaction } from '../persistence/agent.transaction.js';
+import { TxReportResponseDto } from '../dtos/tx.report.response.dto.js';
+import { IBasicMessageHandler } from './basic.message.handler.js';
+import { TransactionMessageStatesEnum } from './transaction.message.states.enum.js';
+import { Logger } from '@nestjs/common';
 
 
 export class ReportMessageHandler implements IBasicMessageHandler {
-    constructor(private readonly agentService: AgentService,
-                private readonly agentId: string,
-                private readonly adminApiKey: string,
-                private readonly connectionId: string,
-                private readonly dbAccessor: DataService,
-                private readonly http: ProtocolHttpService) {
-    }
+
+    constructor(
+        private readonly agentService: AgentService,
+        private readonly agentId: string,
+        private readonly adminApiKey: string,
+        private readonly connectionId: string,
+        private readonly dbAccessor: DataService,
+        private readonly http: ProtocolHttpService
+    ) {}
 
     public async respond(message: any): Promise<boolean> {
         if (message.state === TransactionMessageStatesEnum.STARTED) {

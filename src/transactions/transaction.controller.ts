@@ -1,10 +1,10 @@
 import { Controller, Post, Param, Body } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ProtocolValidationPipe } from 'protocol-common/validation/protocol.validation.pipe';
-import { TransactionService } from './transaction.service';
-import { RegisterTdcDto } from './dtos/register.tdc.dto';
-import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto';
-import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto';
+import { ProtocolValidationPipe } from 'protocol-common/validation';
+import { TransactionService } from './transaction.service.js';
+import { RegisterTdcDto } from './dtos/register.tdc.dto.js';
+import { RegisterOneTimeKeyDto } from './dtos/register.one.time.key.dto.js';
+import { RegisterTdcResponseDto } from './dtos/register.tdc.response.dto.js';
 
 /**
  * Exposing endpoints the TRO would call to interact with the TDC

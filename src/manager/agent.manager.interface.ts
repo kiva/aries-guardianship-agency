@@ -1,4 +1,4 @@
-import { AgentConfig } from './agent.config';
+import { AgentConfig } from './agent.config.js';
 
 export interface IAgentManager {
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "agency for Kiva Protocol",
   "license": "Apache-2.0",
-  "type": "commonjs",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kiva/protocol.git"
@@ -11,24 +11,25 @@
   "scripts": {
     "build": "rm -rf dist/ && tsc",
     "format": "prettier --write \"src/**/*.ts\"",
-    "start": "rm -rf dist/ && tsc && node -r dotenv/config dist/main.js",
+    "start": "rm -rf dist/ && tsc && node -r dotenv/config --experimental-json-modules dist/main.js",
     "start:debug": "nodemon --legacy-watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test": "node -r dotenv/config node_modules/.bin/jest --runInBand",
+    "test": "node -r dotenv/config --experimental-vm-modules node_modules/.bin/jest --runInBand",
     "typeorm": "node --require ts-node/register ./node_modules/typeorm/cli.js",
     "typeorm:migration": "node --require ts-node/register ./node_modules/typeorm/cli.js migration:create -d src/migration -n"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.14.0",
-    "@nestjs/common": "^7.6.5",
-    "@nestjs/core": "^7.5.5",
-    "@nestjs/platform-express": "^7.5.5",
-    "@nestjs/swagger": "^4.8.0",
-    "@nestjs/typeorm": "^7.1.5",
+    "@nestjs/common": "^8.2.0",
+    "@nestjs/core": "^8.2.0",
+    "@nestjs/platform-express": "^8.2.0",
+    "@nestjs/swagger": "^5.2.1",
+    "@nestjs/typeorm": "^8.0.3",
     "@types/dockerode": "^3.2.2",
-    "aries-controller": "1.0.80",
-    "cache-manager": "^3.4.1",
+    "aries-controller": "file:../aries-controller/dist/aries-controller-2.0.0.tgz",
+    "axios": "^0.26.0",
+    "cache-manager": "^3.6.1",
     "cache-manager-fs-hash": "^0.0.9",
     "cache-manager-redis-store": "^2.0.0",
     "class-transformer": "^0.4.0",
@@ -39,36 +40,41 @@
     "express-request-id": "^1.4.1",
     "helmet": "^4.4.1",
     "http-proxy-middleware": "^1.0.6",
-    "pg": "^8.5.1",
-    "protocol-common": "0.1.47",
+    "pg": "^8.6.0",
+    "protocol-common": "1.1.1",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^6.6.6",
+    "rxjs": "^7.5.5",
     "swagger-ui-express": "^4.1.6",
-    "typeorm": "^0.2.31",
-    "typescript": "^4.2.3",
+    "typeorm": "^0.2.45",
+    "typescript": "^4.6.4",
     "ws": "^7.4.6"
   },
   "devDependencies": {
-    "@nestjs/testing": "^7.6.14",
-    "@types/jest": "^26.0.20",
-    "@types/supertest": "^2.0.10",
+    "@nestjs/testing": "^8.4.4",
+    "@types/jest": "^27.5.1",
+    "@types/node": "^17.0.35",
+    "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
-    "dotenv": "^8.2.0",
+    "dotenv": "^9.0.2",
     "eslint": "^8.12.0",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-jsdoc": "^38.1.4",
     "eslint-plugin-prefer-arrow": "^1.2.3",
-    "jest": "^26.6.3",
+    "jest": "^27.5.1",
     "nodemon": "^2.0.7",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
-    "supertest": "^6.1.3",
-    "ts-jest": "^26.5.3"
+    "supertest": "^6.1.6",
+    "ts-jest": "^27.1.5"
   },
   "jest": {
+    "extensionsToTreatAsEsm": [".ts"],
     "globals": {
-      "factories": {}
+      "factories": {},
+      "ts-jest": {
+        "useESM": true
+      }
     },
     "moduleFileExtensions": [
       "js",
@@ -91,6 +97,6 @@
     "ignore": [
       "src/**/*.spec.ts"
     ],
-    "exec": "tsc && node -r dotenv/config dist/main.js"
+    "exec": "tsc && node -r dotenv/config --experimental-json-modules dist/main.js"
   }
 }

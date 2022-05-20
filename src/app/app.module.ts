@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { LoggingInterceptor } from 'protocol-common/logging.interceptor';
-import { ConfigModule } from 'protocol-common/config.module';
-import { AppService } from './app.service';
-import { AppController } from './app.controller';
-import data from '../config/env.json';
-import { OrmConfig } from '../ormconfig';
-import { AgentManagerModule } from '../manager/agent.manager.module';
-import { AgentRouterModule } from '../router/agent.router.module';
-import { AgentControllerModule } from '../controller/agent.controller.module';
-import { MultitenantModule } from '../multitenant/mutlitenant.module';
-import { TransactionModule } from '../transactions/transaction.module';
-import { PersistenceModule } from '../transactions/persistence/persistence.module';
-import { TransactionMessagingModule } from '../transactions/messaging/transaction.messaging.module';
+import { AppService } from './app.service.js';
+import { AppController } from './app.controller.js';
+import { OrmConfig } from '../ormconfig.js';
+import { AgentManagerModule } from '../manager/agent.manager.module.js';
+import { AgentRouterModule } from '../router/agent.router.module.js';
+import { AgentControllerModule } from '../controller/agent.controller.module.js';
+import { MultitenantModule } from '../multitenant/mutlitenant.module.js';
+import { TransactionModule } from '../transactions/transaction.module.js';
+import { PersistenceModule } from '../transactions/persistence/persistence.module.js';
+import { TransactionMessagingModule } from '../transactions/messaging/transaction.messaging.module.js';
+import { ConfigModule, LoggingInterceptor, ProtocolLoggerModule } from 'protocol-common';
+
+// @ts-ignore: assertions are currently required when importing json: https://nodejs.org/docs/latest-v16.x/api/esm.html#json-modules
+import data from '../config/env.json' assert { type: 'json'};
 
 /**
  * Initializes the Nest application
@@ -21,6 +22,7 @@ import { TransactionMessagingModule } from '../transactions/messaging/transactio
     imports: [
         ConfigModule.init(data),
         OrmConfig(),
+        ProtocolLoggerModule,
         AgentManagerModule,
         AgentRouterModule,
         AgentControllerModule,
