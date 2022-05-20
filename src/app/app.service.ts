@@ -38,14 +38,15 @@ export class AppService {
         }
     }
 
-    public async generateStatsReport(): Promise<ServiceReportDto> {
+    public generateStatsReport(): ServiceReportDto {
         const report: ServiceReportDto = new ServiceReportDto();
         report.serviceName = process.env.SERVICE_NAME;
         report.startedAt = AppService.startedAt.toDateString();
         report.currentTime = new Date().toDateString();
+        report.versions = [ 'none' ];
 
         // TODO: once we determine which items we want to check versions on
         // TODO: we will add the version checks here
-        return Promise.resolve(report);
+        return report;
     }
 }
