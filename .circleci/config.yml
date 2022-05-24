@@ -4,7 +4,7 @@ jobs:
   build-and-test:
     executor:
       name: node/default
-      tag: '14.15.1'
+      tag: '16.14.2'
     steps:
       - checkout
       - run: npm install
@@ -26,9 +26,9 @@ jobs:
           name: node npm setup
           command: |
               npm install
-              nvm install v14.15.1
+              nvm install v16.14.2
               node -v
-              nvm alias default v14.15.1
+              nvm alias default v16.14.2
       - run:
           name: setup docker environments
           command: |
@@ -71,9 +71,9 @@ jobs:
       - run:
           name: Node npm setup
           command: |
-            nvm install v14.15.1
+            nvm install v16.14.2
             node -v
-            nvm alias default v14.15.1
+            nvm alias default v16.14.2
       - run:
           name: Get ACAPy
           command: docker pull bcgovimages/aries-cloudagent:py36-1.16-1_0.7.1
