@@ -54,7 +54,7 @@ services:
   aries-guardianship-agency:
     build:
       context: ./
-      dockerfile: docker/Dockerfile
+      dockerfile: docker/Dockerfile.production
     env_file:
       - .env
     image: aries-guardianship-agency:latest
