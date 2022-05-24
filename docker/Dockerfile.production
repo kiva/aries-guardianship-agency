@@ -20,4 +20,4 @@ COPY --from=dist /tmp/resources ./resources
 # Eventually figure out how to grant just that permission
 # RUN adduser -S app
 # USER app
-CMD ["node", "dist/main.js"]
+CMD ["node", "--experimental-vm-modules", "dist/main.js"]
