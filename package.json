@@ -10,7 +10,6 @@
   },
   "scripts": {
     "build": "rm -rf dist/ && tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
     "start": "rm -rf dist/ && tsc && node -r dotenv/config --experimental-json-modules dist/main.js",
     "start:debug": "nodemon --legacy-watch",
     "lint": "eslint .",
@@ -27,7 +26,7 @@
     "@nestjs/swagger": "^5.2.1",
     "@nestjs/typeorm": "^8.0.3",
     "@types/dockerode": "^3.2.2",
-    "aries-controller": "file:../aries-controller/dist/aries-controller-2.0.0.tgz",
+    "aries-controller": "^2.0.0",
     "axios": "^0.26.0",
     "cache-manager": "^3.6.1",
     "cache-manager-fs-hash": "^0.0.9",
@@ -63,7 +62,6 @@
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "jest": "^27.5.1",
     "nodemon": "^2.0.7",
-    "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
     "supertest": "^6.1.6",
     "ts-jest": "^27.1.5"
