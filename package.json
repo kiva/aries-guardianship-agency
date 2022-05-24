@@ -9,8 +9,9 @@
     "url": "git+https://github.com/kiva/protocol.git"
   },
   "scripts": {
-    "build": "rm -rf dist/ && tsc",
+    "build": "rm -rf dist/ && tsc && cp package.json dist/",
     "start": "rm -rf dist/ && tsc && node -r dotenv/config --experimental-json-modules dist/main.js",
+    "start:prod": "node --experimental-json-modules dist/main.js",
     "start:debug": "nodemon --legacy-watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
