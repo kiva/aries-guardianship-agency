@@ -35,6 +35,7 @@ jobs:
             node -v
             nvm alias default v16.14.2
             npm install
+            npm run build
       - run:
           name: setup docker environments
           command: |
