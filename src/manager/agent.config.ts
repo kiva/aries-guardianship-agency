@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { AgentCreateDto } from './dtos/agent.create.dto';
+import { AgentCreateDto } from './dtos/agent.create.dto.js';
 
 /**
  * Centralizes the config setup for an agent so it can be used in docker or k8s

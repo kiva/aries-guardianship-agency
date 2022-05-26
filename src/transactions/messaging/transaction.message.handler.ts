@@ -1,22 +1,21 @@
-import { CreditTransaction } from 'aries-controller/agent/messaging/credit.transaction';
-import { Logger } from 'protocol-common/logger';
-import { SecurityUtility } from 'protocol-common/security.utility';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { AgentService } from 'aries-controller/agent/agent.service';
-import { AgentTransaction } from '../persistence/agent.transaction';
-import { DataService } from '../persistence/data.service';
-import { IBasicMessageHandler } from './basic.message.handler';
-import { TransactionMessageStatesEnum } from './transaction.message.states.enum';
+import { AgentService, CreditTransaction } from 'aries-controller';
+import { ProtocolHttpService, SecurityUtility } from 'protocol-common';
+import { AgentTransaction } from '../persistence/agent.transaction.js';
+import { DataService } from '../persistence/data.service.js';
+import { IBasicMessageHandler } from './basic.message.handler.js';
+import { TransactionMessageStatesEnum } from './transaction.message.states.enum.js';
+import { Logger } from '@nestjs/common';
 
 
 export class TransactionMessageHandler implements IBasicMessageHandler {
-    constructor(private readonly agentService: AgentService,
-                private readonly agentId: string,
-                private readonly adminApiKey: string,
-                private readonly connectionId: string,
-                private readonly dbAccessor: DataService,
-                private readonly http: ProtocolHttpService) {
-    }
+    constructor(
+        private readonly agentService: AgentService,
+        private readonly agentId: string,
+        private readonly adminApiKey: string,
+        private readonly connectionId: string,
+        private readonly dbAccessor: DataService,
+        private readonly http: ProtocolHttpService
+    ) {}
 
     public async respond(message: any): Promise<boolean> {
         if (message.state === TransactionMessageStatesEnum.STARTED) {
@@ -32,7 +31,7 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
             record.issuer_hash = message.transaction.fspHash;
             record.fsp_id = message.transaction.fspId;
             record.merkel_order = maxMerkleOrder + 1;
-            record.merkel_hash = this.generateTransactionId(message.transaction.fspHash);
+            record.merkel_hash = TransactionMessageHandler.generateTransactionId(message.transaction.fspHash);
             record.credential_id = message.credentialId;
             record.transaction_date = message.transaction.date;
             record.type_id = message.transaction.typeId;
@@ -47,7 +46,7 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
             await this.sendTransactionMessage(this.agentId, this.adminApiKey, this.connectionId, TransactionMessageStatesEnum.ACCEPTED,
                 message.id, message.transaction).then();
         } else if (message.state === TransactionMessageStatesEnum.COMPLETED) {
-            Logger.info(`transaction ${message.id as string} is complete`);
+            Logger.log(`transaction ${message.id as string} is complete`);
             // TODO: do we need to note transaction state?
         }
         return false;
@@ -86,7 +85,7 @@ export class TransactionMessageHandler implements IBasicMessageHandler {
         return res.data;
     }
 
-    private generateTransactionId(hashableValue: string) : string {
+    private static generateTransactionId(hashableValue: string) : string {
         return SecurityUtility.hash32(hashableValue);
     }
 }

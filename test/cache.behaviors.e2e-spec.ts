@@ -1,12 +1,14 @@
 import request from 'supertest';
-import { ProtocolUtility } from 'protocol-common/protocol.utility';
-import { ConfigModule } from 'protocol-common/config.module';
-import { DockerService } from '../src/manager/docker.service';
-import { AgentConfig } from '../src/manager/agent.config';
-import { AgentCreateDto } from '../src/manager/dtos/agent.create.dto';
+import { jest } from '@jest/globals';
+import { DockerService } from '../dist/manager/docker.service.js';
+import { AgentConfig } from '../dist/manager/agent.config.js';
+import { AgentCreateDto } from '../dist/manager/dtos/agent.create.dto.js';
+import { ConfigModule, ProtocolUtility } from 'protocol-common';
+
+jest.setTimeout(60000);
 
 /*
-    Integration test to show the gammit of the exchange of messages between
+    Integration test to show the gamut of the exchange of messages between
     agents for connection, credential and proof protocols
 
     Required: manually start aries agency prior to running tests
@@ -47,7 +49,6 @@ describe('Cache behaviors (e2e)', () => {
         process.env.NETWORK_NAME = 'agency-network';
         process.env.AGENT_ADMIN_PORT = '5001';
         process.env.AGENT_HTTP_PORT = '5000';
-        jest.setTimeout(60000);
     });
 
     // Test condition: Cache shouldn't contain the agent, nor should the agent already be running

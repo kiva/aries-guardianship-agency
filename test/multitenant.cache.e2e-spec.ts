@@ -1,5 +1,8 @@
 import request from 'supertest';
-import { ProtocolUtility } from 'protocol-common/protocol.utility';
+import { jest } from '@jest/globals';
+import { ProtocolUtility } from 'protocol-common';
+
+jest.setTimeout(60000);
 
 /**
  * Ensures our system works correctly when attempting to create wallets multiple times regardless of cache state
@@ -12,10 +15,6 @@ describe('Check cache behaviors (e2e)', () => {
     const label2 = 'label2';
     const wallet2Name = 'wallet2Name';
     const wallet2Key = 'wallet2Key';
-
-    beforeAll(async () => {
-        jest.setTimeout(60000);
-    });
 
     it('Create wallet for agent 1', async () => {
         const data = {

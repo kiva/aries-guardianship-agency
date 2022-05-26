@@ -2,11 +2,17 @@ version: 2.1
 
 jobs:
   build-and-test:
-    executor:
-      name: node/default
-      tag: '14.15.1'
+    machine:
+      docker_layer_caching: true
+      image: ubuntu-2004:202201-02
     steps:
       - checkout
+      - run:
+          name: Install node 16
+          command: |
+            nvm install v16.14.2
+            node -v
+            nvm alias default v16.14.2
       - run: npm install
       - run: npm run build
       - run: npm run lint
@@ -25,10 +31,11 @@ jobs:
       - run:
           name: node npm setup
           command: |
-              npm install
-              nvm install v14.15.1
-              node -v
-              nvm alias default v14.15.1
+            nvm install v16.14.2
+            node -v
+            nvm alias default v16.14.2
+            npm install
+            npm run build
       - run:
           name: setup docker environments
           command: |
@@ -71,9 +78,9 @@ jobs:
       - run:
           name: Node npm setup
           command: |
-            nvm install v14.15.1
+            nvm install v16.14.2
             node -v
-            nvm alias default v14.15.1
+            nvm alias default v16.14.2
       - run:
           name: Get ACAPy
           command: docker pull bcgovimages/aries-cloudagent:py36-1.16-1_0.7.1

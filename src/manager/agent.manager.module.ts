@@ -1,7 +1,8 @@
-import { Module, HttpModule } from '@nestjs/common';
-import { AgentManagerService } from './agent.manager.service';
-import { AgentManagerController } from './agent.manager.controller';
-import { GlobalCacheModule } from '../app/global.cache.module';
+import { Module } from '@nestjs/common';
+import { AgentManagerService } from './agent.manager.service.js';
+import { AgentManagerController } from './agent.manager.controller.js';
+import { GlobalCacheModule } from '../app/global.cache.module.js';
+import { ProtocolHttpModule } from 'protocol-common';
 
 /**
  * Manages spinning up and down agents
@@ -9,7 +10,7 @@ import { GlobalCacheModule } from '../app/global.cache.module';
 @Module({
     imports: [
         GlobalCacheModule,
-        HttpModule,
+        ProtocolHttpModule,
     ],
     controllers: [AgentManagerController],
     providers: [AgentManagerService],

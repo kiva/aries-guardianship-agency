@@ -61,7 +61,7 @@ services:
     container_name: aries-guardianship-agency
     ports:
       - "3010:3010"
-    expose: 
+    expose:
       - "3010"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -101,7 +101,7 @@ services:
     ports:
       - "3020:3020"
       - "3021:3021"
-    expose: 
+    expose:
       - "3020"
       - "3021"
     env_file:

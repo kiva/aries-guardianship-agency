@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common';
-import { Logger } from 'protocol-common/logger';
+import { Injectable, Logger } from '@nestjs/common';
 
 /**
  *
@@ -14,7 +13,7 @@ export class AgentRouterService {
 
     public async getUrl(agentId: string) {
         // TODO make http configurable, in case we every want to enable https without or docker/k8s network
-        return 'http://' + agentId + ':' + process.env.AGENT_HTTP_PORT;
+        return `http://${agentId}:${process.env.AGENT_HTTP_PORT}`;
     }
 
     public getRouter() {

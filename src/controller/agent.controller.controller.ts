@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AgentControllerService } from './agent.controller.service';
-import { Logger } from 'protocol-common/logger';
+import { AgentControllerService } from './agent.controller.service.js';
 
 /**
  * This handles all the controller responses to our agents
@@ -23,8 +22,7 @@ export class AgentControllerController {
         @Body() body: any
     ): Promise<any> {
         Logger.log(`GET ${agentId}/${route}/${subroute}`);
-        const value = await this.agentControllerService.handleRequest(agentId, route, subroute, body);
-        return value;
+        return await this.agentControllerService.handleRequest(agentId, route, subroute, body);
     }
 
     @Post(':agentId/:route/:subroute')
@@ -37,8 +35,7 @@ export class AgentControllerController {
         // note letting handler log body as needed
         // toThink() maybe get rid of this log message all together since it can be handled else where
         Logger.log(`POST ${agentId}/${route}/${subroute}`);
-        const value = await this.agentControllerService.handleRequest(agentId, route, subroute, body);
-        return value;
+        return await this.agentControllerService.handleRequest(agentId, route, subroute, body);
     }
 
 }

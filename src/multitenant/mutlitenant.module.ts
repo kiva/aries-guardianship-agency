@@ -1,7 +1,8 @@
-import { HttpModule, Module } from '@nestjs/common';
-import { GlobalCacheModule } from '../app/global.cache.module';
-import { MultitenantService } from './mulittenant.service';
-import { MultitenantController } from './multitenant.controller';
+import { Module } from '@nestjs/common';
+import { GlobalCacheModule } from '../app/global.cache.module.js';
+import { MultitenantService } from './mulittenant.service.js';
+import { MultitenantController } from './multitenant.controller.js';
+import { ProtocolHttpModule } from 'protocol-common';
 
 /**
  * Multitenant module
@@ -9,7 +10,7 @@ import { MultitenantController } from './multitenant.controller';
 @Module({
     imports: [
         GlobalCacheModule,
-        HttpModule,
+        ProtocolHttpModule,
     ],
     controllers: [MultitenantController],
     providers: [MultitenantService],

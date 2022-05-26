@@ -1,8 +1,7 @@
 import { InjectConnection } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Connection } from 'typeorm';
-import { Logger } from 'protocol-common/logger';
-import { AgentTransaction } from './agent.transaction';
+import { AgentTransaction } from './agent.transaction.js';
 
 /*
     This class is the public interface to retrieving and saving records into our persistence

@@ -1,4 +1,4 @@
-import { IControllerHandler } from 'aries-controller/controller.handler/controller.handler.interface';
+import { IControllerHandler } from 'aries-controller';
 
 export class ControllerHandlerMock implements IControllerHandler {
     handleAdminApiKey(agentId?: string): Promise<string> {

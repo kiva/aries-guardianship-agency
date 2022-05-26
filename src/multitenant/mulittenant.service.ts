@@ -1,9 +1,6 @@
-import { Injectable, CacheStore, CACHE_MANAGER, Inject, HttpService } from '@nestjs/common';
-import { Logger } from 'protocol-common/logger';
-import { ProtocolException } from 'protocol-common/protocol.exception';
-import { ProtocolHttpService } from 'protocol-common/protocol.http.service';
-import { ProtocolErrorCode } from 'protocol-common/protocol.errorcode';
-import { WalletCreateDto } from './dtos/wallet.create.dto';
+import { Injectable, CacheStore, CACHE_MANAGER, Inject, Logger } from '@nestjs/common';
+import { WalletCreateDto } from './dtos/wallet.create.dto.js';
+import { ProtocolErrorCode, ProtocolException, ProtocolHttpService } from 'protocol-common';
 
 /**
  * Various calls to add/remove wallets from multitenant aca-py
@@ -15,15 +12,12 @@ import { WalletCreateDto } from './dtos/wallet.create.dto';
 @Injectable()
 export class MultitenantService {
 
-    private http: ProtocolHttpService;
     private readonly DEFAULT_TTL_SECONDS: number = 3600;
 
     constructor(
-        httpService: HttpService,
+        private readonly http: ProtocolHttpService,
         @Inject(CACHE_MANAGER) private readonly cache: CacheStore
-    ) {
-        this.http = new ProtocolHttpService(httpService);
-    }
+    ) {}
 
     /**
      * Creates a wallet in the multitenant aca-py instance, and if set to auto-connection start a connection
